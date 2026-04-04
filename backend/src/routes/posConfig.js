@@ -7,7 +7,10 @@ router.use(requireAuth);
 
 router.get("/", async (req, res) => {
   try {
-    const { data, error } = await supabaseAdmin.from("pos_config").select("*").order("created_at", { ascending: true });
+    const { data, error } = await supabaseAdmin
+      .from("pos_config")
+      .select("*, pos_sessions(opened_at, closing_sale_total, status)")
+      .order("created_at", { ascending: true });
     if (error) throw error;
     res.json({ posConfigs: data || [] });
   } catch (error) {

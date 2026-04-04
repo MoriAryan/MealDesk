@@ -8,6 +8,11 @@ export type PosConfig = {
   self_ordering_enabled: boolean;
   self_ordering_mode: "qr" | "token" | null;
   bg_color: string | null;
+  pos_sessions?: {
+    opened_at: string;
+    closing_sale_total: number;
+    status: "active" | "closed";
+  }[];
 };
 
 export type Category = {
@@ -52,4 +57,36 @@ export type ProductVariant = {
   value: string;
   unit: "unit" | "kg" | "liter" | "gram" | "ml";
   extra_price: number;
+};
+
+export type Customer = {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  street1: string | null;
+  street2: string | null;
+  city: string | null;
+  state: string | null;
+  country: string | null;
+};
+
+export type Order = {
+  id: string;
+  order_number: string;
+  pos_session_id: string | null;
+  pos_config_id: string;
+  table_id: string | null;
+  customer_id: string | null;
+  status: "draft" | "paid" | "archived";
+  notes: string | null;
+  source: "pos" | "mobile";
+  self_order_token: string | null;
+  subtotal: number;
+  tax_total: number;
+  total: number;
+  is_invoice: boolean;
+  created_at: string;
+  updated_at: string;
+  customers?: { name: string } | null;
 };

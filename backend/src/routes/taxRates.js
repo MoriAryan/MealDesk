@@ -10,7 +10,7 @@ router.get("/", async (_req, res) => {
   try {
     const { data, error } = await supabaseAdmin
       .from("tax_rates")
-      .select("id, label, rate, created_at, updated_at")
+      .select("id, label, rate, created_at")
       .order("created_at", { ascending: true });
 
     if (error) {

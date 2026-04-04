@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { listCategories } from "../api/categories";
 import { listPosConfigs } from "../api/posConfig";
@@ -14,18 +14,28 @@ export function ProductsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [search, setSearch] = useState("");
   const [activePosConfigId, setActivePosConfigId] = useState("");
-  const [activeCategoryId, setActiveCategoryId] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [actionMenuOpen, setActionMenuOpen] = useState(false);
+  
+  const actionMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close menu on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (actionMenuRef.current && !actionMenuRef.current.contains(event.target as Node)) {
+        setActionMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const filters = useMemo(
     () => ({
       posConfigId: activePosConfigId || undefined,
-      categoryId: activeCategoryId || undefined,
-      search: search.trim() || undefined,
     }),
-    [activePosConfigId, activeCategoryId, search]
+    [activePosConfigId]
   );
 
   useEffect(() => {
@@ -74,6 +84,7 @@ export function ProductsPage() {
       await archiveProducts(accessToken, selectedIds);
       setProducts((prev) => prev.map((product) => (selectedIds.includes(product.id) ? { ...product, active: false } : product)));
       setSelectedIds([]);
+      setActionMenuOpen(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to archive products");
     }
@@ -85,107 +96,116 @@ export function ProductsPage() {
       await deleteProducts(accessToken, selectedIds);
       setProducts((prev) => prev.filter((product) => !selectedIds.includes(product.id)));
       setSelectedIds([]);
+      setActionMenuOpen(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to delete products");
     }
   };
 
   return (
-    <section className="space-y-5">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-semibold">Products</h2>
-          <p className="text-sm text-[var(--c-muted)]">Manage product catalog and variants with terminal-specific filters.</p>
+    <section className="max-w-5xl">
+      {/* Header matching the mock */}
+      <div className="flex items-center justify-between mb-6 pb-2 border-b border-[var(--c-border)]">
+        <div className="flex items-center gap-4 pt-2">
+          {isAdmin && (
+            <Link to="/products/new" className="text-sm font-semibold px-4 py-1.5 rounded bg-[var(--c-panel-2)] text-[var(--c-ink)] hover:bg-[var(--c-border)] transition-colors">
+              New
+            </Link>
+          )}
+          <span className="text-xl font-bold font-head text-[var(--c-ink)]">Products</span>
         </div>
-        {isAdmin && (
-          <Link to="/products/new" className="rounded-lg bg-[var(--c-accent)] px-4 py-2 font-medium text-white">
-            New Product
-          </Link>
+
+        {/* Action Right Menu */}
+        {isAdmin && selectedIds.length > 0 && (
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium bg-blue-900/30 text-blue-400 px-3 py-1 rounded-sm">
+              x {selectedIds.length} Selected
+            </span>
+            <div className="relative" ref={actionMenuRef}>
+              <button 
+                onClick={() => setActionMenuOpen(!actionMenuOpen)}
+                className="text-sm font-semibold bg-[var(--c-panel-2)] text-[var(--c-ink)] px-3 py-1 rounded border border-[var(--c-border)] hover:bg-[var(--c-border)] flex items-center gap-2"
+              >
+                <span>⚙</span> Action
+              </button>
+              {actionMenuOpen && (
+                <div className="absolute right-0 top-full mt-1 w-32 bg-[var(--c-panel)] border border-[var(--c-border)] rounded-md shadow-lg z-50">
+                  <button onClick={bulkArchive} className="w-full text-left px-4 py-2 text-sm text-[var(--c-ink)] hover:bg-[var(--c-panel-2)] transition-colors">
+                    Archive
+                  </button>
+                  <button onClick={bulkDelete} className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-500/10 transition-colors">
+                    Delete
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </div>
 
-      {error && <p className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      {error && <p className="mb-4 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
-      <div className="grid gap-3 rounded-2xl border border-[var(--c-border)] bg-[var(--c-panel)] p-4 md:grid-cols-3">
+      <div className="flex gap-4 mb-4">
+        {/* POS filter just to maintain functionality, but styled minimally so it doesn't break table design */}
         <select
-          className="rounded-lg border border-[var(--c-border)] bg-white px-3 py-2"
+          className="text-sm bg-transparent border-0 border-b border-[var(--c-border)] px-1 py-1 focus:ring-0 text-[var(--c-muted)]"
           value={activePosConfigId}
           onChange={(event) => setActivePosConfigId(event.target.value)}
         >
           {posConfigs.map((pos) => (
-            <option key={pos.id} value={pos.id}>
-              {pos.name}
-            </option>
+            <option key={pos.id} value={pos.id}>{pos.name}</option>
           ))}
         </select>
-        <select
-          className="rounded-lg border border-[var(--c-border)] bg-white px-3 py-2"
-          value={activeCategoryId}
-          onChange={(event) => setActiveCategoryId(event.target.value)}
-        >
-          <option value="">All categories</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
-        <input
-          placeholder="Search product"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          className="rounded-lg border border-[var(--c-border)] bg-white px-3 py-2"
-        />
       </div>
 
-      {isAdmin && selectedIds.length > 0 && (
-        <div className="flex items-center gap-2 rounded-xl border border-[var(--c-border)] bg-[var(--c-panel)] p-3">
-          <button onClick={() => void bulkArchive()} className="rounded-md border border-[var(--c-border)] bg-white px-3 py-2 text-sm">
-            Archive Selected
-          </button>
-          <button onClick={() => void bulkDelete()} className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
-            Delete Selected
-          </button>
-        </div>
-      )}
-
-      <div className="overflow-x-auto rounded-2xl border border-[var(--c-border)] bg-[var(--c-panel)]">
-        <table className="min-w-full text-sm">
-          <thead className="bg-[var(--c-panel-2)] text-left">
-            <tr>
-              <th className="px-3 py-2">Select</th>
-              <th className="px-3 py-2">Name</th>
-              <th className="px-3 py-2">Category</th>
-              <th className="px-3 py-2">Price</th>
-              <th className="px-3 py-2">Tax</th>
-              <th className="px-3 py-2">Status</th>
+      <div className="border-t border-[var(--c-border)]">
+        <table className="min-w-full text-sm text-left">
+          <thead>
+            <tr className="border-b border-[var(--c-border)] text-[var(--c-muted)]">
+              <th className="px-2 py-3 font-semibold text-[var(--c-ink)]">Product</th>
+              <th className="px-3 py-3 font-semibold text-[var(--c-ink)]">Sale Prices</th>
+              <th className="px-3 py-3 font-semibold text-[var(--c-ink)]">Tax</th>
+              <th className="px-3 py-3 font-semibold text-[var(--c-ink)]">UOM</th>
+              <th className="px-3 py-3 font-semibold text-[var(--c-ink)]">Category</th>
             </tr>
           </thead>
           <tbody>
             {products.map((product) => (
-              <tr key={product.id} className="border-t border-[var(--c-border)]">
-                <td className="px-3 py-2">
+              <tr key={product.id} className={`border-b border-[var(--c-border)] hover:bg-[var(--c-panel-2)] transition-colors ${!product.active ? "opacity-50" : ""}`}>
+                <td className="px-2 py-3 flex items-center gap-3">
                   <input
                     type="checkbox"
                     disabled={!isAdmin}
                     checked={selectedIds.includes(product.id)}
                     onChange={() => toggleSelect(product.id)}
+                    className="rounded border-[var(--c-border)] bg-transparent focus:ring-1 focus:ring-[var(--c-accent)] text-[var(--c-accent)]"
                   />
-                </td>
-                <td className="px-3 py-2 font-medium">
-                  <Link to={`/products/${product.id}`} className="underline decoration-[var(--c-accent)] decoration-2 underline-offset-2">
+                  <Link to={`/products/${product.id}`} className="font-medium hover:text-[var(--c-accent)] transition-colors">
                     {product.name}
                   </Link>
                 </td>
-                <td className="px-3 py-2">{product.categories?.name || "-"}</td>
-                <td className="px-3 py-2">Rs {Number(product.price).toFixed(2)}</td>
-                <td className="px-3 py-2">{product.tax_rates?.label || "-"}</td>
-                <td className="px-3 py-2">{product.active ? "Active" : "Archived"}</td>
+                <td className="px-3 py-3 text-[var(--c-muted)]">${Number(product.price).toFixed(2)}</td>
+                <td className="px-3 py-3 text-[var(--c-muted)]">{product.tax_rates?.rate || "0"}%</td>
+                <td className="px-3 py-3 text-[var(--c-muted)] capitalize">{product.uom === "kg" ? "K.G" : product.uom}</td>
+                <td className="px-3 py-3">
+                  {product.categories ? (
+                    <span 
+                      className="px-2 py-1 rounded text-xs font-medium border"
+                      style={{ 
+                        backgroundColor: `${product.categories.color}20` || 'transparent', 
+                        borderColor: product.categories.color,
+                        color: product.categories.color 
+                      }}
+                    >
+                      {product.categories.name}
+                    </span>
+                  ) : "-"}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {!products.length && <p className="px-3 py-6 text-sm text-[var(--c-muted)]">No products found for the selected filters.</p>}
+        {!products.length && <p className="px-2 py-6 text-sm text-[var(--c-muted)] text-center">No products found.</p>}
       </div>
     </section>
   );

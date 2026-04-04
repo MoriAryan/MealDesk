@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { listPaymentMethods, savePaymentMethod, updatePaymentMethod } from "../api/paymentMethods";
 import { listPosConfigs } from "../api/posConfig";
 import type { PaymentMethod, PosConfig } from "../api/types";
@@ -16,14 +16,28 @@ export function PaymentMethodsPage() {
   const [upiId, setUpiId] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [actionMenuOpen, setActionMenuOpen] = useState(false);
+  const actionMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (actionMenuRef.current && !actionMenuRef.current.contains(event.target as Node)) {
+        setActionMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   useEffect(() => {
     if (!accessToken) return;
 
     const load = async () => {
       try {
-        const response = await listPosConfigs(accessToken);
-        setPosConfigs(response.posConfigs);
-        setActivePosConfigId((current) => current || response.posConfigs[0]?.id || "");
+        const pos = await listPosConfigs(accessToken);
+        setPosConfigs(pos.posConfigs);
+        setActivePosConfigId((current) => current || pos.posConfigs[0]?.id || "");
       } catch (e) {
         setError(e instanceof Error ? e.message : "Failed to load POS terminals");
       }
@@ -41,6 +55,7 @@ export function PaymentMethodsPage() {
         setItems(response.paymentMethods);
         const upi = response.paymentMethods.find((method) => method.method === "upi");
         setUpiId(upi?.upi_id || "");
+        setSelectedIds([]);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Failed to load payment methods");
       }
@@ -55,113 +70,183 @@ export function PaymentMethodsPage() {
     return map;
   }, [items]);
 
-  const toggleMethod = async (method: PaymentMethod["method"], enabled: boolean) => {
+  const toggleSelect = (id: string) => {
+    if (!id) return;
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
+  };
+
+  const saveMethodInfo = async (method: PaymentMethod["method"], isEnabled: boolean, newUpiId?: string) => {
     if (!accessToken || !isAdmin || !activePosConfigId) return;
 
     try {
       const existing = byMethod.get(method);
       if (existing) {
         const response = await updatePaymentMethod(accessToken, existing.id, {
-          enabled,
-          upiId: method === "upi" ? upiId : undefined,
+          enabled: isEnabled,
+          upiId: method === "upi" ? newUpiId : undefined,
         });
         setItems((prev) => prev.map((item) => (item.id === existing.id ? response.paymentMethod : item)));
+        if (method === "upi") setUpiId(response.paymentMethod.upi_id || "");
       } else {
         const response = await savePaymentMethod(accessToken, {
           posConfigId: activePosConfigId,
           method,
-          enabled,
-          upiId: method === "upi" ? upiId : undefined,
+          enabled: isEnabled,
+          upiId: method === "upi" ? newUpiId : undefined,
         });
         setItems((prev) => [...prev, response.paymentMethod]);
+        if (method === "upi") setUpiId(response.paymentMethod.upi_id || "");
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to update payment method");
+      setError(e instanceof Error ? e.message : "Failed to save payment method");
     }
   };
 
-  const saveUpiId = async () => {
-    if (!accessToken || !isAdmin || !activePosConfigId) return;
-
+  const bulkDisable = async () => {
+    if (!accessToken || !isAdmin || !selectedIds.length) return;
     try {
-      const existing = byMethod.get("upi");
-      if (existing) {
-        const response = await updatePaymentMethod(accessToken, existing.id, { upiId, enabled: existing.enabled });
-        setItems((prev) => prev.map((item) => (item.id === existing.id ? response.paymentMethod : item)));
-      } else {
-        const response = await savePaymentMethod(accessToken, {
-          posConfigId: activePosConfigId,
-          method: "upi",
-          enabled: true,
-          upiId,
-        });
-        setItems((prev) => [...prev, response.paymentMethod]);
+      for (const methodId of selectedIds) {
+        const existing = items.find(i => i.id === methodId);
+        if (existing) {
+           await updatePaymentMethod(accessToken, existing.id, {
+            enabled: false,
+            upiId: existing.method === 'upi' ? existing.upi_id : undefined,
+          });
+        }
       }
+      setItems((prev) => prev.map((item) => (selectedIds.includes(item.id) ? { ...item, enabled: false } : item)));
+      setSelectedIds([]);
+      setActionMenuOpen(false);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to save UPI ID");
+      setError(e instanceof Error ? e.message : "Failed to bulk disable methods.");
     }
   };
 
   return (
-    <section className="space-y-5">
-      <div>
-        <h2 className="text-2xl font-semibold">Payment Methods</h2>
-        <p className="text-sm text-[var(--c-muted)]">Configure cash, digital, and UPI acceptance per terminal.</p>
+    <section className="max-w-5xl">
+      {/* Standard Header */}
+      <div className="flex items-center justify-between mb-6 pb-2 border-b border-[var(--c-border)]">
+        <div className="flex items-center gap-4 pt-2">
+          {isAdmin && (
+            <button 
+              type="button"
+              className="text-sm font-semibold px-4 py-1.5 rounded bg-[var(--c-panel-2)] text-[var(--c-ink)] hover:bg-[var(--c-border)] transition-colors opacity-50 cursor-not-allowed"
+              title="Payment methods are predefined. You cannot add new ones."
+            >
+              New
+            </button>
+          )}
+          <span className="text-xl font-bold font-head text-[var(--c-ink)]">Payment</span>
+        </div>
+
+        {/* Action Right Menu */}
+        {isAdmin && selectedIds.length > 0 && (
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium bg-blue-900/30 text-blue-400 px-3 py-1 rounded-sm">
+              x {selectedIds.length} Selected
+            </span>
+            <div className="relative" ref={actionMenuRef}>
+              <button 
+                onClick={() => setActionMenuOpen(!actionMenuOpen)}
+                className="text-sm font-semibold bg-[var(--c-panel-2)] text-[var(--c-ink)] px-3 py-1 rounded border border-[var(--c-border)] hover:bg-[var(--c-border)] flex items-center gap-2"
+              >
+                <span>⚙</span> Action
+              </button>
+              {actionMenuOpen && (
+                <div className="absolute right-0 top-full mt-1 w-32 bg-[var(--c-panel)] border border-[var(--c-border)] rounded-md shadow-lg z-50">
+                  <button onClick={bulkDisable} className="w-full text-left px-4 py-2 text-sm text-[var(--c-ink)] hover:bg-[var(--c-panel-2)] transition-colors">
+                    Disable
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="rounded-2xl border border-[var(--c-border)] bg-[var(--c-panel)] p-4">
-        <label className="mb-2 block text-xs uppercase tracking-wider text-[var(--c-muted)]">POS Terminal</label>
+      {error && <p className="mb-4 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+
+      <div className="flex gap-4 mb-4">
         <select
-          className="w-full rounded-lg border border-[var(--c-border)] bg-white px-3 py-2"
+          className="text-sm bg-transparent border-0 border-b border-[var(--c-border)] px-1 py-1 focus:ring-0 text-[var(--c-muted)]"
           value={activePosConfigId}
           onChange={(event) => setActivePosConfigId(event.target.value)}
         >
           {posConfigs.map((pos) => (
-            <option key={pos.id} value={pos.id}>
-              {pos.name}
-            </option>
+            <option key={pos.id} value={pos.id}>{pos.name}</option>
           ))}
         </select>
       </div>
 
-      {error && <p className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      <div className="border-t border-[var(--c-border)]">
+        <table className="min-w-full text-sm text-left">
+          <thead>
+            <tr className="border-b border-[var(--c-border)] text-[var(--c-muted)]">
+              <th className="px-2 py-3 font-semibold text-[var(--c-ink)]">Select</th>
+              <th className="px-3 py-3 font-semibold text-[var(--c-ink)]">Method</th>
+              <th className="px-3 py-3 font-semibold text-[var(--c-ink)]">Status</th>
+              <th className="px-3 py-3 font-semibold text-[var(--c-ink)]">Configuration</th>
+              <th className="px-3 py-3 font-semibold text-[var(--c-ink)]">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {methodOrder.map((method) => {
+              const current = byMethod.get(method);
+              const enabled = current?.enabled || false;
+              const hasId = !!current?.id;
 
-      <div className="grid gap-3">
-        {methodOrder.map((method) => {
-          const current = byMethod.get(method);
-          const enabled = current?.enabled || false;
-          return (
-            <label key={method} className="flex items-center justify-between rounded-2xl border border-[var(--c-border)] bg-[var(--c-panel)] px-4 py-3">
-              <span className="text-sm font-medium capitalize">{method}</span>
-              <input
-                type="checkbox"
-                checked={enabled}
-                disabled={!isAdmin}
-                onChange={(event) => void toggleMethod(method, event.target.checked)}
-              />
-            </label>
-          );
-        })}
-      </div>
-
-      <div className="rounded-2xl border border-[var(--c-border)] bg-[var(--c-panel)] p-4">
-        <label className="block text-sm">
-          <span className="mb-2 block text-xs uppercase tracking-wider text-[var(--c-muted)]">UPI ID</span>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <input
-              value={upiId}
-              disabled={!isAdmin}
-              onChange={(event) => setUpiId(event.target.value)}
-              placeholder="merchant@upi"
-              className="w-full rounded-lg border border-[var(--c-border)] bg-white px-3 py-2 disabled:bg-[var(--c-panel-2)]"
-            />
-            {isAdmin && (
-              <button onClick={() => void saveUpiId()} className="rounded-lg bg-[var(--c-accent)] px-4 py-2 font-medium text-white">
-                Save UPI
-              </button>
-            )}
-          </div>
-        </label>
+              return (
+                <tr key={method} className="border-b border-[var(--c-border)] transition-colors hover:bg-[var(--c-panel-2)]">
+                  <td className="px-2 py-3">
+                    <input
+                      type="checkbox"
+                      disabled={!isAdmin || !hasId}
+                      checked={hasId && selectedIds.includes(current.id)}
+                      onChange={() => hasId && toggleSelect(current.id)}
+                      className="rounded border-[var(--c-border)] bg-transparent focus:ring-1 focus:ring-[var(--c-accent)] text-[var(--c-accent)]"
+                    />
+                  </td>
+                  <td className="px-3 py-3 capitalize font-medium">{method}</td>
+                  <td className="px-3 py-3">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={enabled}
+                        disabled={!isAdmin}
+                        onChange={(event) => saveMethodInfo(method, event.target.checked, method === "upi" ? upiId : undefined)}
+                        className="rounded border-[var(--c-border)] bg-transparent focus:ring-1 focus:ring-[var(--c-accent)] text-[var(--c-accent)]"
+                      />
+                      <span className="text-xs text-[var(--c-muted)]">{enabled ? 'Enabled' : 'Disabled'}</span>
+                    </label>
+                  </td>
+                  <td className="px-3 py-3">
+                    {method === "upi" ? (
+                      <input
+                        value={upiId}
+                        disabled={!isAdmin}
+                        onChange={(event) => setUpiId(event.target.value)}
+                        placeholder="merchant@upi"
+                        className="bg-transparent border-0 border-b border-[var(--c-border)] focus:border-[var(--c-accent)] px-1 py-1 w-full max-w-[200px] text-[var(--c-ink)] focus:ring-0 text-sm"
+                      />
+                    ) : (
+                      <span className="text-[var(--c-muted)]">-</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-3">
+                    {method === "upi" && isAdmin && (
+                       <button
+                         onClick={() => saveMethodInfo("upi", enabled, upiId)}
+                         className="text-xs font-semibold px-3 py-1 rounded border border-[var(--c-border)] hover:bg-[var(--c-panel-2)] text-[var(--c-ink)] transition-colors"
+                       >
+                         Save UPI
+                       </button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     </section>
   );
