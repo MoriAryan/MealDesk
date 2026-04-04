@@ -31,7 +31,9 @@ const menus: MenuConfig[] = [
     title: "Reporting",
     items: [
       { to: "/", label: "Dashboard" },
-      { to: "/reports", label: "Reports" }, // Optional link for later
+      { to: "/reports", label: "Reports" },
+      { to: "/kitchen-display", label: "Kitchen Display" },
+      { to: "/customer-display", label: "Customer Display" },
     ],
   },
 ];
