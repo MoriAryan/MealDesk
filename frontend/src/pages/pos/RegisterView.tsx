@@ -10,6 +10,8 @@ interface Props {
   setCartItems: React.Dispatch<React.SetStateAction<CartItem[]>>;
   onProceedToPayment: () => void;
   onSendToKitchen: () => void;
+  hasSentToKitchen: boolean;
+  setHasSentToKitchen: (val: boolean) => void;
 }
 
 export function RegisterView({ 
@@ -19,7 +21,9 @@ export function RegisterView({
   cartItems, 
   setCartItems, 
   onProceedToPayment,
-  onSendToKitchen
+  onSendToKitchen,
+  hasSentToKitchen,
+  setHasSentToKitchen
 }: Props) {
   const [activeCategoryId, setActiveCategoryId] = useState<string | "ALL">("ALL");
 
@@ -33,6 +37,7 @@ export function RegisterView({
   }, [products, activeCategoryId]);
 
   const addToCart = (product: Product) => {
+    setHasSentToKitchen(false);
     setCartItems(prev => {
        const existing = prev.find(item => item.product.id === product.id);
        if (existing) {
@@ -43,6 +48,7 @@ export function RegisterView({
   };
 
   const updateQuantity = (cartItemId: string, delta: number) => {
+    setHasSentToKitchen(false);
     setCartItems(prev => prev.map(item => {
       if (item.id === cartItemId) {
         const newQty = Math.max(0, item.quantity + delta);
@@ -222,17 +228,19 @@ export function RegisterView({
           </div>
           
           <div className="flex gap-3">
-            <button 
-              disabled={cartItems.length === 0}
-              onClick={onSendToKitchen}
-              className="w-1/3 py-4 px-2 rounded-xl bg-gray-800 hover:bg-gray-900 text-white font-bold text-sm tracking-wider uppercase transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:active:scale-100"
-            >
-              Kitchen
-            </button>
+            {!hasSentToKitchen && (
+              <button 
+                disabled={cartItems.length === 0}
+                onClick={onSendToKitchen}
+                className="w-1/3 py-4 px-2 rounded-xl bg-gray-800 hover:bg-gray-900 text-white font-bold text-sm tracking-wider uppercase transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-1"
+              >
+                Kitchen
+              </button>
+            )}
             <button 
               disabled={cartItems.length === 0}
               onClick={onProceedToPayment}
-              className="w-2/3 flex items-center justify-center gap-2 py-4 px-4 rounded-xl bg-green-500 hover:bg-green-600 text-white font-black text-lg tracking-wider uppercase transition-all shadow-md shadow-green-500/20 active:scale-95 disabled:opacity-50 disabled:shadow-none disabled:active:scale-100"
+              className={`${hasSentToKitchen ? 'w-full' : 'w-2/3'} flex items-center justify-center gap-2 py-4 px-4 rounded-xl bg-green-500 hover:bg-green-600 text-white font-black text-lg tracking-wider uppercase transition-all shadow-md shadow-green-500/20 active:scale-95 disabled:opacity-50 disabled:shadow-none disabled:active:scale-100`}
             >
               Pay Now <span className="text-xl">→</span>
             </button>
