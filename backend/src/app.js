@@ -9,6 +9,9 @@ const productsRouter = require("./routes/products");
 const paymentMethodsRouter = require("./routes/paymentMethods");
 const posConfigRouter = require("./routes/posConfig");
 const taxRatesRouter = require("./routes/taxRates");
+const kitchenRouter = require("./routes/kitchen");
+const customersRouter = require("./routes/customers");
+const ordersRouter = require("./routes/orders");
 
 const app = express();
 
@@ -29,6 +32,9 @@ app.use("/api/products", productsRouter);
 app.use("/api/payment-methods", paymentMethodsRouter);
 app.use("/api/pos-config", posConfigRouter);
 app.use("/api/tax-rates", taxRatesRouter);
+app.use("/api/kitchen", kitchenRouter);
+app.use("/api/customers", customersRouter);
+app.use("/api/orders", ordersRouter);
 
 app.get("/", (_req, res) => {
   res.json({

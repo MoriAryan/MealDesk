@@ -8,6 +8,10 @@ import { PlaceholderPage } from "./pages/PlaceholderPage";
 import { PosConfigPage } from "./pages/PosConfigPage";
 import { ProductEditorPage } from "./pages/ProductEditorPage";
 import { ProductsPage } from "./pages/ProductsPage";
+import { KitchenDisplayPage } from "./pages/KitchenDisplayPage";
+import { DashboardPage } from "./pages/DashboardPage";
+import { CustomersPage } from "./pages/CustomersPage";
+import { OrdersPage } from "./pages/OrdersPage";
 
 function App() {
   return (
@@ -21,15 +25,7 @@ function App() {
           </ProtectedRoute>
         }
       >
-        <Route
-          path="/"
-          element={
-            <PlaceholderPage
-              title="Dashboard"
-              description="Dashboard shell with KPI and reporting placeholders is ready for upcoming phases."
-            />
-          }
-        />
+        <Route path="/" element={<DashboardPage />} />
         <Route
           path="/settings"
           element={
@@ -43,25 +39,11 @@ function App() {
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/products/:productId" element={<ProductEditorPage />} />
         <Route path="/payment-methods" element={<PaymentMethodsPage />} />
+        <Route path="/customers" element={<CustomersPage />} />
+        <Route path="/pos" element={<PlaceholderPage title="POS Interface" description="Main Point of Sale cash register interface." />} />
+        <Route path="/orders" element={<OrdersPage />} />
         <Route path="/pos-config" element={<PosConfigPage />} />
-        <Route
-          path="/pos"
-          element={
-            <PlaceholderPage
-              title="POS Terminal"
-              description="Floor view, register, and payment flow pages are reserved and scaffolded for the next phases."
-            />
-          }
-        />
-        <Route
-          path="/kitchen-display"
-          element={
-            <PlaceholderPage
-              title="Kitchen Display"
-              description="Kitchen ticket board shell is in place and will be wired to realtime updates in a later phase."
-            />
-          }
-        />
+        <Route path="/kitchen-display" element={<KitchenDisplayPage />} />
         <Route
           path="/customer-display"
           element={
