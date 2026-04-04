@@ -12,6 +12,9 @@ import { KitchenDisplayPage } from "./pages/KitchenDisplayPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { CustomersPage } from "./pages/CustomersPage";
 import { OrdersPage } from "./pages/OrdersPage";
+import { PosTerminalLayout } from "./layouts/PosTerminalLayout";
+import { CustomerDisplayPage } from "./pages/CustomerDisplayPage";
+import { ReportsPage } from "./pages/ReportsPage";
 
 function App() {
   return (
@@ -40,19 +43,11 @@ function App() {
         <Route path="/products/:productId" element={<ProductEditorPage />} />
         <Route path="/payment-methods" element={<PaymentMethodsPage />} />
         <Route path="/customers" element={<CustomersPage />} />
-        <Route path="/pos" element={<PlaceholderPage title="POS Interface" description="Main Point of Sale cash register interface." />} />
+        <Route path="/pos" element={<PosTerminalLayout />} />
         <Route path="/orders" element={<OrdersPage />} />
         <Route path="/pos-config" element={<PosConfigPage />} />
         <Route path="/kitchen-display" element={<KitchenDisplayPage />} />
-        <Route
-          path="/customer-display"
-          element={
-            <PlaceholderPage
-              title="Customer Display"
-              description="Customer-facing realtime display route is scaffolded and ready for integration."
-            />
-          }
-        />
+        <Route path="/customer-display" element={<CustomerDisplayPage />} />
         <Route
           path="/self-ordering"
           element={
@@ -62,15 +57,7 @@ function App() {
             />
           }
         />
-        <Route
-          path="/reports"
-          element={
-            <PlaceholderPage
-              title="Reports"
-              description="Reporting and export screens are scaffolded and will be implemented in the reporting phase."
-            />
-          }
-        />
+        <Route path="/reports" element={<ReportsPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

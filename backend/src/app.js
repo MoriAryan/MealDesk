@@ -12,6 +12,9 @@ const taxRatesRouter = require("./routes/taxRates");
 const kitchenRouter = require("./routes/kitchen");
 const customersRouter = require("./routes/customers");
 const ordersRouter = require("./routes/orders");
+const posTerminalRouter = require("./routes/posTerminal");
+const customerDisplayRouter = require("./routes/customerDisplay");
+const reportsRouter = require("./routes/reports");
 
 const app = express();
 
@@ -35,6 +38,9 @@ app.use("/api/tax-rates", taxRatesRouter);
 app.use("/api/kitchen", kitchenRouter);
 app.use("/api/customers", customersRouter);
 app.use("/api/orders", ordersRouter);
+app.use("/api/pos-terminal", posTerminalRouter);
+app.use("/api/customer-display", customerDisplayRouter);
+app.use("/api/reports", reportsRouter);
 
 app.get("/", (_req, res) => {
   res.json({
