@@ -76,10 +76,10 @@ export function PosConfigPage() {
       <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-2xl font-semibold">POS Terminal Config</h2>
-          <p className="text-sm text-[var(--c-muted)]">Configure payment toggles, self-ordering mode, and terminal appearance.</p>
+          <p className="text-sm text-muted">Configure payment toggles, self-ordering mode, and terminal appearance.</p>
         </div>
         {isAdmin && (
-          <button onClick={() => setIsCreateModalOpen(true)} className="rounded-lg bg-[var(--c-accent)] px-4 py-2 font-medium text-white">
+          <button onClick={() => setIsCreateModalOpen(true)} className="rounded-lg bg-[var(--color-accent)] px-4 py-2 font-medium text-white">
             Create Terminal
           </button>
         )}
@@ -88,35 +88,35 @@ export function PosConfigPage() {
       {error && <p className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
       <div className="grid gap-4 md:grid-cols-[280px_1fr]">
-        <div className="space-y-2 rounded-2xl border border-[var(--c-border)] bg-[var(--c-panel)] p-3">
+        <div className="space-y-2 rounded-2xl border border-border bg-panel p-3">
           {items.map((item) => (
             <button
               key={item.id}
               onClick={() => setSelectedId(item.id)}
               className={`w-full rounded-lg px-3 py-2 text-left text-sm ${
-                selectedId === item.id ? "bg-[var(--c-accent)] text-white" : "bg-[var(--c-panel-2)]"
+                selectedId === item.id ? "bg-[var(--color-accent)] text-white" : "bg-panel"
               }`}
             >
               {item.name}
             </button>
           ))}
-          {!items.length && <p className="px-2 py-3 text-sm text-[var(--c-muted)]">No terminals configured.</p>}
+          {!items.length && <p className="px-2 py-3 text-sm text-muted">No terminals configured.</p>}
         </div>
 
         {selected && (
-          <div className="space-y-4 rounded-2xl border border-[var(--c-border)] bg-[var(--c-panel)] p-4">
+          <div className="space-y-4 rounded-2xl border border-border bg-panel p-4">
             <label className="block text-sm">
-              <span className="mb-1 block text-xs uppercase tracking-wider text-[var(--c-muted)]">Terminal Name</span>
+              <span className="mb-1 block text-xs uppercase tracking-wider text-muted">Terminal Name</span>
               <input
                 disabled={!isAdmin}
                 value={selected.name}
                 onChange={(event) => mutateSelected({ name: event.target.value })}
-                className="w-full rounded-lg border border-[var(--c-border)] bg-white px-3 py-2 disabled:bg-[var(--c-panel-2)]"
+                className="w-full rounded-lg border border-border bg-white px-3 py-2 disabled:bg-panel"
               />
             </label>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className="flex items-center justify-between rounded-lg border border-[var(--c-border)] bg-white px-3 py-2 text-sm">
+              <label className="flex items-center justify-between rounded-lg border border-border bg-white px-3 py-2 text-sm">
                 Cash Enabled
                 <input
                   type="checkbox"
@@ -125,7 +125,7 @@ export function PosConfigPage() {
                   onChange={(event) => mutateSelected({ cash_enabled: event.target.checked })}
                 />
               </label>
-              <label className="flex items-center justify-between rounded-lg border border-[var(--c-border)] bg-white px-3 py-2 text-sm">
+              <label className="flex items-center justify-between rounded-lg border border-border bg-white px-3 py-2 text-sm">
                 Digital Enabled
                 <input
                   type="checkbox"
@@ -134,7 +134,7 @@ export function PosConfigPage() {
                   onChange={(event) => mutateSelected({ digital_enabled: event.target.checked })}
                 />
               </label>
-              <label className="flex items-center justify-between rounded-lg border border-[var(--c-border)] bg-white px-3 py-2 text-sm">
+              <label className="flex items-center justify-between rounded-lg border border-border bg-white px-3 py-2 text-sm">
                 UPI Enabled
                 <input
                   type="checkbox"
@@ -143,7 +143,7 @@ export function PosConfigPage() {
                   onChange={(event) => mutateSelected({ upi_enabled: event.target.checked })}
                 />
               </label>
-              <label className="flex items-center justify-between rounded-lg border border-[var(--c-border)] bg-white px-3 py-2 text-sm">
+              <label className="flex items-center justify-between rounded-lg border border-border bg-white px-3 py-2 text-sm">
                 Self Ordering
                 <input
                   type="checkbox"
@@ -156,21 +156,21 @@ export function PosConfigPage() {
 
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-sm">
-                <span className="mb-1 block text-xs uppercase tracking-wider text-[var(--c-muted)]">UPI ID</span>
+                <span className="mb-1 block text-xs uppercase tracking-wider text-muted">UPI ID</span>
                 <input
                   disabled={!isAdmin}
                   value={selected.upi_id || ""}
                   onChange={(event) => mutateSelected({ upi_id: event.target.value })}
-                  className="w-full rounded-lg border border-[var(--c-border)] bg-white px-3 py-2 disabled:bg-[var(--c-panel-2)]"
+                  className="w-full rounded-lg border border-border bg-white px-3 py-2 disabled:bg-panel"
                 />
               </label>
               <label className="text-sm">
-                <span className="mb-1 block text-xs uppercase tracking-wider text-[var(--c-muted)]">Self Ordering Mode</span>
+                <span className="mb-1 block text-xs uppercase tracking-wider text-muted">Self Ordering Mode</span>
                 <select
                   disabled={!isAdmin}
                   value={selected.self_ordering_mode || ""}
                   onChange={(event) => mutateSelected({ self_ordering_mode: (event.target.value || null) as "qr" | "token" | null })}
-                  className="w-full rounded-lg border border-[var(--c-border)] bg-white px-3 py-2 disabled:bg-[var(--c-panel-2)]"
+                  className="w-full rounded-lg border border-border bg-white px-3 py-2 disabled:bg-panel"
                 >
                   <option value="">Disabled</option>
                   <option value="qr">QR</option>
@@ -180,18 +180,18 @@ export function PosConfigPage() {
             </div>
 
             <label className="text-sm">
-              <span className="mb-1 block text-xs uppercase tracking-wider text-[var(--c-muted)]">Background Color</span>
+              <span className="mb-1 block text-xs uppercase tracking-wider text-muted">Background Color</span>
               <input
                 type="color"
                 disabled={!isAdmin}
                 value={selected.bg_color || "#f6f2ea"}
                 onChange={(event) => mutateSelected({ bg_color: event.target.value })}
-                className="h-11 w-40 rounded-lg border border-[var(--c-border)] bg-white px-2 disabled:bg-[var(--c-panel-2)]"
+                className="h-11 w-40 rounded-lg border border-border bg-white px-2 disabled:bg-panel"
               />
             </label>
 
             {isAdmin && (
-              <button onClick={() => void saveSelected()} className="rounded-lg bg-[var(--c-accent)] px-4 py-2 font-medium text-white">
+              <button onClick={() => void saveSelected()} className="rounded-lg bg-[var(--color-accent)] px-4 py-2 font-medium text-white">
                 Save Terminal
               </button>
             )}
@@ -201,21 +201,21 @@ export function PosConfigPage() {
 
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-30 grid place-items-center bg-black/35 p-4">
-          <form onSubmit={onCreate} className="w-full max-w-md rounded-2xl border border-[var(--c-border)] bg-[var(--c-panel)] p-5">
+          <form onSubmit={onCreate} className="w-full max-w-md rounded-2xl border border-border bg-panel p-5">
             <h3 className="text-xl font-semibold">Create POS Terminal</h3>
-            <p className="mt-1 text-sm text-[var(--c-muted)]">This creates a new terminal profile with default settings.</p>
+            <p className="mt-1 text-sm text-muted">This creates a new terminal profile with default settings.</p>
             <input
               autoFocus
               value={terminalName}
               onChange={(event) => setTerminalName(event.target.value)}
               placeholder="Counter 1"
-              className="mt-4 w-full rounded-lg border border-[var(--c-border)] bg-white px-3 py-2"
+              className="mt-4 w-full rounded-lg border border-border bg-white px-3 py-2"
             />
             <div className="mt-4 flex justify-end gap-2">
-              <button type="button" onClick={() => setIsCreateModalOpen(false)} className="rounded-lg border border-[var(--c-border)] px-4 py-2">
+              <button type="button" onClick={() => setIsCreateModalOpen(false)} className="rounded-lg border border-border px-4 py-2">
                 Cancel
               </button>
-              <button type="submit" className="rounded-lg bg-[var(--c-accent)] px-4 py-2 font-medium text-white">
+              <button type="submit" className="rounded-lg bg-[var(--color-accent)] px-4 py-2 font-medium text-white">
                 Create
               </button>
             </div>

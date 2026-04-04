@@ -12,6 +12,7 @@ import { KitchenDisplayPage } from "./pages/KitchenDisplayPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { CustomersPage } from "./pages/CustomersPage";
 import { OrdersPage } from "./pages/OrdersPage";
+import { PaymentsPage } from "./pages/PaymentsPage";
 import { PosTerminalLayout } from "./layouts/PosTerminalLayout";
 import { CustomerDisplayPage } from "./pages/CustomerDisplayPage";
 import { ReportsPage } from "./pages/ReportsPage";
@@ -45,6 +46,7 @@ function App() {
         <Route path="/customers" element={<CustomersPage />} />
         <Route path="/pos" element={<PosTerminalLayout />} />
         <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/payments" element={<PaymentsPage />} />
         <Route path="/pos-config" element={<PosConfigPage />} />
         <Route path="/kitchen-display" element={<KitchenDisplayPage />} />
         <Route path="/customer-display" element={<CustomerDisplayPage />} />

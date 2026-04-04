@@ -15,6 +15,7 @@ const ordersRouter = require("./routes/orders");
 const posTerminalRouter = require("./routes/posTerminal");
 const customerDisplayRouter = require("./routes/customerDisplay");
 const reportsRouter = require("./routes/reports");
+const paymentsRouter = require("./routes/payments");
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use("/api/orders", ordersRouter);
 app.use("/api/pos-terminal", posTerminalRouter);
 app.use("/api/customer-display", customerDisplayRouter);
 app.use("/api/reports", reportsRouter);
+app.use("/api/payments", paymentsRouter);
 
 app.get("/", (_req, res) => {
   res.json({

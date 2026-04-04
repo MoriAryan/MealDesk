@@ -125,18 +125,18 @@ export function PaymentMethodsPage() {
   return (
     <section className="max-w-5xl">
       {/* Standard Header */}
-      <div className="flex items-center justify-between mb-6 pb-2 border-b border-[var(--c-border)]">
+      <div className="flex items-center justify-between mb-6 pb-2 border-b border-border">
         <div className="flex items-center gap-4 pt-2">
           {isAdmin && (
             <button 
               type="button"
-              className="text-sm font-semibold px-4 py-1.5 rounded bg-[var(--c-panel-2)] text-[var(--c-ink)] hover:bg-[var(--c-border)] transition-colors opacity-50 cursor-not-allowed"
+              className="text-sm font-semibold px-4 py-1.5 rounded bg-panel text-ink hover:bg-[var(--color-border)] transition-colors opacity-50 cursor-not-allowed"
               title="Payment methods are predefined. You cannot add new ones."
             >
               New
             </button>
           )}
-          <span className="text-xl font-bold font-head text-[var(--c-ink)]">Payment</span>
+          <span className="text-xl font-bold font-head text-ink">Payment</span>
         </div>
 
         {/* Action Right Menu */}
@@ -148,13 +148,13 @@ export function PaymentMethodsPage() {
             <div className="relative" ref={actionMenuRef}>
               <button 
                 onClick={() => setActionMenuOpen(!actionMenuOpen)}
-                className="text-sm font-semibold bg-[var(--c-panel-2)] text-[var(--c-ink)] px-3 py-1 rounded border border-[var(--c-border)] hover:bg-[var(--c-border)] flex items-center gap-2"
+                className="text-sm font-semibold bg-panel text-ink px-3 py-1 rounded border border-border hover:bg-[var(--color-border)] flex items-center gap-2"
               >
                 <span>⚙</span> Action
               </button>
               {actionMenuOpen && (
-                <div className="absolute right-0 top-full mt-1 w-32 bg-[var(--c-panel)] border border-[var(--c-border)] rounded-md shadow-lg z-50">
-                  <button onClick={bulkDisable} className="w-full text-left px-4 py-2 text-sm text-[var(--c-ink)] hover:bg-[var(--c-panel-2)] transition-colors">
+                <div className="absolute right-0 top-full mt-1 w-32 bg-panel border border-border rounded-md shadow-lg z-50">
+                  <button onClick={bulkDisable} className="w-full text-left px-4 py-2 text-sm text-ink hover:bg-panel transition-colors">
                     Disable
                   </button>
                 </div>
@@ -168,7 +168,7 @@ export function PaymentMethodsPage() {
 
       <div className="flex gap-4 mb-4">
         <select
-          className="text-sm bg-transparent border-0 border-b border-[var(--c-border)] px-1 py-1 focus:ring-0 text-[var(--c-muted)]"
+          className="text-sm bg-transparent border-0 border-b border-border px-1 py-1 focus:ring-0 text-muted"
           value={activePosConfigId}
           onChange={(event) => setActivePosConfigId(event.target.value)}
         >
@@ -178,15 +178,15 @@ export function PaymentMethodsPage() {
         </select>
       </div>
 
-      <div className="border-t border-[var(--c-border)]">
+      <div className="border-t border-border">
         <table className="min-w-full text-sm text-left">
           <thead>
-            <tr className="border-b border-[var(--c-border)] text-[var(--c-muted)]">
-              <th className="px-2 py-3 font-semibold text-[var(--c-ink)]">Select</th>
-              <th className="px-3 py-3 font-semibold text-[var(--c-ink)]">Method</th>
-              <th className="px-3 py-3 font-semibold text-[var(--c-ink)]">Status</th>
-              <th className="px-3 py-3 font-semibold text-[var(--c-ink)]">Configuration</th>
-              <th className="px-3 py-3 font-semibold text-[var(--c-ink)]">Actions</th>
+            <tr className="border-b border-border text-muted">
+              <th className="px-2 py-3 font-semibold text-ink">Select</th>
+              <th className="px-3 py-3 font-semibold text-ink">Method</th>
+              <th className="px-3 py-3 font-semibold text-ink">Status</th>
+              <th className="px-3 py-3 font-semibold text-ink">Configuration</th>
+              <th className="px-3 py-3 font-semibold text-ink">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -196,14 +196,14 @@ export function PaymentMethodsPage() {
               const hasId = !!current?.id;
 
               return (
-                <tr key={method} className="border-b border-[var(--c-border)] transition-colors hover:bg-[var(--c-panel-2)]">
+                <tr key={method} className="border-b border-border transition-colors hover:bg-panel">
                   <td className="px-2 py-3">
                     <input
                       type="checkbox"
                       disabled={!isAdmin || !hasId}
                       checked={hasId && selectedIds.includes(current.id)}
                       onChange={() => hasId && toggleSelect(current.id)}
-                      className="rounded border-[var(--c-border)] bg-transparent focus:ring-1 focus:ring-[var(--c-accent)] text-[var(--c-accent)]"
+                      className="rounded border-border bg-transparent focus:ring-1 focus:ring-[var(--color-accent)] text-[var(--color-accent)]"
                     />
                   </td>
                   <td className="px-3 py-3 capitalize font-medium">{method}</td>
@@ -214,9 +214,9 @@ export function PaymentMethodsPage() {
                         checked={enabled}
                         disabled={!isAdmin}
                         onChange={(event) => saveMethodInfo(method, event.target.checked, method === "upi" ? upiId : undefined)}
-                        className="rounded border-[var(--c-border)] bg-transparent focus:ring-1 focus:ring-[var(--c-accent)] text-[var(--c-accent)]"
+                        className="rounded border-border bg-transparent focus:ring-1 focus:ring-[var(--color-accent)] text-[var(--color-accent)]"
                       />
-                      <span className="text-xs text-[var(--c-muted)]">{enabled ? 'Enabled' : 'Disabled'}</span>
+                      <span className="text-xs text-muted">{enabled ? 'Enabled' : 'Disabled'}</span>
                     </label>
                   </td>
                   <td className="px-3 py-3">
@@ -226,17 +226,17 @@ export function PaymentMethodsPage() {
                         disabled={!isAdmin}
                         onChange={(event) => setUpiId(event.target.value)}
                         placeholder="merchant@upi"
-                        className="bg-transparent border-0 border-b border-[var(--c-border)] focus:border-[var(--c-accent)] px-1 py-1 w-full max-w-[200px] text-[var(--c-ink)] focus:ring-0 text-sm"
+                        className="bg-transparent border-0 border-b border-border focus:border-[var(--color-accent)] px-1 py-1 w-full max-w-[200px] text-ink focus:ring-0 text-sm"
                       />
                     ) : (
-                      <span className="text-[var(--c-muted)]">-</span>
+                      <span className="text-muted">-</span>
                     )}
                   </td>
                   <td className="px-3 py-3">
                     {method === "upi" && isAdmin && (
                        <button
                          onClick={() => saveMethodInfo("upi", enabled, upiId)}
-                         className="text-xs font-semibold px-3 py-1 rounded border border-[var(--c-border)] hover:bg-[var(--c-panel-2)] text-[var(--c-ink)] transition-colors"
+                         className="text-xs font-semibold px-3 py-1 rounded border border-border hover:bg-panel text-ink transition-colors"
                        >
                          Save UPI
                        </button>

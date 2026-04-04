@@ -87,12 +87,12 @@ export function ReportsPage() {
   return (
     <section className="max-w-5xl space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between pb-2 border-b border-[var(--c-border)]">
-        <span className="text-xl font-bold font-head text-[var(--c-ink)]">Reports & Analytics</span>
+      <div className="flex items-center justify-between pb-2 border-b border-border">
+        <span className="text-xl font-bold font-head text-ink">Reports & Analytics</span>
         <button
           onClick={() => void fetchReport()}
           disabled={loading}
-          className="text-sm font-semibold px-4 py-1.5 rounded bg-[var(--c-accent)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="text-sm font-semibold px-4 py-1.5 rounded bg-[var(--color-accent)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
         >
           {loading ? "Loading…" : "↻ Refresh"}
         </button>
@@ -101,15 +101,15 @@ export function ReportsPage() {
       {/* Filters Row */}
       <div className="flex flex-wrap gap-4 items-center">
         {/* Period Tabs */}
-        <div className="flex bg-[var(--c-panel-2)] rounded-lg p-1 border border-[var(--c-border)] gap-1">
+        <div className="flex bg-panel rounded-lg p-1 border border-border gap-1">
           {(["today", "week", "month", "custom"] as Period[]).map(p => (
             <button
               key={p}
               onClick={() => setPeriod(p)}
               className={`px-4 py-1.5 rounded-md text-sm font-semibold capitalize transition-colors ${
                 period === p
-                  ? "bg-[var(--c-ink)] text-white shadow"
-                  : "text-[var(--c-muted)] hover:text-[var(--c-ink)]"
+                  ? "bg-[var(--color-ink)] text-white shadow"
+                  : "text-muted hover:text-ink"
               }`}
             >
               {p}
@@ -121,7 +121,7 @@ export function ReportsPage() {
         <select
           value={selectedConfigId}
           onChange={e => setSelectedConfigId(e.target.value)}
-          className="text-sm bg-[var(--c-panel)] border border-[var(--c-border)] rounded-lg px-3 py-1.5 text-[var(--c-ink)] focus:ring-1 focus:ring-[var(--c-accent)]"
+          className="text-sm bg-panel border border-border rounded-lg px-3 py-1.5 text-ink focus:ring-1 focus:ring-[var(--color-accent)]"
         >
           <option value="">All Terminals</option>
           {posConfigs.map(p => (
@@ -136,18 +136,18 @@ export function ReportsPage() {
               type="date"
               value={customFrom}
               onChange={e => setCustomFrom(e.target.value)}
-              className="text-sm bg-[var(--c-panel)] border border-[var(--c-border)] rounded-lg px-3 py-1.5 text-[var(--c-ink)]"
+              className="text-sm bg-panel border border-border rounded-lg px-3 py-1.5 text-ink"
             />
-            <span className="text-[var(--c-muted)]">→</span>
+            <span className="text-muted">→</span>
             <input
               type="date"
               value={customTo}
               onChange={e => setCustomTo(e.target.value)}
-              className="text-sm bg-[var(--c-panel)] border border-[var(--c-border)] rounded-lg px-3 py-1.5 text-[var(--c-ink)]"
+              className="text-sm bg-panel border border-border rounded-lg px-3 py-1.5 text-ink"
             />
             <button
               onClick={() => void fetchReport()}
-              className="text-sm font-semibold px-3 py-1.5 rounded bg-[var(--c-accent)] text-white"
+              className="text-sm font-semibold px-3 py-1.5 rounded bg-[var(--color-accent)] text-white"
             >
               Apply
             </button>
@@ -171,41 +171,41 @@ export function ReportsPage() {
             ].map(kpi => (
               <div
                 key={kpi.label}
-                className="bg-[var(--c-panel)] border border-[var(--c-border)] rounded-xl p-5 shadow-sm"
+                className="bg-panel border border-border rounded-xl p-5 shadow-sm"
               >
-                <p className="text-xs font-bold uppercase tracking-widest text-[var(--c-muted)] mb-2">{kpi.label}</p>
-                <p className="text-3xl font-black text-[var(--c-ink)] tracking-tight">{kpi.value}</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-muted mb-2">{kpi.label}</p>
+                <p className="text-3xl font-black text-ink tracking-tight">{kpi.value}</p>
               </div>
             ))}
           </div>
 
           {/* Top Products Table */}
-          <div className="bg-[var(--c-panel)] border border-[var(--c-border)] rounded-xl shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-[var(--c-border)]">
-              <h3 className="font-bold text-[var(--c-ink)]">Top Products</h3>
-              <p className="text-xs text-[var(--c-muted)] mt-0.5">Ranked by quantity sold in selected period</p>
+          <div className="bg-panel border border-border rounded-xl shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-border">
+              <h3 className="font-bold text-ink">Top Products</h3>
+              <p className="text-xs text-muted mt-0.5">Ranked by quantity sold in selected period</p>
             </div>
             {report.topProducts.length === 0 ? (
-              <p className="px-6 py-8 text-center text-[var(--c-muted)] text-sm">No sales data for this period.</p>
+              <p className="px-6 py-8 text-center text-muted text-sm">No sales data for this period.</p>
             ) : (
-              <div className="divide-y divide-[var(--c-border)]">
+              <div className="divide-y divide-[var(--color-border)]">
                 {report.topProducts.map((p, i) => (
-                  <div key={p.name} className="flex items-center gap-4 px-6 py-3 hover:bg-[var(--c-panel-2)] transition-colors">
-                    <span className="w-7 h-7 rounded-full bg-[var(--c-panel-2)] border border-[var(--c-border)] flex items-center justify-center text-xs font-black text-[var(--c-muted)]">
+                  <div key={p.name} className="flex items-center gap-4 px-6 py-3 hover:bg-panel transition-colors">
+                    <span className="w-7 h-7 rounded-full bg-panel border border-border flex items-center justify-center text-xs font-black text-muted">
                       {i + 1}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-[var(--c-ink)] truncate">{p.name}</p>
-                      <div className="mt-1.5 h-1.5 rounded-full bg-[var(--c-panel-2)] overflow-hidden">
+                      <p className="font-semibold text-ink truncate">{p.name}</p>
+                      <div className="mt-1.5 h-1.5 rounded-full bg-panel overflow-hidden">
                         <div
-                          className="h-full rounded-full bg-[var(--c-accent)] transition-all"
+                          className="h-full rounded-full bg-[var(--color-accent)] transition-all"
                           style={{ width: `${Math.round((p.qty / maxQty) * 100)}%` }}
                         />
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="font-bold text-[var(--c-ink)]">{p.qty} sold</p>
-                      <p className="text-xs text-[var(--c-muted)]">${p.revenue.toFixed(2)}</p>
+                      <p className="font-bold text-ink">{p.qty} sold</p>
+                      <p className="text-xs text-muted">${p.revenue.toFixed(2)}</p>
                     </div>
                   </div>
                 ))}
