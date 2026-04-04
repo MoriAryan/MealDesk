@@ -48,6 +48,7 @@ export type Product = {
   active: boolean;
   categories?: { name: string; color: string } | null;
   tax_rates?: { label: string; rate: number } | null;
+  product_variants?: ProductVariant[];
 };
 
 export type ProductVariant = {

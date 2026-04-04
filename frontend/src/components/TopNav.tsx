@@ -31,7 +31,7 @@ const menus: MenuConfig[] = [
   {
     title: "Dashboard",
     items: [
-      { to: "/", label: "Dashboard" },
+      { to: "/dashboard", label: "Dashboard" },
     ],
   },
 ];

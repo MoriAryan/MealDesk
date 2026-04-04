@@ -18,8 +18,8 @@ type VariantInput = {
 };
 
 export function ProductEditorPage() {
-  const { accessToken, user } = useAuth();
-  const isAdmin = user?.role === "admin";
+  const { accessToken } = useAuth();
+  const isAdmin = true; // Temporary prototype unlock
 
   const navigate = useNavigate();
   const { productId } = useParams();
@@ -150,11 +150,12 @@ export function ProductEditorPage() {
 
   return (
     <section className="max-w-4xl">
-      <div className="flex items-center gap-4 mb-8 border-b border-border pb-2 pt-2">
-        <Link to="/products" className="text-sm font-semibold px-4 py-1.5 rounded bg-panel text-ink hover:bg-[var(--color-border)] transition-colors">
-          New
+      <div className="flex items-center gap-3 mb-8 border-b border-border pb-2 pt-2">
+        <Link to="/products" className="text-xl font-bold font-head text-muted hover:text-ink transition-colors">
+          Products
         </Link>
-        <span className="text-xl font-bold font-head text-ink">Products</span>
+        <span className="text-xl font-bold font-head text-muted">/</span>
+        <span className="text-xl font-bold font-head text-ink">{isCreate ? 'New' : name || 'Unnamed Product'}</span>
       </div>
 
       {error && <p className="mb-4 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
@@ -275,7 +276,11 @@ export function ProductEditorPage() {
                     <select
                       disabled={!isAdmin}
                       value={uom}
-                      onChange={(event) => setUom(event.target.value as Product["uom"])}
+                      onChange={(event) => {
+                        const newUom = event.target.value as Product["uom"];
+                        setUom(newUom);
+                        setVariants(prev => prev.map(v => ({...v, unit: newUom})));
+                      }}
                       className={selectClass + " font-medium uppercase"}
                     >
                       {units.map((unit) => (
@@ -344,7 +349,7 @@ export function ProductEditorPage() {
                   </div>
                   <div className="col-span-3">
                     <select
-                      disabled={!isAdmin}
+                      disabled={true}
                       value={variant.unit}
                       onChange={(event) =>
                         setVariants((prev) =>

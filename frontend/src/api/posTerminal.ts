@@ -24,7 +24,7 @@ export function submitPosOrder(token: string, params: SubmitOrderParams) {
   );
 }
 
-// Pay an existing draft order — updates status + writes payment record
+// Pay an existing draft order by ID — updates status + writes payment record
 export function payOrder(
   token: string,
   orderId: string,
@@ -33,11 +33,22 @@ export function payOrder(
 ): Promise<{ order: Order; payment: unknown }> {
   return requestJson<{ order: Order; payment: unknown }>(
     `/orders/${orderId}/pay`,
-    {
-      method: "PATCH",
-      token,
-      body: { paymentMethod, customerId: customerId ?? null },
-    }
+    { method: "PATCH", token, body: { paymentMethod, customerId: customerId ?? null } }
   );
 }
+
+// Pay by finding the most recent draft for this table (avoids stale UUID problem)
+export function payDraftOrder(
+  token: string,
+  posConfigId: string,
+  tableId: string | null,
+  paymentMethod: "cash" | "digital" | "upi",
+  customerId?: string | null
+): Promise<{ order: Order; payment: unknown }> {
+  return requestJson<{ order: Order; payment: unknown }>(
+    `/orders/pay-draft`,
+    { method: "PATCH", token, body: { posConfigId, tableId, paymentMethod, customerId: customerId ?? null } }
+  );
+}
+
 

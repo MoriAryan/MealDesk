@@ -4,17 +4,18 @@ import { useAuth } from "../auth/AuthProvider";
 import { FloorView } from "../pages/pos/FloorView";
 import { RegisterView } from "../pages/pos/RegisterView";
 import { PaymentView } from "../pages/pos/PaymentView";
-import type { Product, Category, Customer } from "../api/types";
+import type { Product, Category, Customer, ProductVariant } from "../api/types";
 import { listProducts } from "../api/products";
 import { listCategories } from "../api/categories";
 import { listPosConfigs } from "../api/posConfig";
 import { listCustomers } from "../api/customers";
-import { submitPosOrder, payOrder } from "../api/posTerminal";
+import { submitPosOrder, payDraftOrder } from "../api/posTerminal";
 import { Search, X, UserRound } from "lucide-react";
 
 export type CartItem = {
   id: string; // unique cart entry id
   product: Product;
+  variant?: ProductVariant;
   quantity: number;
 };
 
@@ -128,12 +129,9 @@ export function PosTerminalLayout() {
   const [currentView, setCurrentView] = useState<PosView>("FLOOR");
   const [activeTableId, setActiveTableId] = useState<string | null>(null);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  // Track whether kitchen send happened (if true, look for existing draft to pay)
   const [hasSentToKitchen, setHasSentToKitchen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-
-  // Track the draft order created when "Send to Kitchen" is pressed.
-  // On payment we UPDATE this order rather than creating a duplicate.
-  const [draftOrderId, setDraftOrderId] = useState<string | null>(null);
 
   // Loaded Data
   const [activePosConfigId, setActivePosConfigId] = useState<string | null>(null);
@@ -172,7 +170,6 @@ export function PosTerminalLayout() {
   // Reset session state when table changes
   useEffect(() => {
     setHasSentToKitchen(false);
-    setDraftOrderId(null);
   }, [activeTableId]);
 
   const closeRegister = () => {
@@ -188,7 +185,7 @@ export function PosTerminalLayout() {
   const handleSendToKitchen = async () => {
     if (!activePosConfigId || !accessToken) return alert("Terminal not configured");
     try {
-      const res = await submitPosOrder(accessToken, {
+      await submitPosOrder(accessToken, {
         posConfigId: activePosConfigId,
         tableId: activeTableId,
         items: cartItems,
@@ -196,8 +193,6 @@ export function PosTerminalLayout() {
         createKitchenTicket: true,
         customerId: selectedCustomer?.id ?? null,
       });
-      // Save the draft order ID so payment can update it instead of creating a new one
-      setDraftOrderId(res.order.id);
       setHasSentToKitchen(true);
       alert("Ticket sent to Kitchen!");
     } catch (e) {
@@ -209,24 +204,27 @@ export function PosTerminalLayout() {
   const handlePaymentSuccess = async (paymentMethod: "cash" | "digital" | "upi") => {
     if (!activePosConfigId || !accessToken) return alert("Terminal not configured");
     try {
-      if (draftOrderId) {
-        // CASE A: Order already exists as draft → just update status + write payment
+      // STRATEGY: Always try to find & pay the existing draft order for this table first.
+      // This works whether or not "Send to Kitchen" was pressed, and avoids stale UUID bugs.
+      let paid = false;
+
+      if (hasSentToKitchen) {
         try {
-          await payOrder(accessToken, draftOrderId, paymentMethod, selectedCustomer?.id ?? null);
-        } catch {
-          // Draft order not found (stale state from page refresh/HMR) → create fresh paid order
-          await submitPosOrder(accessToken, {
-            posConfigId: activePosConfigId,
-            tableId: activeTableId,
-            items: cartItems,
-            status: "paid",
-            createKitchenTicket: false,
-            customerId: selectedCustomer?.id ?? null,
+          await payDraftOrder(
+            accessToken,
+            activePosConfigId,
+            activeTableId,
             paymentMethod,
-          });
+            selectedCustomer?.id ?? null
+          );
+          paid = true;
+        } catch {
+          // No draft found — fall through to create fresh paid order
         }
-      } else {
-        // CASE B: No kitchen send → create a new paid order directly
+      }
+
+      if (!paid) {
+        // No kitchen order exists — create a new paid order directly
         await submitPosOrder(accessToken, {
           posConfigId: activePosConfigId,
           tableId: activeTableId,
@@ -241,7 +239,6 @@ export function PosTerminalLayout() {
       // Reset entire session
       setCartItems([]);
       setHasSentToKitchen(false);
-      setDraftOrderId(null);
       setActiveTableId(null);
       setSelectedCustomer(null);
       setCurrentView("FLOOR");
