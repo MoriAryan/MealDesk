@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
+import { Coffee } from "lucide-react";
 
 type AuthTab = "login" | "signup";
 
@@ -36,78 +37,100 @@ export function LoginPage() {
     }
   };
 
+  const inputClasses = "mt-2 block w-full rounded-xl border border-border bg-bg/50 px-4 py-3 text-ink placeholder:text-muted/60 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-colors shadow-inner"
+
   return (
-    <section className="mx-auto mt-8 max-w-xl rounded-2xl border border-[var(--c-border)] bg-[var(--c-panel)] p-6 shadow-sm md:mt-14 md:p-8">
-      <div className="mb-6 flex gap-2 rounded-xl bg-[var(--c-panel-2)] p-1">
-        <button
-          type="button"
-          onClick={() => setActiveTab("login")}
-          className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium ${
-            activeTab === "login" ? "bg-[var(--c-accent)] text-white" : "text-[var(--c-ink)]"
-          }`}
-        >
-          Login
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("signup")}
-          className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium ${
-            activeTab === "signup" ? "bg-[var(--c-accent)] text-white" : "text-[var(--c-ink)]"
-          }`}
-        >
-          Signup
-        </button>
+    <div className="flex min-h-[80vh] flex-col items-center justify-center p-4">
+      <div className="mb-8 flex items-center justify-center rounded-2xl bg-accent p-3 shadow-lg shadow-accent/20">
+         <Coffee size={32} className="text-white" />
       </div>
+      
+      <section className="w-full max-w-md overflow-hidden rounded-[2rem] border border-border bg-panel/80 p-8 shadow-[var(--shadow-artisanal)] backdrop-blur-xl sm:p-10">
+        
+        <div className="relative mb-10 flex w-full rounded-full bg-bg p-1 shadow-inner border border-border/50">
+          <div 
+             className="absolute bottom-1 top-1 w-[calc(50%-4px)] rounded-full bg-panel shadow-sm transition-transform duration-300 ease-out"
+             style={{ transform: activeTab === 'login' ? 'translateX(0)' : 'translateX(100%)' }}
+          />
+          <button
+            type="button"
+            onClick={() => setActiveTab("login")}
+            className={`relative z-10 flex-1 py-2.5 text-sm font-semibold tracking-wide transition-colors ${activeTab === 'login' ? 'text-accent' : 'text-muted hover:text-ink'}`}
+          >
+            Sign In
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("signup")}
+            className={`relative z-10 flex-1 py-2.5 text-sm font-semibold tracking-wide transition-colors ${activeTab === 'signup' ? 'text-accent' : 'text-muted hover:text-ink'}`}
+          >
+            Create Account
+          </button>
+        </div>
 
-      <h2 className="text-2xl font-semibold">{activeTab === "login" ? "Welcome Back" : "Create Account"}</h2>
-      <p className="mt-2 text-sm text-[var(--c-muted)]">Phase 2 auth is now partially implemented.</p>
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold tracking-tight text-ink">
+            {activeTab === "login" ? "Welcome back" : "Join the cafe"}
+          </h2>
+          <p className="mt-2 text-sm text-muted">
+             {activeTab === "login" ? "Enter your credentials to access the terminal." : "Set up your management account."}
+          </p>
+        </div>
 
-      <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-        {activeTab === "signup" ? (
-          <label className="block text-sm">
-            Name
+        <form className="space-y-5" onSubmit={handleSubmit}>
+          {activeTab === "signup" && (
+            <label className="block text-sm font-medium text-ink">
+              Full Name
+              <input
+                required
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                placeholder="Manager Name"
+                className={inputClasses}
+              />
+            </label>
+          )}
+
+          <label className="block text-sm font-medium text-ink">
+            Email Address
             <input
               required
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              className="mt-1 w-full rounded-lg border border-[var(--c-border)] bg-white px-3 py-2"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="manager@cafe.com"
+              className={inputClasses}
             />
           </label>
-        ) : null}
 
-        <label className="block text-sm">
-          Email
-          <input
-            required
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            className="mt-1 w-full rounded-lg border border-[var(--c-border)] bg-white px-3 py-2"
-          />
-        </label>
+          <label className="block text-sm font-medium text-ink">
+            Password
+            <input
+              required
+              type="password"
+              minLength={8}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="••••••••"
+              className={inputClasses}
+            />
+          </label>
 
-        <label className="block text-sm">
-          Password
-          <input
-            required
-            type="password"
-            minLength={8}
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className="mt-1 w-full rounded-lg border border-[var(--c-border)] bg-white px-3 py-2"
-          />
-        </label>
+          {error && (
+            <div className="rounded-xl bg-red-500/10 p-3 text-center border border-red-500/20">
+               <p className="text-sm font-medium text-red-500">{error}</p>
+            </div>
+          )}
 
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-lg bg-[var(--c-accent)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
-        >
-          {loading ? "Please wait..." : activeTab === "login" ? "Login" : "Signup"}
-        </button>
-      </form>
-    </section>
+          <button
+            type="submit"
+            disabled={loading}
+            className="mt-4 w-full rounded-xl bg-accent px-4 py-3.5 text-sm font-bold tracking-wide text-white transition-all hover:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-panel disabled:opacity-70 disabled:cursor-not-allowed shadow-md shadow-accent/20"
+          >
+            {loading ? "Authenticating..." : activeTab === "login" ? "Sign In" : "Create Account"}
+          </button>
+        </form>
+      </section>
+    </div>
   );
 }

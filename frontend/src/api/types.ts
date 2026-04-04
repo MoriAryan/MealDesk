@@ -69,6 +69,21 @@ export type Customer = {
   city: string | null;
   state: string | null;
   country: string | null;
+  total_sales?: number;
+};
+
+export type OrderLine = {
+  id: string;
+  order_id?: string;
+  product_name: string;
+  qty: number;
+  unit_price: number;
+  tax_rate: number;
+  uom: string;
+  discount: number;
+  subtotal: number;
+  total: number;
+  notes: string | null;
 };
 
 export type Order = {
@@ -89,4 +104,16 @@ export type Order = {
   created_at: string;
   updated_at: string;
   customers?: { name: string } | null;
+  pos_sessions?: { id: string; opened_at: string } | null;
+  order_lines?: OrderLine[];
+};
+
+export type Payment = {
+  id: string;
+  order_id: string;
+  payment_method: "cash" | "digital" | "upi";
+  amount: number;
+  paid_at: string;
+  created_at: string;
+  orders?: { order_number: string } | null;
 };

@@ -145,16 +145,16 @@ export function ProductEditorPage() {
     }
   };
 
-  const inputClass = "w-full bg-transparent border-0 border-b border-[var(--c-border)] px-1 py-1.5 focus:ring-0 focus:border-[var(--c-accent)] disabled:opacity-50 text-[var(--c-ink)] placeholder-[var(--c-muted)] rounded-none";
-  const selectClass = "w-full bg-transparent border-0 border-b border-[var(--c-border)] px-1 py-1.5 focus:ring-0 focus:border-[var(--c-accent)] disabled:opacity-50 text-[var(--c-ink)] rounded-none";
+  const inputClass = "w-full bg-transparent border-0 border-b border-border px-1 py-1.5 focus:ring-0 focus:border-[var(--color-accent)] disabled:opacity-50 text-ink placeholder-[var(--color-muted)] rounded-none";
+  const selectClass = "w-full bg-transparent border-0 border-b border-border px-1 py-1.5 focus:ring-0 focus:border-[var(--color-accent)] disabled:opacity-50 text-ink rounded-none";
 
   return (
     <section className="max-w-4xl">
-      <div className="flex items-center gap-4 mb-8 border-b border-[var(--c-border)] pb-2 pt-2">
-        <Link to="/products" className="text-sm font-semibold px-4 py-1.5 rounded bg-[var(--c-panel-2)] text-[var(--c-ink)] hover:bg-[var(--c-border)] transition-colors">
+      <div className="flex items-center gap-4 mb-8 border-b border-border pb-2 pt-2">
+        <Link to="/products" className="text-sm font-semibold px-4 py-1.5 rounded bg-panel text-ink hover:bg-[var(--color-border)] transition-colors">
           New
         </Link>
-        <span className="text-xl font-bold font-head text-[var(--c-ink)]">Products</span>
+        <span className="text-xl font-bold font-head text-ink">Products</span>
       </div>
 
       {error && <p className="mb-4 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
@@ -163,7 +163,7 @@ export function ProductEditorPage() {
         
         {/* Global Product Name (Above Tabs) */}
         <div>
-          <label className="block text-sm font-semibold text-[var(--c-ink)] mb-1">Product</label>
+          <label className="block text-sm font-semibold text-ink mb-1">Product</label>
           <input
             disabled={!isAdmin}
             value={name}
@@ -174,18 +174,18 @@ export function ProductEditorPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-6 border-b border-[var(--c-border)]">
+        <div className="flex gap-6 border-b border-border">
           <button
             type="button"
             onClick={() => setTab("general")}
-            className={`pb-2 text-sm font-semibold transition-colors border-b-2 ${tab === "general" ? "border-[var(--c-ink)] text-[var(--c-ink)]" : "border-transparent text-[var(--c-muted)] hover:text-[var(--c-ink)]"}`}
+            className={`pb-2 text-sm font-semibold transition-colors border-b-2 ${tab === "general" ? "border-[var(--color-ink)] text-ink" : "border-transparent text-muted hover:text-ink"}`}
           >
             General Info
           </button>
           <button
             type="button"
             onClick={() => setTab("variants")}
-            className={`pb-2 text-sm font-semibold transition-colors border-b-2 ${tab === "variants" ? "border-[var(--c-ink)] text-[var(--c-ink)]" : "border-transparent text-[var(--c-muted)] hover:text-[var(--c-ink)]"}`}
+            className={`pb-2 text-sm font-semibold transition-colors border-b-2 ${tab === "variants" ? "border-[var(--color-ink)] text-ink" : "border-transparent text-muted hover:text-ink"}`}
           >
             Variant
           </button>
@@ -198,7 +198,7 @@ export function ProductEditorPage() {
               {/* Left Column */}
               <div className="flex flex-col gap-8">
                 <div>
-                  <label className="block text-sm font-semibold text-[var(--c-ink)] mb-1">Category</label>
+                  <label className="block text-sm font-semibold text-ink mb-1">Category</label>
                   <select
                     disabled={!isAdmin}
                     value={categoryId}
@@ -215,7 +215,7 @@ export function ProductEditorPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-[var(--c-ink)] mb-1">Product Description</label>
+                  <label className="block text-sm font-semibold text-ink mb-1">Product Description</label>
                   <input
                     disabled={!isAdmin}
                     value={description}
@@ -226,10 +226,10 @@ export function ProductEditorPage() {
                 </div>
                 
                 {/* Admin/Internal Settings placed here so they aren't totally lost, but styled cleanly */}
-                <div className="flex flex-col gap-4 mt-6 pt-6 border-t border-[var(--c-border)] border-dashed">
-                  <div className="text-xs uppercase tracking-widest text-[var(--c-muted)] font-bold mb-2">Internal Info</div>
+                <div className="flex flex-col gap-4 mt-6 pt-6 border-t border-border border-dashed">
+                  <div className="text-xs uppercase tracking-widest text-muted font-bold mb-2">Internal Info</div>
                   <div>
-                    <label className="block text-sm font-semibold text-[var(--c-ink)] mb-1">POS Terminal</label>
+                    <label className="block text-sm font-semibold text-ink mb-1">POS Terminal</label>
                     <select
                       disabled={!isAdmin || !isCreate}
                       value={posConfigId}
@@ -241,13 +241,13 @@ export function ProductEditorPage() {
                       ))}
                     </select>
                   </div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-[var(--c-ink)]">
+                  <label className="flex items-center gap-2 text-sm font-medium text-ink">
                     <input
                       type="checkbox"
                       disabled={!isAdmin}
                       checked={active}
                       onChange={(event) => setActive(event.target.checked)}
-                      className="rounded border-[var(--c-border)] text-[var(--c-accent)] focus:ring-[var(--c-accent)]"
+                      className="rounded border-border text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
                     />
                     Active Product
                   </label>
@@ -258,9 +258,9 @@ export function ProductEditorPage() {
               <div className="flex flex-col gap-8">
                 <div className="flex items-end gap-4">
                   <div className="flex-1">
-                    <label className="block text-sm font-semibold text-[var(--c-ink)] mb-1">Prices</label>
+                    <label className="block text-sm font-semibold text-ink mb-1">Prices</label>
                     <div className="flex items-baseline">
-                      <span className="text-[var(--c-muted)] mr-1">$</span>
+                      <span className="text-muted mr-1">$</span>
                       <input
                         type="number"
                         step="0.01"
@@ -288,7 +288,7 @@ export function ProductEditorPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-[var(--c-ink)] mb-1">Tax</label>
+                  <label className="block text-sm font-semibold text-ink mb-1">Tax</label>
                   <select
                     disabled={!isAdmin}
                     value={taxRateId}
@@ -310,7 +310,7 @@ export function ProductEditorPage() {
           {tab === "variants" && (
             <div className="mt-4 flex flex-col gap-2">
               {/* Header row */}
-              <div className="grid grid-cols-12 gap-4 pb-2 border-b border-[var(--c-border)] text-sm font-semibold text-[var(--c-ink)] mb-2 px-1">
+              <div className="grid grid-cols-12 gap-4 pb-2 border-b border-border text-sm font-semibold text-ink mb-2 px-1">
                 <div className="col-span-3">Attributes</div>
                 <div className="col-span-3">Value</div>
                 <div className="col-span-3">Unit</div>
@@ -363,7 +363,7 @@ export function ProductEditorPage() {
                     </select>
                   </div>
                   <div className="col-span-2 relative">
-                    <span className="absolute left-0 top-[10px] text-[var(--c-muted)] text-sm">$</span>
+                    <span className="absolute left-0 top-[10px] text-muted text-sm">$</span>
                     <input
                       type="number"
                       step="0.01"
@@ -384,7 +384,7 @@ export function ProductEditorPage() {
                       <button
                         type="button"
                         onClick={() => setVariants((prev) => prev.filter((_, rowIndex) => rowIndex !== index))}
-                        className="text-[var(--c-muted)] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-2"
+                        className="text-muted hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-2"
                         title="Delete Variant"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -416,11 +416,11 @@ export function ProductEditorPage() {
 
         {/* Global Save Button */}
         {isAdmin && (
-          <div className="pt-6 border-t border-[var(--c-border)] flex justify-end">
+          <div className="pt-6 border-t border-border flex justify-end">
              <button
               disabled={!canSubmit}
               type="submit"
-              className="rounded-lg bg-[var(--c-accent)] px-8 py-2 font-medium text-white disabled:opacity-50 hover:bg-orange-800 transition-colors"
+              className="rounded-lg bg-[var(--color-accent)] px-8 py-2 font-medium text-white disabled:opacity-50 hover:bg-orange-800 transition-colors"
             >
               Save Product
             </button>

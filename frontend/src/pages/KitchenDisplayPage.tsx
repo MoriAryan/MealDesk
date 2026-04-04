@@ -172,16 +172,16 @@ export const KitchenDisplayPage = () => {
   const countPreparing = tickets.filter(t => t.stage === 'preparing').length;
   const countCompleted = tickets.filter(t => t.stage === 'completed').length;
 
-  if (loading) return <div className="text-[var(--c-muted)]">Loading Kitchen Display...</div>;
+  if (loading) return <div className="text-muted">Loading Kitchen Display...</div>;
 
   return (
     <div className="flex flex-col md:flex-row gap-6 min-h-[75vh]">
       {/* Sidebar Filters */}
       <div className="w-full md:w-64 shrink-0 flex flex-col gap-4">
-        <div className="bg-[var(--c-panel)] rounded-xl border border-[var(--c-border)] shadow-sm overflow-hidden flex flex-col p-4">
+        <div className="bg-panel rounded-xl border border-border shadow-sm overflow-hidden flex flex-col p-4">
           <button 
             onClick={clearFilters}
-            className="text-[var(--c-accent)] hover:text-orange-700 flex items-center justify-between w-full text-sm font-semibold mb-4 border-b border-[var(--c-border)] pb-3"
+            className="text-[var(--color-accent)] hover:text-orange-700 flex items-center justify-between w-full text-sm font-semibold mb-4 border-b border-border pb-3"
           >
             Clear Filters <span>✕</span>
           </button>
@@ -190,12 +190,12 @@ export const KitchenDisplayPage = () => {
             {/* Categories Filter */}
             {availableCategories.length > 0 && (
               <div className="mb-6">
-                <div className="text-xs uppercase tracking-widest text-[var(--c-muted)] font-bold mb-2">Categories</div>
+                <div className="text-xs uppercase tracking-widest text-muted font-bold mb-2">Categories</div>
                 <div className="flex flex-col gap-1.5">
                   {availableCategories.map(c => (
                     <label key={c} className="flex items-center cursor-pointer group">
                       <input type="checkbox" className="hidden" checked={selectedCategories.has(c)} onChange={() => toggleCategory(c)} />
-                      <div className={`text-sm py-1.5 px-3 rounded-lg w-full font-medium transition-colors border ${selectedCategories.has(c) ? 'bg-[var(--c-panel-2)] border-[var(--c-accent)] text-[var(--c-ink)]' : 'border-transparent text-[var(--c-muted)] hover:bg-[var(--c-panel-2)] hover:text-[var(--c-ink)]'}`}>
+                      <div className={`text-sm py-1.5 px-3 rounded-lg w-full font-medium transition-colors border ${selectedCategories.has(c) ? 'bg-panel border-[var(--color-accent)] text-ink' : 'border-transparent text-muted hover:bg-panel hover:text-ink'}`}>
                         {c}
                       </div>
                     </label>
@@ -207,12 +207,12 @@ export const KitchenDisplayPage = () => {
             {/* Products Filter */}
             {availableProducts.length > 0 && (
               <div>
-                <div className="text-xs uppercase tracking-widest text-[var(--c-muted)] font-bold mb-2">Products</div>
+                <div className="text-xs uppercase tracking-widest text-muted font-bold mb-2">Products</div>
                 <div className="flex flex-col gap-1.5">
                   {availableProducts.map(p => (
                     <label key={p} className="flex items-center cursor-pointer group">
                       <input type="checkbox" className="hidden" checked={selectedProducts.has(p)} onChange={() => toggleProduct(p)} />
-                      <div className={`text-sm py-1.5 px-3 rounded-lg w-full font-medium transition-colors border ${selectedProducts.has(p) ? 'bg-[var(--c-panel-2)] border-[var(--c-accent)] text-[var(--c-ink)]' : 'border-transparent text-[var(--c-muted)] hover:bg-[var(--c-panel-2)] hover:text-[var(--c-ink)]'}`}>
+                      <div className={`text-sm py-1.5 px-3 rounded-lg w-full font-medium transition-colors border ${selectedProducts.has(p) ? 'bg-panel border-[var(--color-accent)] text-ink' : 'border-transparent text-muted hover:bg-panel hover:text-ink'}`}>
                         {p}
                       </div>
                     </label>
@@ -227,29 +227,29 @@ export const KitchenDisplayPage = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col gap-4">
         {/* Toolbar */}
-        <div className="bg-[var(--c-panel)] rounded-xl border border-[var(--c-border)] shadow-sm px-5 py-3 flex flex-wrap items-center justify-between gap-4">
+        <div className="bg-panel rounded-xl border border-border shadow-sm px-5 py-3 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-sm font-semibold">
             <button 
               onClick={() => setActiveTab("All")}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors ${activeTab === 'All' ? 'bg-[var(--c-ink)] text-white' : 'text-[var(--c-muted)] hover:bg-[var(--c-panel-2)] text-[var(--c-ink)]'}`}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors ${activeTab === 'All' ? 'bg-[var(--color-ink)] text-white' : 'text-muted hover:bg-panel text-ink'}`}
             >
               All <span className="bg-white/20 px-1.5 rounded text-xs">{tickets.length}</span>
             </button>
             <button 
               onClick={() => setActiveTab("to_cook")}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors ${activeTab === 'to_cook' ? 'bg-blue-600 text-white' : 'text-[var(--c-muted)] hover:bg-[var(--c-panel-2)] hover:text-blue-600'}`}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors ${activeTab === 'to_cook' ? 'bg-blue-600 text-white' : 'text-muted hover:bg-panel hover:text-blue-600'}`}
             >
               To Cook <span className="bg-white/20 px-1.5 rounded text-xs">{countToCook}</span>
             </button>
             <button 
               onClick={() => setActiveTab("preparing")}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors ${activeTab === 'preparing' ? 'bg-[var(--c-accent)] text-white' : 'text-[var(--c-muted)] hover:bg-[var(--c-panel-2)] hover:text-[var(--c-accent)]'}`}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors ${activeTab === 'preparing' ? 'bg-[var(--color-accent)] text-white' : 'text-muted hover:bg-panel hover:text-[var(--color-accent)]'}`}
             >
               Preparing <span className="bg-white/20 px-1.5 rounded text-xs">{countPreparing}</span>
             </button>
             <button 
               onClick={() => setActiveTab("completed")}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors ${activeTab === 'completed' ? 'bg-green-600 text-white' : 'text-[var(--c-muted)] hover:bg-[var(--c-panel-2)] hover:text-green-600'}`}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors ${activeTab === 'completed' ? 'bg-green-600 text-white' : 'text-muted hover:bg-panel hover:text-green-600'}`}
             >
               Completed <span className="bg-white/20 px-1.5 rounded text-xs">{countCompleted}</span>
             </button>
@@ -258,7 +258,7 @@ export const KitchenDisplayPage = () => {
           <div className="flex items-center gap-3">
              <button 
               onClick={handleSendTestTicket}
-              className="bg-[var(--c-panel-2)] text-[var(--c-ink)] border border-[var(--c-border)] hover:bg-[var(--c-border)] px-3 py-1.5 rounded font-medium text-sm shadow-sm transition-colors flex items-center gap-2"
+              className="bg-panel text-ink border border-border hover:bg-[var(--color-border)] px-3 py-1.5 rounded font-medium text-sm shadow-sm transition-colors flex items-center gap-2"
             >
               Send <span className="text-xs font-normal opacity-70">(Mock)</span>
             </button>
@@ -269,14 +269,14 @@ export const KitchenDisplayPage = () => {
                 placeholder="Search..." 
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="bg-[var(--c-bg)] border border-[var(--c-border)] rounded-md px-3 py-1.5 text-sm w-40 focus:outline-none focus:border-[var(--c-accent)] text-[var(--c-ink)] placeholder-[var(--c-muted)]"
+                className="bg-bg border border-border rounded-md px-3 py-1.5 text-sm w-40 focus:outline-none focus:border-[var(--color-accent)] text-ink placeholder-[var(--color-muted)]"
               />
             </div>
             
-            <div className="flex items-center gap-1 text-sm text-[var(--c-muted)] font-medium bg-[var(--c-bg)] rounded-md border border-[var(--c-border)] px-1 py-1">
+            <div className="flex items-center gap-1 text-sm text-muted font-medium bg-bg rounded-md border border-border px-1 py-1">
               <span className="w-12 text-center text-xs">{filteredTickets.length === 0 ? '0' : `${Math.min((page - 1) * itemsPerPage + 1, filteredTickets.length)}-${Math.min(page * itemsPerPage, filteredTickets.length)}`}</span>
-              <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="hover:text-[var(--c-ink)] disabled:opacity-30 px-1.5">{'<'}</button>
-              <button disabled={page >= totalPages || totalPages === 0} onClick={() => setPage(p => p + 1)} className="hover:text-[var(--c-ink)] disabled:opacity-30 px-1.5">{'>'}</button>
+              <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="hover:text-ink disabled:opacity-30 px-1.5">{'<'}</button>
+              <button disabled={page >= totalPages || totalPages === 0} onClick={() => setPage(p => p + 1)} className="hover:text-ink disabled:opacity-30 px-1.5">{'>'}</button>
             </div>
           </div>
         </div>
@@ -284,8 +284,8 @@ export const KitchenDisplayPage = () => {
         {/* Board */}
         <div className="flex-1 w-full relative">
           {paginatedTickets.length === 0 ? (
-            <div className="text-center justify-center flex items-center h-40 bg-[var(--c-panel)] border border-dashed border-[var(--c-border)] rounded-xl">
-              <p className="text-[var(--c-muted)] font-medium">No tickets found.</p>
+            <div className="text-center justify-center flex items-center h-40 bg-panel border border-dashed border-border rounded-xl">
+              <p className="text-muted font-medium">No tickets found.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
@@ -293,21 +293,21 @@ export const KitchenDisplayPage = () => {
                 <div 
                   key={t.id} 
                   onClick={() => handleCardClick(t)}
-                  className={`bg-[var(--c-panel)] rounded-xl p-5 cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all border shadow-sm flex flex-col gap-4 relative overflow-hidden
+                  className={`bg-panel rounded-xl p-5 cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all border shadow-sm flex flex-col gap-4 relative overflow-hidden
                     ${t.stage === 'to_cook' ? 'border-blue-300' : 
-                      t.stage === 'preparing' ? 'border-[var(--c-accent)]' : 
+                      t.stage === 'preparing' ? 'border-[var(--color-accent)]' : 
                       'border-green-400 opacity-80'}`}
                 >
                   <div className={`absolute top-0 left-0 w-full h-1.5 
-                    ${t.stage === 'to_cook' ? 'bg-blue-500' : t.stage === 'preparing' ? 'bg-[var(--c-accent)]' : 'bg-green-500'}`} />
+                    ${t.stage === 'to_cook' ? 'bg-blue-500' : t.stage === 'preparing' ? 'bg-[var(--color-accent)]' : 'bg-green-500'}`} />
                     
-                  <div className="flex items-center justify-between border-b border-[var(--c-border)] pb-2 pt-1">
-                    <h3 className="text-xl font-bold tracking-wide text-[var(--c-ink)] font-head">
+                  <div className="flex items-center justify-between border-b border-border pb-2 pt-1">
+                    <h3 className="text-xl font-bold tracking-wide text-ink font-head">
                       #{t.order_number.replace('MOCK-', '')}
                     </h3>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider
                       ${t.stage === 'to_cook' ? 'bg-blue-100 text-blue-800' : 
-                        t.stage === 'preparing' ? 'bg-orange-100 text-[var(--c-accent)]' : 
+                        t.stage === 'preparing' ? 'bg-orange-100 text-[var(--color-accent)]' : 
                         'bg-green-100 text-green-800'}`}>
                       {t.stage.replace('_', ' ')}
                     </span>
@@ -318,13 +318,13 @@ export const KitchenDisplayPage = () => {
                       <div 
                         key={item.id} 
                         onClick={(e) => handleItemClick(e, t.id, item)}
-                        className={`flex items-start text-[14px] hover:bg-[var(--c-bg)] py-1.5 px-2 -mx-2 rounded transition-colors group ${item.prepared ? 'text-[var(--c-muted)]' : 'text-[var(--c-ink)]'}`}
+                        className={`flex items-start text-[14px] hover:bg-bg py-1.5 px-2 -mx-2 rounded transition-colors group ${item.prepared ? 'text-muted' : 'text-ink'}`}
                       >
-                        <span className={`mr-2 font-bold w-5 text-right ${item.prepared ? 'opacity-40' : 'text-[var(--c-accent)]'}`}>
+                        <span className={`mr-2 font-bold w-5 text-right ${item.prepared ? 'opacity-40' : 'text-[var(--color-accent)]'}`}>
                           {item.qty}
                         </span>
-                        <span className="mr-2 text-[var(--c-muted)] opacity-50 font-sans">×</span>
-                        <span className={`flex-1 break-words font-medium ${item.prepared ? 'line-through decoration-[var(--c-muted)] decoration-2 opacity-60' : ''}`}>
+                        <span className="mr-2 text-muted opacity-50 font-sans">×</span>
+                        <span className={`flex-1 break-words font-medium ${item.prepared ? 'line-through decoration-[var(--color-muted)] decoration-2 opacity-60' : ''}`}>
                           {item.product_name}
                         </span>
                       </div>

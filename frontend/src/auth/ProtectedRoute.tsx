@@ -7,7 +7,7 @@ export function ProtectedRoute({ children }: { children: ReactElement }) {
 
   if (loading) {
     return (
-      <section className="mx-auto max-w-xl rounded-2xl border border-[var(--c-border)] bg-[var(--c-panel)] p-6 shadow-sm">
+      <section className="mx-auto max-w-xl rounded-2xl border border-border bg-panel p-6 shadow-sm">
         <h2 className="text-2xl font-semibold">Checking session...</h2>
       </section>
     );

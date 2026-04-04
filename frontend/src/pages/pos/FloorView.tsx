@@ -16,8 +16,8 @@ interface Props {
 
 export function FloorView({ activeTableId, setActiveTableId }: Props) {
   return (
-    <div className="h-full w-full p-8 bg-[var(--c-bg)]">
-      <h2 className="mb-6 font-head text-2xl font-bold text-[var(--c-ink)]">Main Floor Layout</h2>
+    <div className="h-full w-full p-8 bg-bg">
+      <h2 className="mb-6 font-head text-2xl font-bold text-ink">Main Floor Layout</h2>
       
       <div className="grid grid-cols-3 gap-6 sm:grid-cols-4 md:grid-cols-5">
         {DEFAULT_TABLES.map((table) => {
@@ -28,14 +28,14 @@ export function FloorView({ activeTableId, setActiveTableId }: Props) {
               onClick={() => setActiveTableId(table.id)}
               className={`flex aspect-square flex-col items-center justify-center rounded-2xl border-2 transition-all hover:-translate-y-1 ${
                 isActive 
-                  ? "border-[var(--c-accent)] bg-[var(--c-accent)]/10 text-[var(--c-accent)] ring-4 ring-[var(--c-accent)]/20 shadow-lg" 
-                  : "border-[var(--c-border)] bg-[var(--c-panel)] text-[var(--c-ink)] hover:border-[var(--c-accent)]/50 hover:shadow-md"
+                  ? "border-[var(--color-accent)] bg-[var(--color-accent)]/10 text-[var(--color-accent)] ring-4 ring-[var(--color-accent)]/20 shadow-lg" 
+                  : "border-border bg-panel text-ink hover:border-[var(--color-accent)]/50 hover:shadow-md"
               }`}
             >
               <span className="text-xl font-bold">{table.name}</span>
-              <span className="mt-2 text-sm text-[var(--c-muted)]">{table.seats} Seats</span>
+              <span className="mt-2 text-sm text-muted">{table.seats} Seats</span>
               {isActive && (
-                <span className="mt-2 rounded-full bg-[var(--c-accent)] px-2 py-0.5 text-xs font-bold text-white uppercase tracking-wider">
+                <span className="mt-2 rounded-full bg-[var(--color-accent)] px-2 py-0.5 text-xs font-bold text-white uppercase tracking-wider">
                   Active
                 </span>
               )}

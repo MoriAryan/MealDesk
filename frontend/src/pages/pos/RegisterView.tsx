@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import type { Product, Category } from "../../api/types";
 import type { CartItem } from "../../layouts/PosTerminalLayout";
+import { Trash2, Plus, Minus, ChefHat, CreditCard, ShoppingBag } from "lucide-react";
 
 interface Props {
   activeTableId: string | null;
@@ -28,7 +29,6 @@ export function RegisterView({
   const [activeCategoryId, setActiveCategoryId] = useState<string | "ALL">("ALL");
 
   const filteredProducts = useMemo(() => {
-    // Only show active products
     let prods = products.filter(p => p.active);
     if (activeCategoryId !== "ALL") {
       prods = prods.filter(p => p.category_id === activeCategoryId);
@@ -71,35 +71,31 @@ export function RegisterView({
   }, [cartItems]);
 
   return (
-    <div className="flex h-full w-full">
+    <div className="flex h-full w-full bg-bg">
       {/* Left Menu (Products) */}
-      <div className="flex-1 bg-[var(--c-bg)] flex flex-col border-r border-[var(--c-border)] relative">
+      <div className="flex-1 flex flex-col relative pr-2">
          {/* Categories Bar */}
-         <div className="flex bg-[var(--c-panel)] p-4 border-b border-[var(--c-border)] gap-2 overflow-x-auto shrink-0 shadow-sm z-10">
+         <div className="flex bg-bg pt-6 pb-4 px-6 gap-3 overflow-x-auto shrink-0 z-10 custom-scrollbar-hide items-center">
             <button 
               onClick={() => setActiveCategoryId("ALL")}
-              className={`whitespace-nowrap px-6 py-2 rounded-full font-bold text-sm transition-all ${
+              className={`whitespace-nowrap px-5 py-2.5 rounded-xl font-semibold text-sm transition-all focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 ${
                 activeCategoryId === "ALL" 
-                  ? "bg-[var(--c-ink)] text-white shadow-md transform scale-105" 
-                  : "bg-[var(--c-panel-2)] text-[var(--c-muted)] hover:bg-[var(--c-border)]"
+                  ? "bg-ink text-panel shadow-sm" 
+                  : "bg-panel text-muted hover:text-ink border border-border/60 hover:border-border"
               }`}
             >
               All Items
             </button>
+            <div className="h-6 w-px bg-border/80 mx-1 shrink-0" />
             {categories.map(cat => (
               <button 
                 key={cat.id}
                 onClick={() => setActiveCategoryId(cat.id)}
-                className={`whitespace-nowrap px-6 py-2 rounded-full font-bold text-sm transition-all border ${
+                className={`whitespace-nowrap px-5 py-2.5 rounded-xl font-semibold text-sm transition-all focus:outline-none border ${
                   activeCategoryId === cat.id 
-                    ? "text-white shadow-md transform scale-105" 
-                    : "bg-[var(--c-panel-2)] hover:bg-[var(--c-border)]"
+                    ? "bg-accent text-white border-accent shadow-sm" 
+                    : "bg-panel text-muted hover:text-ink border-border/60 hover:border-border"
                 }`}
-                style={{
-                  backgroundColor: activeCategoryId === cat.id ? cat.color : undefined,
-                  borderColor: activeCategoryId === cat.id ? cat.color : `${cat.color}40`,
-                  color: activeCategoryId !== cat.id ? cat.color : undefined
-                }}
               >
                 {cat.name}
               </button>
@@ -107,37 +103,34 @@ export function RegisterView({
          </div>
 
          {/* Product Grid */}
-         <div className="flex-1 overflow-y-auto p-6 bg-[var(--c-panel-2)]">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+         <div className="flex-1 overflow-y-auto px-6 pb-24 custom-scrollbar">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
                {filteredProducts.map(product => {
                   const cat = categories.find(c => c.id === product.category_id);
-                  const color = cat?.color || "var(--c-accent)";
                   return (
                     <button 
                       key={product.id}
                       onClick={() => addToCart(product)}
-                      className="flex flex-col text-left aspect-square bg-white rounded-xl shadow-sm border border-[var(--c-border)] overflow-hidden hover:shadow-md hover:border-gray-400 transition-all active:scale-95 group relative"
+                      className="flex flex-col text-left aspect-[4/5] bg-panel rounded-[1.25rem] shadow-sm border border-border/60 overflow-hidden hover:shadow-[var(--shadow-artisanal)] hover:border-accent/40 transition-all active:scale-[0.97] group focus:outline-none focus:ring-2 focus:ring-accent"
                     >
-                      {/* Product Image Placeholder / Color Banner */}
-                      <div className="h-[45%] w-full flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: `${color}15` }}>
-                         <div className="absolute inset-0 opacity-20 bg-gradient-to-t from-black/20 to-transparent" />
-                         <span className="text-3xl font-black opacity-40 mix-blend-overlay uppercase overflow-hidden whitespace-nowrap text-ellipsis max-w-[90%] pointer-events-none" style={{ color }}>
-                           {product.name.substring(0, 3)}
-                         </span>
+                      {/* Product Image Placeholder */}
+                      <div className="h-2/5 w-full bg-bg/50 border-b border-border/50 flex flex-col justify-end p-3 relative">
+                         {cat && (
+                            <div className="absolute top-3 left-3 bg-panel/80 backdrop-blur-sm px-2 py-0.5 rounded-md border border-border/50 text-[9px] font-bold tracking-widest uppercase text-muted shadow-sm">
+                              {cat.name}
+                            </div>
+                         )}
                       </div>
                       
                       {/* Product Details */}
-                      <div className="flex-1 p-3 flex flex-col justify-between w-full h-full">
-                        <span className="font-bold text-[var(--c-ink)] leading-snug break-words line-clamp-2">
+                      <div className="flex-1 p-4 flex flex-col justify-between w-full h-full">
+                        <span className="font-semibold text-ink leading-snug break-words line-clamp-3 group-hover:text-accent transition-colors">
                            {product.name}
                         </span>
-                        <div className="flex justify-between items-end mt-1 w-full">
-                           <span className="font-black text-lg text-[var(--c-ink)] group-hover:text-[var(--c-accent)] transition-colors">
+                        <div className="flex items-end mt-2 w-full">
+                           <span className="font-bold text-lg text-ink">
                              ${Number(product.price).toFixed(2)}
                            </span>
-                           {cat && (
-                             <span className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: color }} />
-                           )}
                         </div>
                       </div>
                     </button>
@@ -145,56 +138,63 @@ export function RegisterView({
                })}
             </div>
             {filteredProducts.length === 0 && (
-               <div className="flex w-full h-full items-center justify-center p-12 text-center text-[var(--c-muted)]">
-                 No products available. Add products safely from the Backend settings!
+               <div className="flex w-full h-full flex-col items-center justify-center p-12 text-center">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-border/40 mb-4">
+                     <ShoppingBag size={24} className="text-muted" />
+                  </div>
+                 <p className="text-lg font-semibold text-ink">No products found</p>
+                 <p className="text-sm text-muted mt-1">Change your category filter or add products securely.</p>
                </div>
             )}
          </div>
       </div>
 
       {/* Right Cart (Order Lines) */}
-      <div className="w-[420px] flex shrink-0 flex-col bg-white border-l border-[var(--c-border)] shadow-xl z-20">
-        <div className="p-4 border-b border-[var(--c-border)] bg-[var(--c-panel)] flex items-center justify-between">
+      <div className="w-[400px] xl:w-[440px] flex shrink-0 flex-col bg-panel border-l border-border shadow-[var(--shadow-artisanal)] z-20 h-[calc(100vh-64px)]">
+        <div className="px-6 py-5 border-b border-border/60 flex items-center justify-between bg-panel/50 backdrop-blur-sm">
           <div>
-            <h3 className="font-bold text-xl text-[var(--c-ink)] tracking-tight">Current Order</h3>
-            <p className="text-sm font-semibold text-[var(--c-accent)] mt-0.5 uppercase tracking-wider">
-               {activeTableId ? `${activeTableId.replace('-', ' ')}` : "Takeaway"}
-            </p>
+            <h3 className="font-bold text-xl text-ink tracking-tight">Active Order</h3>
+            <div className="flex items-center gap-2 mt-1">
+              <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-widest ${activeTableId ? 'bg-accent/10 text-accent' : 'bg-muted/10 text-muted'}`}>
+                {activeTableId ? activeTableId.replace('-', ' ') : 'Takeaway'}
+              </span>
+            </div>
           </div>
           <button 
             onClick={() => setCartItems([])} 
             disabled={cartItems.length === 0}
-            className="text-xs font-bold text-[var(--c-muted)] hover:text-red-500 disabled:opacity-30 disabled:hover:text-[var(--c-muted)] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted hover:bg-red-500/10 hover:text-red-500 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-muted transition-colors"
           >
-            Clear All
+            <Trash2 size={14} />
+            Discard
           </button>
         </div>
         
-        <div className="flex-1 p-3 overflow-y-auto space-y-2 bg-gray-50/50">
+        <div className="flex-1 px-4 py-4 overflow-y-auto space-y-3 custom-scrollbar bg-bg/20">
           {cartItems.map(item => (
-             <div key={item.id} className="flex flex-col bg-white border border-[var(--c-border)] rounded-lg p-3 shadow-sm hover:border-[var(--c-accent)] transition-colors">
-                <div className="flex justify-between items-start mb-2">
-                   <div className="font-bold text-[var(--c-ink)] text-base pr-2">{item.product.name}</div>
-                   <div className="font-bold text-[var(--c-ink)] whitespace-nowrap">
+             <div key={item.id} className="flex flex-col bg-panel border border-border/80 rounded-xl p-4 shadow-sm hover:border-accent/40 transition-colors group">
+                <div className="flex gap-3 justify-between items-start mb-3">
+                   <div className="font-semibold text-ink text-sm leading-tight pr-2 line-clamp-2">{item.product.name}</div>
+                   <div className="font-bold text-ink whitespace-nowrap text-base">
                      ${(Number(item.product.price) * item.quantity).toFixed(2)}
                    </div>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                   <span className="text-[var(--c-muted)]">${Number(item.product.price).toFixed(2)} / {item.product.uom}</span>
+                   <span className="text-muted/80 text-xs font-medium">${Number(item.product.price).toFixed(2)}</span>
                    
-                   <div className="flex items-center gap-3 bg-[var(--c-panel-2)] rounded-full p-1 border border-[var(--c-border)]">
+                   <div className="flex items-center gap-1 bg-bg/80 rounded-lg p-1 border border-border/50">
                       <button 
                         onClick={() => updateQuantity(item.id, -1)}
-                        className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm hover:bg-gray-50 text-[var(--c-ink)] font-bold text-lg leading-none select-none"
+                        className="w-8 h-8 flex items-center justify-center rounded-md bg-panel shadow-sm hover:bg-border/50 text-muted transition-colors"
                       >
-                        -
+                        {item.quantity === 1 ? <Trash2 size={14} /> : <Minus size={14} />}
                       </button>
-                      <span className="font-bold w-4 text-center select-none">{item.quantity}</span>
+                      <span className="font-bold w-6 text-center select-none text-ink">{item.quantity}</span>
                       <button 
                         onClick={() => updateQuantity(item.id, 1)}
-                        className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm hover:bg-gray-50 text-[var(--c-accent)] font-bold text-lg leading-none select-none"
+                        className="w-8 h-8 flex items-center justify-center rounded-md bg-panel shadow-sm hover:bg-border/50 text-ink transition-colors"
                       >
-                        +
+                        <Plus size={14} />
                       </button>
                    </div>
                 </div>
@@ -202,28 +202,30 @@ export function RegisterView({
           ))}
 
           {cartItems.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full text-[var(--c-muted)]">
-               <div className="text-4xl mb-3 opacity-20">🛒</div>
-               <p className="font-medium">The cart is empty.</p>
-               <p className="text-sm mt-1">Select a product from the left to start processing.</p>
+            <div className="flex flex-col items-center justify-center h-full text-center">
+               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-bg mb-4 border border-border/40 shadow-inner">
+                 <ShoppingBag size={28} className="text-muted opacity-50" />
+               </div>
+               <p className="font-medium text-ink">Your cart is empty</p>
+               <p className="text-sm text-muted mt-1 max-w-[200px]">Select items from the catalog to begin.</p>
             </div>
           )}
         </div>
 
         {/* Cart Totals & Checkout Actions */}
-        <div className="p-5 border-t-2 border-[var(--c-border)] bg-gray-50">
-          <div className="flex flex-col gap-1.5 mb-5 text-sm font-semibold text-[var(--c-muted)]">
+        <div className="p-6 border-t border-border bg-panel">
+          <div className="flex flex-col gap-2 mb-6 text-sm font-medium text-muted">
              <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span className="text-ink">${subtotal.toFixed(2)}</span>
              </div>
              <div className="flex justify-between">
-                <span>Taxes</span>
-                <span>${taxTotal.toFixed(2)}</span>
+                <span>Tax</span>
+                <span className="text-ink">${taxTotal.toFixed(2)}</span>
              </div>
-             <div className="flex justify-between items-center pt-3 border-t border-[var(--c-border)] mt-2">
-                <span className="text-base text-[var(--c-ink)] font-bold uppercase tracking-wider">Total</span>
-                <span className="text-4xl text-[var(--c-ink)] font-black tracking-tight">${total.toFixed(2)}</span>
+             <div className="flex justify-between items-end pt-4 border-t border-border/60 mt-2">
+                <span className="text-sm font-bold uppercase tracking-widest text-ink">Total</span>
+                <span className="text-4xl text-ink font-black tracking-tighter">${total.toFixed(2)}</span>
              </div>
           </div>
           
@@ -232,17 +234,19 @@ export function RegisterView({
               <button 
                 disabled={cartItems.length === 0}
                 onClick={onSendToKitchen}
-                className="w-1/3 py-4 px-2 rounded-xl bg-gray-800 hover:bg-gray-900 text-white font-bold text-sm tracking-wider uppercase transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-1"
+                className="w-24 shrink-0 flex flex-col items-center justify-center gap-1 py-3 rounded-xl bg-ink hover:bg-ink/90 text-panel font-semibold text-[10px] tracking-widest uppercase transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:active:scale-100 disabled:shadow-none"
               >
-                Kitchen
+                <ChefHat size={20} />
+                <span>Kitchen</span>
               </button>
             )}
             <button 
               disabled={cartItems.length === 0}
               onClick={onProceedToPayment}
-              className={`${hasSentToKitchen ? 'w-full' : 'w-2/3'} flex items-center justify-center gap-2 py-4 px-4 rounded-xl bg-green-500 hover:bg-green-600 text-white font-black text-lg tracking-wider uppercase transition-all shadow-md shadow-green-500/20 active:scale-95 disabled:opacity-50 disabled:shadow-none disabled:active:scale-100`}
+              className={`flex-1 flex items-center justify-center gap-2 py-4 px-6 rounded-xl bg-accent hover:bg-accent-hover text-white font-bold text-sm tracking-widest uppercase transition-all shadow-lg shadow-accent/20 active:scale-97 disabled:opacity-40 disabled:shadow-none disabled:active:scale-100`}
             >
-              Pay Now <span className="text-xl">→</span>
+              <CreditCard size={18} />
+              <span>Checkout</span>
             </button>
           </div>
         </div>
