@@ -16,6 +16,7 @@ function requireAuth(req, res, next) {
       id: decoded.sub,
       role: decoded.role,
       email: decoded.email,
+      name: decoded.name || null,
     };
     return next();
   } catch (error) {
