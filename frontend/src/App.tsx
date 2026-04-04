@@ -1,14 +1,26 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import { ProtectedRoute } from "./auth/ProtectedRoute";
 import { AppLayout } from "./layouts/AppLayout";
 import { LoginPage } from "./pages/LoginPage";
+import { CategoriesPage } from "./pages/CategoriesPage";
+import { PaymentMethodsPage } from "./pages/PaymentMethodsPage";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
+import { PosConfigPage } from "./pages/PosConfigPage";
+import { ProductEditorPage } from "./pages/ProductEditorPage";
+import { ProductsPage } from "./pages/ProductsPage";
 
 function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
 
-      <Route element={<AppLayout />}>
+      <Route
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route
           path="/"
           element={
@@ -22,11 +34,16 @@ function App() {
           path="/settings"
           element={
             <PlaceholderPage
-              title="POS Settings"
-              description="POS configuration pages for products, terminals, payment methods, and self ordering will be implemented from Phase 2 onward."
+              title="Settings Home"
+              description="Use Products, Categories, Payment Methods, and POS Config routes for Phase 2 management flows."
             />
           }
         />
+        <Route path="/categories" element={<CategoriesPage />} />
+        <Route path="/products" element={<ProductsPage />} />
+        <Route path="/products/:productId" element={<ProductEditorPage />} />
+        <Route path="/payment-methods" element={<PaymentMethodsPage />} />
+        <Route path="/pos-config" element={<PosConfigPage />} />
         <Route
           path="/pos"
           element={

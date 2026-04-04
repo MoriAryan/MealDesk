@@ -6,6 +6,7 @@ function buildAccessToken(user) {
     {
       role: user.role,
       email: user.email,
+      name: user.name,
     },
     env.jwt.accessSecret,
     {
