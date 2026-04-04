@@ -26,6 +26,7 @@ export function PosTerminalLayout() {
   const [currentView, setCurrentView] = useState<PosView>("FLOOR");
   const [activeTableId, setActiveTableId] = useState<string | null>(null);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [hasSentToKitchen, setHasSentToKitchen] = useState(false);
 
   // Loaded Data
   const [activePosConfigId, setActivePosConfigId] = useState<string | null>(null);
@@ -58,6 +59,11 @@ export function PosTerminalLayout() {
   useEffect(() => {
     void loadData();
   }, [accessToken]);
+
+  // Reset kitchen flag when switching tables
+  useEffect(() => {
+    setHasSentToKitchen(false);
+  }, [activeTableId]);
 
   const closeRegister = () => {
     if (cartItems.length > 0) {
@@ -149,6 +155,8 @@ export function PosTerminalLayout() {
                 categories={categories}
                 cartItems={cartItems}
                 setCartItems={setCartItems}
+                hasSentToKitchen={hasSentToKitchen}
+                setHasSentToKitchen={setHasSentToKitchen}
                 onProceedToPayment={() => setCurrentView("PAYMENT")}
                 onSendToKitchen={async () => {
                   if (!activePosConfigId || !accessToken) return alert("Terminal not configured");
@@ -160,7 +168,7 @@ export function PosTerminalLayout() {
                       status: "draft",
                       createKitchenTicket: true
                     });
-                    setCartItems([]);
+                    setHasSentToKitchen(true);
                     alert("Ticket sent to Kitchen!");
                   } catch (e) {
                     alert("Failed to send to kitchen: " + String(e));
@@ -181,9 +189,11 @@ export function PosTerminalLayout() {
                       tableId: activeTableId,
                       items: cartItems,
                       status: "paid",
-                      createKitchenTicket: true // optionally still send to kitchen if paid immediately
+                      // If it's already sent, no need to send it again when paying
+                      createKitchenTicket: !hasSentToKitchen 
                     });
                     setCartItems([]);
+                    setHasSentToKitchen(false);
                     setActiveTableId(null);
                     setCurrentView("FLOOR");
                   } catch (e) {
