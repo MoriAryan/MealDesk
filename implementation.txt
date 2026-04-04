@@ -1,0 +1,323 @@
+Optimizing tool selection...**Phase 1 — Project Foundation & Database Schema**  
+Depends on: none.
+
+**Backend Tasks**
+1. Establish the Node.js + Express repository structure with clear separation for API modules, shared utilities, and configuration.
+2. Set up environment variable loading for all runtime secrets and service configuration values.
+3. Initialize the Supabase project connection for database, auth, realtime, and storage access from the backend.
+4. Define and migrate all core relational tables required by products, variants, categories, payment methods, POS terminals, floors, tables, sessions, orders, order lines, payments, users, and roles.
+5. Define and migrate all foreign keys and constraints that enforce relationships and data integrity across the POS domain.
+6. Seed initial data needed to start development and testing, including baseline roles, default payment methods, and starter catalog records.
+7. Create a JWT auth middleware skeleton that can parse and validate access tokens for protected routes.
+8. Create a refresh-token rotation middleware skeleton and token persistence model needed for secure session renewal.
+9. Add migration and seed execution commands so schema and seed state can be reproduced consistently across environments.
+
+**Frontend Tasks**
+1. Initialize the React application scaffold with Tailwind CSS configured and ready for feature screens.
+2. Establish frontend environment configuration handling for API URL, realtime endpoints, and public runtime settings.
+3. Create the base routing shell and authenticated app layout placeholders for upcoming phase screens.
+4. Add a shared design token and utility style layer in Tailwind for consistent spacing, typography, and color usage.
+5. Create placeholder navigation entries for settings, POS, kitchen display, customer display, self-ordering, and reports.
+
+**Definition of Done (Phase 1)**
+1. Database schema exists with all required tables, keys, and constraints for roadmap entities.
+2. Seed data populates a runnable baseline state without manual database edits.
+3. Backend starts with Supabase connectivity verified.
+4. Frontend starts with routing shell and Tailwind styles applied.
+5. JWT auth middleware skeleton and refresh rotation skeleton are in place and wired into app structure.
+
+---
+
+**Phase 2 — Backend Configuration & Product Management**  
+Depends on: Phase 1 schema, seed, and auth skeleton completion.
+
+**Backend Tasks**
+1. Implement user signup endpoint integrated with Supabase Auth and role assignment defaults.
+2. Implement user login endpoint that issues JWT access tokens and rotated refresh tokens.
+3. Implement refresh endpoint that invalidates old refresh tokens and returns new token pair.
+4. Implement authenticated profile endpoint used by the frontend to restore user session context.
+5. Implement full CRUD APIs for product categories.
+6. Implement full CRUD APIs for products with General Info fields from the roadmap.
+7. Implement full CRUD APIs for product variants linked to parent products.
+8. Implement validation rules that enforce required product and variant data completeness.
+9. Implement full CRUD APIs for payment methods including Cash, Digital, and UPI type handling.
+10. Implement support for UPI ID storage and retrieval on UPI payment method records.
+11. Implement full CRUD APIs for POS terminal configuration records.
+12. Implement terminal creation endpoint to support create-new-terminal modal flow.
+13. Add authorization checks so only permitted roles can manage catalog and configuration entities.
+
+**Frontend Tasks**
+1. Build signup screen and login screen with token-based session initialization.
+2. Build product management UI with General Info tab and Variants tab.
+3. Build category management UI with create, edit, list, and delete actions.
+4. Build payment methods UI showing Cash, Digital, and UPI options with UPI ID field visibility when relevant.
+5. Build POS terminal configuration UI with list/edit actions and create-new-terminal modal flow.
+6. Wire all management screens to authenticated API requests and failure states.
+7. Add session persistence and logout flow in the app shell.
+
+**Definition of Done (Phase 2)**
+1. Users can sign up, log in, refresh session, and access protected management screens.
+2. Products, categories, variants, payment methods, and POS terminals support complete CRUD operations.
+3. UPI payment method persists and returns UPI ID correctly.
+4. Terminal can be created from modal flow end to end.
+5. Role-based authorization blocks unauthorized management actions.
+
+---
+
+**Phase 3 — Floor Plan, Tables & Session Management**  
+Depends on: Phase 2 authentication and POS terminal configuration APIs.
+
+**Backend Tasks**
+1. Implement full CRUD APIs for floor entities.
+2. Implement full CRUD APIs for table entities linked to floors.
+3. Implement table data fields for Number, Seats, Active status, and Appointment Resource.
+4. Implement table validation rules to prevent inconsistent floor/table relationships.
+5. Implement QR token generation and persistence for each table used in scan flows.
+6. Implement downloadable table QR PDF generation endpoint as a grid output.
+7. Implement POS session open API linked to a POS terminal configuration.
+8. Implement POS session close API with proper state transition handling.
+9. Implement one-active-session-per-config validation to prevent parallel active sessions on the same terminal.
+10. Implement session status query endpoints used by POS startup and guard logic.
+
+**Frontend Tasks**
+1. Build floor management screen with full CRUD interactions.
+2. Build table management screen with Number, Seats, Active, and Appointment Resource fields.
+3. Build QR code export action that downloads table QR codes as PDF grid.
+4. Build POS session open UI flow that selects terminal context and starts session.
+5. Build POS session close UI flow with confirmation and state feedback.
+6. Add session-state guard behavior in POS entry points to block ordering when no active session exists.
+
+**Definition of Done (Phase 3)**
+1. Floors and tables are fully manageable with required fields and validation.
+2. Table QR PDF grid download works for configured tables.
+3. POS sessions can be opened and closed with correct state transitions.
+4. System enforces one active session per terminal configuration.
+5. POS entry correctly reflects session state before allowing order actions.
+
+---
+
+**Phase 4 — POS Terminal (Register & Order Flow)**  
+Depends on: Phase 3 active-session APIs, floor/table entities, and table status data.
+
+**Backend Tasks**
+1. Implement order creation endpoint that starts a draft order tied to floor, table, session, and terminal.
+2. Implement order line create/update/remove endpoints for cart line-item management.
+3. Implement product lookup endpoints optimized for category filtering and text search.
+4. Implement order note and customer metadata update endpoints for draft orders.
+5. Implement manual line price and line discount update endpoints for authorized users.
+6. Implement send-to-kitchen action endpoint that marks draft lines for kitchen processing lifecycle.
+7. Implement order retrieval endpoint returning full cart state for register screen restoration.
+
+**Frontend Tasks**
+1. Build floor view with table grid for selecting active ordering table.
+2. Build register/order screen layout with category filter, search, product grid, and cart panel.
+3. Build numpad controls for quantity and editable numeric operations.
+4. Build action keys for Customer, Notes, Prices, and Disc interactions.
+5. Implement add-to-cart, update-line, remove-line, and quantity-change cart behaviors.
+6. Implement send-to-kitchen action in register flow with success/error state handling.
+7. Implement order state persistence so current draft can be resumed during active session.
+
+**Definition of Done (Phase 4)**
+1. Cashier can select table and run complete draft order flow from product selection to line editing.
+2. Register screen supports category filtering, product search, cart updates, and numpad edits.
+3. Customer, notes, price override, and discount actions update draft order correctly.
+4. Send-to-kitchen triggers backend state transition for kitchen visibility.
+5. Draft order can be reopened with accurate line-item state.
+
+---
+
+**Phase 5 — Payment Processing & Receipts**  
+Depends on: Phase 4 draft order and line-item APIs, Phase 2 payment method configuration.
+
+**Backend Tasks**
+1. Implement payment application endpoints for draft orders supporting partial and full payments.
+2. Implement payment method handling for Cash, Digital, and UPI payment records.
+3. Implement UPI QR payload generation endpoint using configured UPI ID for selected payment method.
+4. Implement invoice-flag persistence on payment validation request.
+5. Implement order validation endpoint that transitions order status from Draft to Paid when payment criteria are met.
+6. Implement receipt data endpoint for confirmation screen and receipt delivery actions.
+7. Implement email receipt trigger endpoint for paid orders.
+
+**Frontend Tasks**
+1. Build payment screen with applied payments list and action buttons for Cash, Digital, and UPI.
+2. Build Is Invoice checkbox behavior and include it in validation flow.
+3. Build Validate button flow with final payment checks and blocking errors.
+4. Build UPI QR modal that renders generated QR based on stored UPI ID.
+5. Build confirmation screen with Email Receipt and Continue actions.
+6. Implement post-confirmation reset behavior that returns UI to floor view and clears transient payment state.
+
+**Definition of Done (Phase 5)**
+1. Payment screen supports multi-method application and displays applied payments accurately.
+2. UPI flow shows QR modal generated from stored UPI ID.
+3. Validate action correctly transitions eligible orders from Draft to Paid.
+4. Confirmation screen supports receipt email action and continue action.
+5. POS resets to floor view cleanly after successful payment completion.
+
+---
+
+**Phase 6 — Kitchen Display System & Customer Facing Display**  
+Depends on: Phase 4 send-to-kitchen events and order states, Phase 5 payment state updates.
+
+**Backend Tasks**
+1. Implement Socket.io channels for kitchen and customer display real-time event streaming.
+2. Implement authenticated websocket handshake using token validation.
+3. Implement KDS ticket query endpoint with stage filters for All, To Cook, Preparing, and Completed.
+4. Implement KDS stage transition endpoint that advances an order ticket through kitchen stages.
+5. Implement KDS item-level strike endpoint to mark individual line items as completed within a ticket.
+6. Implement KDS counts computation for stage tabs.
+7. Implement KDS filtering by product and category for sidebar filters.
+8. Emit realtime events for ticket creation, stage changes, and item strike updates.
+9. Implement customer-display state endpoint and event stream for ordering cart view, UPI QR view, and success thank-you state.
+10. Emit realtime customer-display updates driven by cashier actions in POS payment/order flow.
+
+**Frontend Tasks**
+1. Build KDS screen with stage filter tabs showing counts for All, To Cook, Preparing, and Completed.
+2. Build KDS sidebar with product and category filters.
+3. Build KDS ticket cards with visible order details and item list.
+4. Implement click-on-card behavior to advance ticket stage.
+5. Implement click-on-item behavior to apply and remove strikethrough state.
+6. Subscribe KDS UI to Socket.io updates for live ticket and stage refresh.
+7. Build customer-facing display with left static pane and right dynamic pane.
+8. Implement customer display dynamic states for ordering cart, UPI QR, and success thank-you.
+9. Subscribe customer display UI to realtime cashier-driven updates.
+
+**Definition of Done (Phase 6)**
+1. KDS receives and updates tickets live without manual refresh.
+2. Stage tabs, counts, and filters behave correctly and reflect backend state.
+3. Ticket-stage advancement and item strikethrough actions persist and broadcast in realtime.
+4. Customer display switches among all three required states in sync with cashier flow.
+5. Websocket authentication is enforced for realtime channels.
+
+---
+
+**Phase 7 — Self / Mobile Ordering Module**  
+Depends on: Phase 3 table tokens and QR infrastructure, Phase 4 product/cart logic, Phase 6 realtime status updates.
+
+**Backend Tasks**
+1. Implement POS Settings API for enabling and disabling Self Ordering mode.
+2. Implement mode selector persistence for Online Ordering versus QR Menu operation.
+3. Implement secure token-based table route resolution for /s/[token] requests.
+4. Implement mobile ordering session API that initializes context from table token.
+5. Implement self-order product menu API with categories, product details, and availability.
+6. Implement product customization API schema support for variants as single-select options and add-ons as multi-select options.
+7. Implement self-order cart APIs for add, update, remove, and summary totals.
+8. Implement self-order payment summary and order confirmation APIs.
+9. Implement order tracking API and realtime events exposing live status from kitchen stages.
+10. Implement per-table QR code PDF generation endpoint for self-order links.
+11. Implement preview webpage link endpoint or config retrieval used by admin preview action.
+
+**Frontend Tasks**
+1. Build POS Settings UI with Self Ordering toggle.
+2. Build mode selector UI for Online Ordering and QR Menu modes.
+3. Build mobile Splash screen for token-entry route initialization.
+4. Build mobile Product Menu screen with browsing and item selection.
+5. Build Product Customization screen with variants as radio choices and add-ons as checkbox choices.
+6. Build Cart and Payment Summary screen for quantity edits and total review.
+7. Build Order Confirmation screen for successful submission feedback.
+8. Build Order Tracking screen with live status updates mapped to kitchen state.
+9. Build per-table QR PDF download action in management UI.
+10. Build preview webpage link action for testing self-order storefront flow.
+
+**Definition of Done (Phase 7)**
+1. Self Ordering can be enabled or disabled from POS Settings.
+2. Mode selector persists and controls correct flow behavior.
+3. Table token routes open correct table context via /s/[token].
+4. Mobile flow works end to end from Splash to Tracking with required screens.
+5. Variant radio and add-on checkbox behavior is correct in customization.
+6. Tracking screen updates live based on kitchen status transitions.
+7. Table QR PDF and preview link features work from admin side.
+
+---
+
+**Phase 8 — Reporting, Dashboard & Export**  
+Depends on: Phases 4–7 transactional data and finalized payment/order records.
+
+**Backend Tasks**
+1. Implement dashboard KPI aggregation APIs for Total Orders, Revenue, and Average Order Value.
+2. Implement comparative KPI calculations for percentage change versus previous period.
+3. Implement sales trend dataset API for line chart rendering.
+4. Implement top selling category dataset API for pie chart rendering.
+5. Implement top orders dataset API.
+6. Implement top products dataset API with Product, Qty, and Revenue columns.
+7. Implement top categories dataset API with Category and Revenue columns.
+8. Implement global report filtering by Location, Duration, Staff, Session, and Product.
+9. Implement filter-tag payload model so applied filters can be represented and removed individually.
+10. Implement payments list API grouped by payment method with collapsible-row grouping metadata.
+11. Implement orders list API returning Order No, Session, Date, Total, Customer, and Status.
+12. Implement order status mapping for Draft and Paid badges in list responses.
+13. Implement orders bulk action API for Archived and Delete operations restricted to Draft orders only.
+14. Implement order detail API with Product and Extra Info tab payloads, line items table data, and order summary with tax breakdown.
+15. Implement PDF export API for report outputs.
+16. Implement XLS export API for report outputs.
+
+**Frontend Tasks**
+1. Build dashboard KPI cards with value and percent-change display versus prior period.
+2. Build sales trend line chart view.
+3. Build top selling category pie chart view.
+4. Build top orders table view.
+5. Build top products table with Product, Qty, and Revenue columns.
+6. Build top categories table with Category and Revenue columns.
+7. Build global filter bar with Location, Duration, Staff, Session, and Product filters as removable tags.
+8. Build payments list view grouped by payment method with collapsible rows.
+9. Build orders list view with required columns and Draft/Paid badge styles.
+10. Build multi-select order actions with Action dropdown supporting Archived and Delete for Draft only.
+11. Build order detail page with Product and Extra Info tabs.
+12. Build line items table and order summary tax-breakdown panel in detail view.
+13. Build PDF export action for reports.
+14. Build XLS export action for reports.
+
+**Definition of Done (Phase 8)**
+1. Dashboard and all required tables/charts render with correct metrics and aggregations.
+2. Global filters apply across views and removable tags update data correctly.
+3. Payments and orders list views match required grouping, columns, badges, and actions.
+4. Draft-only archive/delete enforcement works in bulk action flow.
+5. Order detail tabs and tax breakdown are complete and accurate.
+6. PDF and XLS exports generate valid files for report data.
+
+---
+
+**Phase 9 — Security, Testing & Deployment**  
+Depends on: all prior phases functionally complete.
+
+**Backend Tasks**
+1. Enforce JWT authentication on all protected HTTP endpoints.
+2. Enforce role-based authorization for Admin, Cashier, and Kitchen Staff access scopes.
+3. Apply rate limiting to authentication routes.
+4. Apply request input sanitization on all user-provided data paths.
+5. Configure CORS policy for approved origins and credential behavior.
+6. Enforce token-authenticated websocket handshake for realtime channels.
+7. Create unit tests for critical domain logic and validation rules.
+8. Create integration tests for key API workflows including auth, order, payment, kitchen, and reporting.
+9. Create end-to-end tests for critical user flows across cashier, kitchen, customer display, and self-ordering.
+10. Create Docker Compose setup for backend, frontend, and supporting services.
+11. Create CI pipeline that runs linting, tests, and build checks automatically.
+12. Document all required environment variables with purpose and expected format.
+
+**Frontend Tasks**
+1. Enforce authenticated route guards and role-based screen access restrictions in UI navigation.
+2. Add frontend input sanitization and validation alignment with backend contracts.
+3. Add E2E UI coverage for POS register flow, payment completion, KDS updates, customer display transitions, self-ordering flow, and reporting interactions.
+4. Validate deployment readiness for production build, runtime config injection, and containerized startup behavior.
+
+**Definition of Done (Phase 9)**
+1. All protected APIs and websocket channels require valid tokens.
+2. Role-based permissions are consistently enforced on backend and frontend.
+3. Auth routes are rate-limited and request inputs are sanitized.
+4. Unit, integration, and E2E suites pass for all critical flows.
+5. Docker Compose starts complete stack successfully.
+6. CI pipeline executes automated checks on each change.
+7. Environment variable documentation is complete and usable for setup.
+
+---
+
+**Cross-Phase Dependency Map**
+1. Phase 2 depends on Phase 1 database schema, auth skeleton, and environment setup.
+2. Phase 3 depends on Phase 2 auth and terminal configuration APIs.
+3. Phase 4 depends on Phase 3 session state APIs and floor/table data readiness.
+4. Phase 5 depends on Phase 4 draft order flow and Phase 2 payment method configuration.
+5. Phase 6 depends on Phase 4 kitchen-send events and Phase 5 payment/order transitions.
+6. Phase 7 depends on Phase 3 table tokens/QR, Phase 4 order/cart primitives, and Phase 6 realtime status events.
+7. Phase 8 depends on transactional completeness from Phases 4, 5, 6, and 7.
+8. Phase 9 depends on all previous phases being functionally complete for full security hardening, testing, and deployment validation.
+
+If you want, I can also convert this into a task tracker format next with explicit ticket IDs and estimated effort per item.
