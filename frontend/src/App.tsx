@@ -10,6 +10,7 @@ import { ProductEditorPage } from "./pages/ProductEditorPage";
 import { ProductsPage } from "./pages/ProductsPage";
 import { KitchenDisplayPage } from "./pages/KitchenDisplayPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { HomePage } from "./pages/HomePage";
 import { CustomersPage } from "./pages/CustomersPage";
 import { OrdersPage } from "./pages/OrdersPage";
 import { PaymentsPage } from "./pages/PaymentsPage";
@@ -29,7 +30,8 @@ function App() {
           </ProtectedRoute>
         }
       >
-        <Route path="/" element={<DashboardPage />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route
           path="/settings"
           element={

@@ -379,6 +379,9 @@ export function OrdersPage() {
                       day: "numeric",
                       month: "short",
                       year: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                      second: "2-digit"
                     })}
                   </td>
                   <td className="px-4 py-3 font-semibold text-ink">${Number(o.total).toFixed(2)}</td>

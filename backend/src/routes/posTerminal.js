@@ -30,7 +30,9 @@ router.post("/order", async (req, res) => {
     let tax_total = 0;
 
     for (const item of items) {
-      const lineSub = Number(item.product.price) * item.quantity;
+      const extraPrice = item.variant ? Number(item.variant.extra_price || 0) : 0;
+      const unitPrice = Number(item.product.price) + extraPrice;
+      const lineSub = unitPrice * item.quantity;
       const rate = item.product.tax_rates?.rate ? Number(item.product.tax_rates.rate) : 0;
       subtotal += lineSub;
       tax_total += lineSub * (rate / 100);
@@ -69,14 +71,19 @@ router.post("/order", async (req, res) => {
 
     // 4. Create order lines
     const orderLines = items.map((item) => {
-      const lineSub = Number(item.product.price) * item.quantity;
+      const extraPrice = item.variant ? Number(item.variant.extra_price || 0) : 0;
+      const unitPrice = Number(item.product.price) + extraPrice;
+      const lineSub = unitPrice * item.quantity;
       const rate = item.product.tax_rates?.rate ? Number(item.product.tax_rates.rate) : 0;
+      const productName = item.variant
+        ? `${item.product.name} (${item.variant.value})`
+        : item.product.name;
       return {
         order_id: order.id,
         product_id: item.product.id,
-        product_name: item.product.name,
+        product_name: productName,
         qty: item.quantity,
-        unit_price: item.product.price,
+        unit_price: unitPrice,
         tax_rate: rate,
         uom: item.product.uom || "unit",
         discount: 0,

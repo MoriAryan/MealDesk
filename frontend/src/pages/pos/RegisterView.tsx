@@ -27,6 +27,7 @@ export function RegisterView({
   setHasSentToKitchen
 }: Props) {
   const [activeCategoryId, setActiveCategoryId] = useState<string | "ALL">("ALL");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const filteredProducts = useMemo(() => {
     let prods = products.filter(p => p.active);
@@ -36,14 +37,23 @@ export function RegisterView({
     return prods;
   }, [products, activeCategoryId]);
 
-  const addToCart = (product: Product) => {
+  const handleProductClick = (product: Product) => {
+    if (product.product_variants && product.product_variants.length > 0) {
+      setSelectedProduct(product);
+    } else {
+      addToCart(product);
+    }
+  };
+
+  const addToCart = (product: Product, variant?: import("../../api/types").ProductVariant) => {
     setHasSentToKitchen(false);
+    setSelectedProduct(null);
     setCartItems(prev => {
-       const existing = prev.find(item => item.product.id === product.id);
+       const existing = prev.find(item => item.product.id === product.id && item.variant?.id === variant?.id);
        if (existing) {
          return prev.map(item => item.id === existing.id ? { ...item, quantity: item.quantity + 1 } : item);
        }
-       return [...prev, { id: crypto.randomUUID(), product, quantity: 1 }];
+       return [...prev, { id: crypto.randomUUID(), product, variant, quantity: 1 }];
     });
   };
 
@@ -62,7 +72,8 @@ export function RegisterView({
     let sub = 0;
     let tax = 0;
     cartItems.forEach(item => {
-      const lineSub = Number(item.product.price) * item.quantity;
+      const basePrice = Number(item.product.price) + (item.variant ? Number(item.variant.extra_price) : 0);
+      const lineSub = basePrice * item.quantity;
       const rate = item.product.tax_rates?.rate ? Number(item.product.tax_rates.rate) : 0;
       sub += lineSub;
       tax += lineSub * (rate / 100);
@@ -103,34 +114,49 @@ export function RegisterView({
          </div>
 
          {/* Product Grid */}
-         <div className="flex-1 overflow-y-auto px-6 pb-24 custom-scrollbar">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
+         <div className="flex-1 overflow-y-auto px-8 pb-24 custom-scrollbar">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
                {filteredProducts.map(product => {
                   const cat = categories.find(c => c.id === product.category_id);
+                  const color = cat?.color || '#cbd5e1';
                   return (
                     <button 
                       key={product.id}
-                      onClick={() => addToCart(product)}
-                      className="flex flex-col text-left aspect-[4/5] bg-panel rounded-[1.25rem] shadow-sm border border-border/60 overflow-hidden hover:shadow-[var(--shadow-artisanal)] hover:border-accent/40 transition-all active:scale-[0.97] group focus:outline-none focus:ring-2 focus:ring-accent"
+                      onClick={() => handleProductClick(product)}
+                      className="flex flex-col text-left aspect-[4/5] bg-panel rounded-[24px] shadow-sm border border-border/40 overflow-hidden hover:shadow-[var(--shadow-artisanal)] hover:border-border transition-all active:scale-[0.97] group focus:outline-none focus:ring-2 focus:ring-accent relative"
                     >
-                      {/* Product Image Placeholder */}
-                      <div className="h-2/5 w-full bg-bg/50 border-b border-border/50 flex flex-col justify-end p-3 relative">
+                      {/* Vibrant Image Placeholder */}
+                      <div 
+                        className="h-[75%] w-full flex items-center justify-center p-8 relative overflow-hidden transition-transform group-hover:scale-105 duration-500 ease-out"
+                        style={{ background: `linear-gradient(145deg, ${color}33, ${color}11)` }}
+                      >
+                         <span className="text-[7rem] opacity-20 font-black tracking-tighter mix-blend-multiply" style={{ color }}>
+                           {product.name.charAt(0).toUpperCase()}
+                         </span>
                          {cat && (
-                            <div className="absolute top-3 left-3 bg-panel/80 backdrop-blur-sm px-2 py-0.5 rounded-md border border-border/50 text-[9px] font-bold tracking-widest uppercase text-muted shadow-sm">
+                            <div 
+                              className="absolute top-4 left-4 px-3 py-1.5 rounded-[10px] border text-[10px] font-bold tracking-widest uppercase shadow-sm"
+                              style={{ backgroundColor: `${color}EE`, color: '#fff', borderColor: `${color}40` }}
+                            >
                               {cat.name}
                             </div>
                          )}
                       </div>
                       
                       {/* Product Details */}
-                      <div className="flex-1 p-4 flex flex-col justify-between w-full h-full">
-                        <span className="font-semibold text-ink leading-snug break-words line-clamp-3 group-hover:text-accent transition-colors">
+                      <div className="flex-1 p-3 px-4 flex flex-col justify-between w-full bg-panel z-10">
+                        <span className="font-bold text-ink leading-tight line-clamp-2 group-hover:text-accent transition-colors text-[14px]">
                            {product.name}
                         </span>
-                        <div className="flex items-end mt-2 w-full">
-                           <span className="font-bold text-lg text-ink">
+                        <div className="flex items-center justify-between w-full mt-2">
+                           <span className="font-extrabold text-[17px] text-ink drop-shadow-sm">
                              ${Number(product.price).toFixed(2)}
                            </span>
+                           {product.product_variants && product.product_variants.length > 0 && (
+                             <span className="text-[9px] font-bold text-ink bg-bg px-2 py-1.5 rounded-md uppercase tracking-widest border border-border/80 shadow-sm">
+                               Variants
+                             </span>
+                           )}
                         </div>
                       </div>
                     </button>
@@ -174,13 +200,22 @@ export function RegisterView({
           {cartItems.map(item => (
              <div key={item.id} className="flex flex-col bg-panel border border-border/80 rounded-xl p-4 shadow-sm hover:border-accent/40 transition-colors group">
                 <div className="flex gap-3 justify-between items-start mb-3">
-                   <div className="font-semibold text-ink text-sm leading-tight pr-2 line-clamp-2">{item.product.name}</div>
+                   <div className="flex flex-col pr-2">
+                     <div className="font-semibold text-ink text-sm leading-tight line-clamp-2">{item.product.name}</div>
+                     {item.variant && (
+                        <span className="text-muted text-[10px] uppercase font-bold tracking-widest mt-0.5">
+                          {item.variant.attribute_name}: <span className="text-accent">{item.variant.value}</span>
+                        </span>
+                     )}
+                   </div>
                    <div className="font-bold text-ink whitespace-nowrap text-base">
-                     ${(Number(item.product.price) * item.quantity).toFixed(2)}
+                     ${((Number(item.product.price) + (item.variant ? Number(item.variant.extra_price) : 0)) * item.quantity).toFixed(2)}
                    </div>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                   <span className="text-muted/80 text-xs font-medium">${Number(item.product.price).toFixed(2)}</span>
+                   <span className="text-muted/80 text-xs font-medium">
+                     ${(Number(item.product.price) + (item.variant ? Number(item.variant.extra_price) : 0)).toFixed(2)}
+                   </span>
                    
                    <div className="flex items-center gap-1 bg-bg/80 rounded-lg p-1 border border-border/50">
                       <button 
@@ -251,6 +286,45 @@ export function RegisterView({
           </div>
         </div>
       </div>
+
+      {/* Variant Selection Modal */}
+      {selectedProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 backdrop-blur-sm">
+          <div className="bg-panel w-full max-w-md rounded-3xl shadow-2xl border border-border/80 overflow-hidden flex flex-col">
+            <div className="px-6 py-5 border-b border-border/80 flex justify-between items-center bg-bg/50">
+              <div>
+                <h3 className="font-bold text-xl text-ink">Select Variant</h3>
+                <p className="text-sm text-muted">{selectedProduct.name}</p>
+              </div>
+              <button onClick={() => setSelectedProduct(null)} className="h-8 w-8 flex items-center justify-center rounded-full bg-border/50 text-muted hover:bg-red-500/10 hover:text-red-500 transition-colors">
+                ✕
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              <div className="flex flex-col gap-3">
+                {selectedProduct.product_variants?.map(variant => (
+                  <button
+                    key={variant.id}
+                    onClick={() => addToCart(selectedProduct, variant)}
+                    className="flex justify-between items-center p-4 rounded-xl border border-border bg-bg/30 hover:border-accent hover:bg-accent/5 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-accent group"
+                  >
+                    <div className="flex flex-col text-left">
+                      <span className="font-semibold text-ink group-hover:text-accent">{variant.value}</span>
+                      <span className="text-xs font-medium text-muted">{variant.attribute_name}</span>
+                    </div>
+                    {Number(variant.extra_price) !== 0 && (
+                      <span className="font-bold text-sm bg-panel border-border border px-2 py-1 rounded-lg text-ink">
+                        {Number(variant.extra_price) > 0 ? '+' : ''}${Number(variant.extra_price).toFixed(2)}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

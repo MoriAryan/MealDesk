@@ -28,7 +28,68 @@ router.get("/", async (req, res) => {
   }
 });
 
-// PATCH /api/orders/:id/pay — mark an existing order as paid + record payment (idempotent)
+// PATCH /api/orders/pay-draft — finds draft order for a table and pays it (avoids duplicates)
+router.patch("/pay-draft", async (req, res) => {
+  try {
+    const { posConfigId, tableId, paymentMethod = "cash", customerId = null } = req.body;
+    if (!posConfigId) return res.status(400).json({ message: "posConfigId required" });
+
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const safeCustomerId = customerId && uuidRegex.test(customerId) ? customerId : null;
+    const safeTableId = tableId && uuidRegex.test(tableId) ? tableId : null;
+
+    // Find the most recent draft order for this config/table
+    let query = supabaseAdmin
+      .from("orders")
+      .select("*")
+      .eq("pos_config_id", posConfigId)
+      .eq("status", "draft")
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (safeTableId) query = query.eq("table_id", safeTableId);
+
+    const { data: drafts, error: draftError } = await query;
+    if (draftError) throw draftError;
+
+    // No draft found — caller should create a fresh paid order instead
+    if (!drafts || drafts.length === 0) {
+      return res.status(404).json({ message: "No draft order found for this table" });
+    }
+
+    const existingOrder = drafts[0];
+
+    // Already paid (unlikely but handle it)
+    if (existingOrder.status === "paid") {
+      return res.json({ order: existingOrder, payment: null, alreadyPaid: true });
+    }
+
+    const updateFields = { status: "paid", updated_at: new Date().toISOString() };
+    if (safeCustomerId) updateFields.customer_id = safeCustomerId;
+
+    const { data: order, error: orderError } = await supabaseAdmin
+      .from("orders")
+      .update(updateFields)
+      .eq("id", existingOrder.id)
+      .select("*")
+      .single();
+
+    if (orderError) throw orderError;
+
+    const { data: payment, error: paymentError } = await supabaseAdmin
+      .from("payments")
+      .insert({ order_id: existingOrder.id, payment_method: paymentMethod, amount: existingOrder.total, paid_at: new Date().toISOString() })
+      .select("*")
+      .single();
+
+    if (paymentError) throw paymentError;
+
+    res.json({ order, payment });
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Failed" });
+  }
+});
+
 router.patch("/:id/pay", async (req, res) => {
   try {
     const { id } = req.params;

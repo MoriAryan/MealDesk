@@ -11,7 +11,7 @@ router.get("/", async (req, res) => {
 
     let query = supabaseAdmin
       .from("products")
-      .select("*, categories(name,color), tax_rates(label,rate)")
+      .select("*, categories(name,color), tax_rates(label,rate), product_variants(*)")
       .order("created_at", { ascending: false });
 
     if (pos_config_id) query = query.eq("pos_config_id", pos_config_id);

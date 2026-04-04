@@ -110,7 +110,7 @@ export function PaymentMethodsPage() {
         if (existing) {
            await updatePaymentMethod(accessToken, existing.id, {
             enabled: false,
-            upiId: existing.method === 'upi' ? existing.upi_id : undefined,
+            upiId: existing.method === 'upi' ? (existing.upi_id ?? undefined) : undefined,
           });
         }
       }
