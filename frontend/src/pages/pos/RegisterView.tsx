@@ -3,6 +3,12 @@ import type { Product, Category } from "../../api/types";
 import type { CartItem } from "../../layouts/PosTerminalLayout";
 import { Trash2, Plus, Minus, ChefHat, CreditCard, ShoppingBag } from "lucide-react";
 
+const getDummyImage = (id: string, name: string) => {
+  // Picsum guarantees rendering and generates a unique image per product seed
+  const seed = encodeURIComponent((id + name).replace(/\s+/g, '')).substring(0, 20);
+  return `https://picsum.photos/seed/${seed}/400/400`;
+};
+
 interface Props {
   activeTableId: string | null;
   products: Product[];
@@ -123,19 +129,29 @@ export function RegisterView({
                     <button 
                       key={product.id}
                       onClick={() => handleProductClick(product)}
-                      className="flex flex-col text-left h-[300px] bg-panel rounded-[24px] shadow-[var(--shadow-artisanal)] border border-border/60 overflow-hidden hover:border-accent/50 transition-all active:scale-[0.97] group focus:outline-none focus:ring-2 focus:ring-accent relative"
+                      className="flex flex-col text-left h-[300px] bg-panel rounded-[24px] shadow-[var(--shadow-artisanal)] border border-border/60 overflow-hidden hover:border-accent/50 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 active:scale-[0.97] group focus:outline-none focus:ring-2 focus:ring-accent relative"
                     >
                       {/* Massive Breathing Room for Image */}
                       <div 
-                        className="flex-1 w-full flex flex-col items-center justify-center p-8 relative overflow-hidden transition-transform group-hover:scale-[1.03] duration-500 ease-out"
+                        className="flex-1 w-full flex flex-col items-center justify-center p-8 relative overflow-hidden"
                         style={{ background: `linear-gradient(145deg, ${color}33, ${color}11)` }}
                       >
-                         <span className="text-[120px] opacity-15 font-black tracking-tighter mix-blend-multiply leading-none" style={{ color }}>
+                         {/* ---> INSERT IMAGE LINK HERE <--- */}
+                         {/* Remove the dummy string and uncomment product.image_url when your API returns images */}
+                         <img 
+                           src={/* product.image_url || */ getDummyImage(product.id, product.name)}
+                           alt={product.name}
+                           className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+                         />
+                         
+                         {/* Fallback Letter if image doesn't load or is mostly transparent */}
+                         <span className="text-[120px] opacity-15 font-black tracking-tighter mix-blend-multiply leading-none relative z-0 transition-transform duration-500 ease-out group-hover:scale-110" style={{ color }}>
                            {product.name.charAt(0).toUpperCase()}
                          </span>
+                         
                          {cat && (
                             <div 
-                              className="absolute top-4 left-4 px-3 py-1.5 rounded-xl border text-[10px] font-bold tracking-widest uppercase shadow-sm"
+                              className="absolute top-4 left-4 px-3 py-1.5 rounded-xl border text-[10px] font-bold tracking-widest uppercase shadow-sm z-10"
                               style={{ backgroundColor: `${color}EE`, color: '#fff', borderColor: `${color}40` }}
                             >
                               {cat.name}
