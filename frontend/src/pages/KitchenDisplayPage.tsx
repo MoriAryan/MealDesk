@@ -12,7 +12,7 @@ import { RefreshCw, Plus } from "lucide-react";
 // ─── Sticky Note Colors per stage ─────────────────────────────────────────────
 const STAGE_STYLES = {
   to_cook: {
-    bg: "#fef9c3",       // warm yellow
+    bg: "#fef9c3", // warm yellow
     border: "#fde047",
     tape: "#fbbf24",
     label: "Pending",
@@ -21,7 +21,7 @@ const STAGE_STYLES = {
     shadow: "4px 5px 12px rgba(0,0,0,0.13), 0 1px 3px rgba(0,0,0,0.08)",
   },
   preparing: {
-    bg: "#fce7f3",       // rose pink
+    bg: "#fce7f3", // rose pink
     border: "#f9a8d4",
     tape: "#ec4899",
     label: "Preparing",
@@ -30,7 +30,7 @@ const STAGE_STYLES = {
     shadow: "4px 5px 12px rgba(0,0,0,0.13), 0 1px 3px rgba(0,0,0,0.08)",
   },
   completed: {
-    bg: "#dcfce7",       // mint green
+    bg: "#dcfce7", // mint green
     border: "#86efac",
     tape: "#22c55e",
     label: "Done ✓",
@@ -62,12 +62,18 @@ function StickyNote({
 }: {
   ticket: KitchenTicket;
   onStageChange: (t: KitchenTicket, next: string) => void;
-  onItemToggle: (e: React.MouseEvent, tId: string, item: KitchenTicketItem) => void;
+  onItemToggle: (
+    e: React.MouseEvent,
+    tId: string,
+    item: KitchenTicketItem,
+  ) => void;
 }) {
-  const style = STAGE_STYLES[ticket.stage as keyof typeof STAGE_STYLES] ?? STAGE_STYLES.to_cook;
+  const style =
+    STAGE_STYLES[ticket.stage as keyof typeof STAGE_STYLES] ??
+    STAGE_STYLES.to_cook;
   const isCompleted = ticket.stage === "completed";
-  const allPrepared = ticket.kitchen_ticket_items.every(i => i.prepared);
-  const someStarted = ticket.kitchen_ticket_items.some(i => i.prepared);
+  const allPrepared = ticket.kitchen_ticket_items.every((i) => i.prepared);
+  const someStarted = ticket.kitchen_ticket_items.some((i) => i.prepared);
 
   // Time since created
   const sentAgo = (() => {
@@ -86,8 +92,12 @@ function StickyNote({
         transform: `rotate(${Math.random() * 2 - 1}deg)`,
         transition: "transform 0.2s ease, box-shadow 0.2s ease",
       }}
-      onMouseEnter={e => (e.currentTarget.style.transform = "rotate(0deg) scale(1.01)")}
-      onMouseLeave={e => (e.currentTarget.style.transform = `rotate(${Math.random() * 2 - 1}deg)`)}
+      onMouseEnter={(e) =>
+        (e.currentTarget.style.transform = "rotate(0deg) scale(1.01)")
+      }
+      onMouseLeave={(e) =>
+        (e.currentTarget.style.transform = `rotate(${Math.random() * 2 - 1}deg)`)
+      }
     >
       {/* Tape */}
       <Tape color={style.tape} />
@@ -106,28 +116,49 @@ function StickyNote({
         }}
       >
         {/* Ruled lines */}
-        <div className="absolute inset-0 pointer-events-none" style={{
-          backgroundImage: `repeating-linear-gradient(transparent, transparent 28px, rgba(0,0,0,0.06) 28px, rgba(0,0,0,0.06) 29px)`,
-          backgroundPositionY: "57px",
-        }} />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `repeating-linear-gradient(transparent, transparent 28px, rgba(0,0,0,0.06) 28px, rgba(0,0,0,0.06) 29px)`,
+            backgroundPositionY: "57px",
+          }}
+        />
 
         {/* Header */}
         <div className="flex items-start justify-between mb-1 relative z-10">
           <div>
             <p
               className="font-bold leading-tight"
-              style={{ fontFamily: "'Caveat', cursive", fontSize: 26, color: "#1c1917", letterSpacing: 0.5 }}
+              style={{
+                fontFamily: "'Caveat', cursive",
+                fontSize: 26,
+                color: "#1c1917",
+                letterSpacing: 0.5,
+              }}
             >
               #{ticket.order_number.replace("MOCK-", "").replace("POS-", "")}
             </p>
             {sentAgo && (
-              <p style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: "#78716c" }}>{sentAgo}</p>
+              <p
+                style={{
+                  fontFamily: "'Caveat', cursive",
+                  fontSize: 13,
+                  color: "#78716c",
+                }}
+              >
+                {sentAgo}
+              </p>
             )}
           </div>
           {/* Stage badge */}
           <span
             className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider shrink-0"
-            style={{ backgroundColor: style.labelBg, color: style.labelColor, fontFamily: "DM Sans, sans-serif", border: `1px solid ${style.border}` }}
+            style={{
+              backgroundColor: style.labelBg,
+              color: style.labelColor,
+              fontFamily: "DM Sans, sans-serif",
+              border: `1px solid ${style.border}`,
+            }}
           >
             {style.label}
           </span>
@@ -145,7 +176,8 @@ function StickyNote({
               <div
                 className="shrink-0 flex items-center justify-center transition-all"
                 style={{
-                  width: 22, height: 22,
+                  width: 22,
+                  height: 22,
                   border: `2px solid ${item.prepared ? "#16a34a" : "#78716c"}`,
                   borderRadius: 3,
                   backgroundColor: item.prepared ? "#dcfce7" : "transparent",
@@ -177,7 +209,9 @@ function StickyNote({
                     fontFamily: "'Caveat', cursive",
                     fontSize: 20,
                     color: item.prepared ? "#78716c" : "#1c1917",
-                    textDecoration: item.prepared ? "line-through wavy #6b7280" : "none",
+                    textDecoration: item.prepared
+                      ? "line-through wavy #6b7280"
+                      : "none",
                     transition: "color 0.3s, text-decoration 0.3s",
                   }}
                 >
@@ -191,11 +225,14 @@ function StickyNote({
         {/* Progress bar */}
         {ticket.kitchen_ticket_items.length > 0 && (
           <div className="relative z-10 mt-1">
-            <div className="h-1 w-full rounded-full" style={{ backgroundColor: `${style.border}` }}>
+            <div
+              className="h-1 w-full rounded-full"
+              style={{ backgroundColor: `${style.border}` }}
+            >
               <div
                 className="h-full rounded-full transition-all duration-700"
                 style={{
-                  width: `${(ticket.kitchen_ticket_items.filter(i => i.prepared).length / ticket.kitchen_ticket_items.length) * 100}%`,
+                  width: `${(ticket.kitchen_ticket_items.filter((i) => i.prepared).length / ticket.kitchen_ticket_items.length) * 100}%`,
                   backgroundColor: style.tape,
                 }}
               />
@@ -208,18 +245,34 @@ function StickyNote({
           <div className="flex gap-2 mt-1 relative z-10">
             {ticket.stage === "to_cook" && (
               <button
-                onClick={(e) => { e.stopPropagation(); onStageChange(ticket, "preparing"); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onStageChange(ticket, "preparing");
+                }}
                 className="flex-1 py-1.5 rounded text-xs font-bold uppercase tracking-widest transition-all hover:opacity-80"
-                style={{ fontFamily: "DM Sans, sans-serif", backgroundColor: style.tape, color: style.labelColor, opacity: 0.85 }}
+                style={{
+                  fontFamily: "DM Sans, sans-serif",
+                  backgroundColor: style.tape,
+                  color: style.labelColor,
+                  opacity: 0.85,
+                }}
               >
                 Start Cooking →
               </button>
             )}
             {ticket.stage === "preparing" && (
               <button
-                onClick={(e) => { e.stopPropagation(); onStageChange(ticket, "completed"); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onStageChange(ticket, "completed");
+                }}
                 className="flex-1 py-1.5 rounded text-xs font-bold uppercase tracking-widest transition-all hover:opacity-80"
-                style={{ fontFamily: "DM Sans, sans-serif", backgroundColor: "#22c55e", color: "#fff", opacity: allPrepared ? 1 : 0.7 }}
+                style={{
+                  fontFamily: "DM Sans, sans-serif",
+                  backgroundColor: "#22c55e",
+                  color: "#fff",
+                  opacity: allPrepared ? 1 : 0.7,
+                }}
               >
                 Mark Done ✓
               </button>
@@ -256,7 +309,9 @@ export const KitchenDisplayPage = () => {
   const { accessToken } = useAuth();
   const [tickets, setTickets] = useState<KitchenTicket[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"All" | "to_cook" | "preparing" | "completed">("All");
+  const [activeTab, setActiveTab] = useState<
+    "All" | "to_cook" | "preparing" | "completed"
+  >("All");
 
   const loadTickets = async () => {
     if (!accessToken) return;
@@ -279,42 +334,65 @@ export const KitchenDisplayPage = () => {
 
   const handleStageChange = async (t: KitchenTicket, next: string) => {
     if (!accessToken) return;
-    setTickets(prev => prev.map(pt => pt.id === t.id ? { ...pt, stage: next as typeof t.stage } : pt));
+    setTickets((prev) =>
+      prev.map((pt) =>
+        pt.id === t.id ? { ...pt, stage: next as typeof t.stage } : pt,
+      ),
+    );
     try {
       await updateTicketStage(accessToken, t.id, next);
       loadTickets();
-    } catch { loadTickets(); }
+    } catch {
+      loadTickets();
+    }
   };
 
-  const handleItemToggle = async (e: React.MouseEvent, tId: string, item: KitchenTicketItem) => {
+  const handleItemToggle = async (
+    e: React.MouseEvent,
+    tId: string,
+    item: KitchenTicketItem,
+  ) => {
     e.stopPropagation();
     if (!accessToken) return;
     const newPrepared = !item.prepared;
     // Optimistic update
-    setTickets(prev => prev.map(t => {
-      if (t.id !== tId) return t;
-      const updatedItems = t.kitchen_ticket_items.map(i => i.id === item.id ? { ...i, prepared: newPrepared } : i);
-      const allDone = updatedItems.every(i => i.prepared);
-      return { ...t, kitchen_ticket_items: updatedItems, stage: allDone ? "completed" : t.stage };
-    }));
+    setTickets((prev) =>
+      prev.map((t) => {
+        if (t.id !== tId) return t;
+        const updatedItems = t.kitchen_ticket_items.map((i) =>
+          i.id === item.id ? { ...i, prepared: newPrepared } : i,
+        );
+        const allDone = updatedItems.every((i) => i.prepared);
+        return {
+          ...t,
+          kitchen_ticket_items: updatedItems,
+          stage: allDone ? "completed" : t.stage,
+        };
+      }),
+    );
     try {
       await updateItemPrepared(accessToken, tId, item.id, newPrepared);
       // Small delay then refresh to get server truth
       setTimeout(loadTickets, 600);
-    } catch { loadTickets(); }
+    } catch {
+      loadTickets();
+    }
   };
 
   const filteredTickets = useMemo(() => {
     if (activeTab === "All") return tickets;
-    return tickets.filter(t => t.stage === activeTab);
+    return tickets.filter((t) => t.stage === activeTab);
   }, [tickets, activeTab]);
 
-  const counts = useMemo(() => ({
-    all: tickets.length,
-    to_cook: tickets.filter(t => t.stage === "to_cook").length,
-    preparing: tickets.filter(t => t.stage === "preparing").length,
-    completed: tickets.filter(t => t.stage === "completed").length,
-  }), [tickets]);
+  const counts = useMemo(
+    () => ({
+      all: tickets.length,
+      to_cook: tickets.filter((t) => t.stage === "to_cook").length,
+      preparing: tickets.filter((t) => t.stage === "preparing").length,
+      completed: tickets.filter((t) => t.stage === "completed").length,
+    }),
+    [tickets],
+  );
 
   if (loading) {
     return (
@@ -325,10 +403,34 @@ export const KitchenDisplayPage = () => {
   }
 
   const TAB_LABELS = [
-    { key: "All", label: "All", count: counts.all, color: "#1c1917", bg: "#e7e5e4" },
-    { key: "to_cook", label: "Pending", count: counts.to_cook, color: "#92400e", bg: "#fef3c7" },
-    { key: "preparing", label: "Preparing", count: counts.preparing, color: "#831843", bg: "#fce7f3" },
-    { key: "completed", label: "Done", count: counts.completed, color: "#14532d", bg: "#dcfce7" },
+    {
+      key: "All",
+      label: "All",
+      count: counts.all,
+      color: "#1c1917",
+      bg: "#e7e5e4",
+    },
+    {
+      key: "to_cook",
+      label: "Pending",
+      count: counts.to_cook,
+      color: "#92400e",
+      bg: "#fef3c7",
+    },
+    {
+      key: "preparing",
+      label: "Preparing",
+      count: counts.preparing,
+      color: "#831843",
+      bg: "#fce7f3",
+    },
+    {
+      key: "completed",
+      label: "Done",
+      count: counts.completed,
+      color: "#14532d",
+      bg: "#dcfce7",
+    },
   ] as const;
 
   return (
@@ -336,12 +438,18 @@ export const KitchenDisplayPage = () => {
       {/* Header bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
         <div>
-          <h1 className="text-2xl font-black text-ink tracking-tight">Kitchen Display</h1>
-          <p className="text-sm text-muted mt-0.5">Tap an item to mark it prepared · Tap a button to advance the stage</p>
+          <h1 className="text-2xl font-black text-ink tracking-tight">
+            Kitchen Display
+          </h1>
+          <p className="text-sm text-muted mt-0.5">
+            Tap an item to mark it prepared · Tap a button to advance the stage
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => void generateMockTicket(accessToken!, "").then(loadTickets)}
+            onClick={() =>
+              void generateMockTicket(accessToken!, "").then(loadTickets)
+            }
             className="flex items-center gap-2 px-4 py-2 border border-dashed border-border rounded-xl text-sm font-semibold text-muted hover:text-ink hover:border-ink transition-all"
           >
             <Plus size={15} /> Add Test Ticket
@@ -357,40 +465,59 @@ export const KitchenDisplayPage = () => {
 
       {/* Stage Tab Pills */}
       <div className="flex items-center gap-2 flex-wrap">
-        {TAB_LABELS.map(tab => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key as typeof activeTab)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all border"
-            style={{
-              backgroundColor: activeTab === tab.key ? tab.bg : "transparent",
-              color: activeTab === tab.key ? tab.color : "#8b8074",
-              borderColor: activeTab === tab.key ? tab.bg : "#e8e2d9",
-              boxShadow: activeTab === tab.key ? "inset 0 1px 2px rgba(0,0,0,0.06)" : "none",
-            }}
-          >
-            {tab.label}
-            <span
-              className="min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full text-[10px] font-black"
-              style={{ backgroundColor: activeTab === tab.key ? tab.color + "22" : "#e7e5e4", color: tab.color }}
+        {TAB_LABELS.map((tab) => {
+          const isActive = activeTab === tab.key;
+
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key as typeof activeTab)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all border hover:-translate-y-px"
+              style={{
+                backgroundColor: isActive ? tab.bg : "var(--color-panel)",
+                color: isActive ? tab.color : "var(--color-muted)",
+                borderColor: isActive
+                  ? `${tab.color}66`
+                  : "var(--color-border)",
+                boxShadow: isActive
+                  ? "0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.5)"
+                  : "0 1px 2px rgba(44,36,27,0.05)",
+              }}
             >
-              {tab.count}
-            </span>
-          </button>
-        ))}
+              {tab.label}
+              <span
+                className="min-w-5 h-5 px-1.5 flex items-center justify-center rounded-full text-[10px] font-black"
+                style={{
+                  backgroundColor: isActive ? `${tab.color}22` : "#e7e5e4",
+                  color: tab.color,
+                }}
+              >
+                {tab.count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Sticky notes grid */}
       {filteredTickets.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 border border-dashed border-border/80 rounded-2xl">
-          <p style={{ fontFamily: "'Caveat', cursive", fontSize: 28, color: "#a8a29e" }}>
+          <p
+            style={{
+              fontFamily: "'Caveat', cursive",
+              fontSize: 28,
+              color: "#a8a29e",
+            }}
+          >
             No tickets here yet…
           </p>
-          <p className="text-sm text-muted mt-2">Orders sent to kitchen will appear as sticky notes</p>
+          <p className="text-sm text-muted mt-2">
+            Orders sent to kitchen will appear as sticky notes
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          {filteredTickets.map(ticket => (
+          {filteredTickets.map((ticket) => (
             <StickyNote
               key={ticket.id}
               ticket={ticket}

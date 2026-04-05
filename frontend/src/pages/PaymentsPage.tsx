@@ -33,7 +33,9 @@ export function PaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [expandedMethods, setExpandedMethods] = useState<Set<string>>(new Set());
+  const [expandedMethods, setExpandedMethods] = useState<Set<string>>(
+    new Set(),
+  );
 
   useEffect(() => {
     if (!accessToken) return;
@@ -51,7 +53,9 @@ export function PaymentsPage() {
     void load();
 
     // Auto-refresh every 10 seconds
-    const interval = setInterval(() => { void load(); }, 10_000);
+    const interval = setInterval(() => {
+      void load();
+    }, 10_000);
     return () => clearInterval(interval);
   }, [accessToken]);
 
@@ -106,19 +110,29 @@ export function PaymentsPage() {
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center py-20 text-muted text-sm">Loading payments…</div>
+        <div className="flex items-center justify-center py-20 text-muted text-sm">
+          Loading payments…
+        </div>
       ) : (
         <div className="rounded-xl border border-border overflow-hidden">
           {/* Table header */}
           <div className="grid grid-cols-[auto_1fr_160px_140px] bg-bg/60 border-b border-border">
             <div className="px-4 py-3 w-10" />
-            <div className="px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider">Payment Method</div>
-            <div className="px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider">Date</div>
-            <div className="px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider text-right">Amount</div>
+            <div className="px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider">
+              Payment Method
+            </div>
+            <div className="px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider">
+              Date
+            </div>
+            <div className="px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider text-right">
+              Amount
+            </div>
           </div>
 
           {groups.length === 0 && (
-            <div className="px-4 py-16 text-center text-muted text-sm">No payments recorded yet.</div>
+            <div className="px-4 py-16 text-center text-muted text-sm">
+              No payments recorded yet.
+            </div>
           )}
 
           {groups.map((group) => {
@@ -143,14 +157,16 @@ export function PaymentsPage() {
                           group.method === "cash"
                             ? "bg-green-500"
                             : group.method === "upi"
-                            ? "bg-purple-500"
-                            : "bg-blue-500"
+                              ? "bg-purple-500"
+                              : "bg-blue-500"
                         }`}
                       />
                       {methodLabel[group.method] ?? group.method}
                     </span>
                   </div>
-                  <div className="px-4 py-3.5 text-muted text-sm flex items-center">—</div>
+                  <div className="px-4 py-3.5 text-muted text-sm flex items-center">
+                    —
+                  </div>
                   <div className="px-4 py-3.5 text-ink font-bold text-right flex items-center justify-end">
                     ${Number(group.total).toFixed(2)}
                   </div>
@@ -166,7 +182,7 @@ export function PaymentsPage() {
                       <div className="px-4 py-2.5 w-10 flex items-center justify-center">
                         <input
                           type="checkbox"
-                          className="rounded border-border accent-[var(--color-accent)]"
+                          className="themed-checkbox"
                           readOnly
                         />
                       </div>
