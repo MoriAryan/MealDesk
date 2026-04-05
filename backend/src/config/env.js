@@ -1,6 +1,6 @@
-const dotenv = require("dotenv");
+import { config } from "dotenv";
 
-dotenv.config();
+config();
 
 const requiredEnv = [
   "PORT",
@@ -46,7 +46,7 @@ for (const entry of supabaseKeysToValidate) {
   }
 }
 
-module.exports = {
+export default {
   port: Number(process.env.PORT || 4000),
   frontendUrl: process.env.FRONTEND_URL,
   supabase: {

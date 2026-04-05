@@ -18,8 +18,8 @@ type VariantInput = {
 };
 
 export function ProductEditorPage() {
-  const { accessToken } = useAuth();
-  const isAdmin = true; // Temporary prototype unlock
+  const { accessToken, user } = useAuth();
+  const isAdmin = user?.role === "admin";
 
   const navigate = useNavigate();
   const { productId } = useParams();

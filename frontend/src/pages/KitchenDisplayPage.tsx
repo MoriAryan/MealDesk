@@ -7,335 +7,399 @@ import {
   generateMockTicket,
 } from "../api/kitchen";
 import type { KitchenTicket, KitchenTicketItem } from "../api/kitchen";
+import { RefreshCw, Plus } from "lucide-react";
 
+// ─── Sticky Note Colors per stage ─────────────────────────────────────────────
+const STAGE_STYLES = {
+  to_cook: {
+    bg: "#fef9c3",       // warm yellow
+    border: "#fde047",
+    tape: "#fbbf24",
+    label: "Pending",
+    labelColor: "#92400e",
+    labelBg: "#fef3c7",
+    shadow: "4px 5px 12px rgba(0,0,0,0.13), 0 1px 3px rgba(0,0,0,0.08)",
+  },
+  preparing: {
+    bg: "#fce7f3",       // rose pink
+    border: "#f9a8d4",
+    tape: "#ec4899",
+    label: "Preparing",
+    labelColor: "#831843",
+    labelBg: "#fce7f3",
+    shadow: "4px 5px 12px rgba(0,0,0,0.13), 0 1px 3px rgba(0,0,0,0.08)",
+  },
+  completed: {
+    bg: "#dcfce7",       // mint green
+    border: "#86efac",
+    tape: "#22c55e",
+    label: "Done ✓",
+    labelColor: "#14532d",
+    labelBg: "#dcfce7",
+    shadow: "4px 5px 12px rgba(0,0,0,0.10)",
+  },
+};
+
+// ─── Sticky Note Tape ──────────────────────────────────────────────────────────
+function Tape({ color }: { color: string }) {
+  return (
+    <div
+      className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-6 rounded-sm z-10 opacity-70"
+      style={{
+        backgroundColor: color,
+        boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+        transform: "translateX(-50%) rotate(-1deg)",
+      }}
+    />
+  );
+}
+
+// ─── Single Sticky Note ────────────────────────────────────────────────────────
+function StickyNote({
+  ticket,
+  onStageChange,
+  onItemToggle,
+}: {
+  ticket: KitchenTicket;
+  onStageChange: (t: KitchenTicket, next: string) => void;
+  onItemToggle: (e: React.MouseEvent, tId: string, item: KitchenTicketItem) => void;
+}) {
+  const style = STAGE_STYLES[ticket.stage as keyof typeof STAGE_STYLES] ?? STAGE_STYLES.to_cook;
+  const isCompleted = ticket.stage === "completed";
+  const allPrepared = ticket.kitchen_ticket_items.every(i => i.prepared);
+  const someStarted = ticket.kitchen_ticket_items.some(i => i.prepared);
+
+  // Time since created
+  const sentAgo = (() => {
+    const sent = ticket.sent_at ? new Date(ticket.sent_at) : null;
+    if (!sent) return null;
+    const mins = Math.floor((Date.now() - sent.getTime()) / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins}m ago`;
+    return `${Math.floor(mins / 60)}h ${mins % 60}m ago`;
+  })();
+
+  return (
+    <div
+      className="relative mt-5 select-none"
+      style={{
+        transform: `rotate(${Math.random() * 2 - 1}deg)`,
+        transition: "transform 0.2s ease, box-shadow 0.2s ease",
+      }}
+      onMouseEnter={e => (e.currentTarget.style.transform = "rotate(0deg) scale(1.01)")}
+      onMouseLeave={e => (e.currentTarget.style.transform = `rotate(${Math.random() * 2 - 1}deg)`)}
+    >
+      {/* Tape */}
+      <Tape color={style.tape} />
+
+      {/* Note body */}
+      <div
+        className="relative rounded-sm pt-8 pb-5 px-5 flex flex-col gap-3 overflow-hidden"
+        style={{
+          backgroundColor: style.bg,
+          border: `1px solid ${style.border}`,
+          boxShadow: style.shadow,
+          minHeight: 200,
+          // subtle paper texture via gradient
+          backgroundImage: `linear-gradient(${style.bg} 28px, #e5e7eb33 28px)`,
+          backgroundSize: "100% 29px",
+        }}
+      >
+        {/* Ruled lines */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          backgroundImage: `repeating-linear-gradient(transparent, transparent 28px, rgba(0,0,0,0.06) 28px, rgba(0,0,0,0.06) 29px)`,
+          backgroundPositionY: "57px",
+        }} />
+
+        {/* Header */}
+        <div className="flex items-start justify-between mb-1 relative z-10">
+          <div>
+            <p
+              className="font-bold leading-tight"
+              style={{ fontFamily: "'Caveat', cursive", fontSize: 26, color: "#1c1917", letterSpacing: 0.5 }}
+            >
+              #{ticket.order_number.replace("MOCK-", "").replace("POS-", "")}
+            </p>
+            {sentAgo && (
+              <p style={{ fontFamily: "'Caveat', cursive", fontSize: 13, color: "#78716c" }}>{sentAgo}</p>
+            )}
+          </div>
+          {/* Stage badge */}
+          <span
+            className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider shrink-0"
+            style={{ backgroundColor: style.labelBg, color: style.labelColor, fontFamily: "DM Sans, sans-serif", border: `1px solid ${style.border}` }}
+          >
+            {style.label}
+          </span>
+        </div>
+
+        {/* Item list */}
+        <div className="flex flex-col gap-2 flex-1 relative z-10">
+          {ticket.kitchen_ticket_items.map((item) => (
+            <div
+              key={item.id}
+              className="flex items-center gap-3 cursor-pointer group"
+              onClick={(e) => onItemToggle(e, ticket.id, item)}
+            >
+              {/* Handwritten checkbox */}
+              <div
+                className="shrink-0 flex items-center justify-center transition-all"
+                style={{
+                  width: 22, height: 22,
+                  border: `2px solid ${item.prepared ? "#16a34a" : "#78716c"}`,
+                  borderRadius: 3,
+                  backgroundColor: item.prepared ? "#dcfce7" : "transparent",
+                  fontFamily: "'Caveat', cursive",
+                  fontSize: 18,
+                  color: "#15803d",
+                  lineHeight: 1,
+                  transform: item.prepared ? "rotate(-3deg)" : "none",
+                }}
+              >
+                {item.prepared ? "✓" : ""}
+              </div>
+              {/* Quantity + name */}
+              <div className="flex items-baseline gap-1.5 flex-1">
+                <span
+                  style={{
+                    fontFamily: "'Caveat', cursive",
+                    fontSize: 20,
+                    fontWeight: 700,
+                    color: item.prepared ? "#86efac" : "#b45309",
+                    minWidth: 20,
+                    textDecoration: item.prepared ? "none" : "none",
+                  }}
+                >
+                  {item.qty}×
+                </span>
+                <span
+                  style={{
+                    fontFamily: "'Caveat', cursive",
+                    fontSize: 20,
+                    color: item.prepared ? "#78716c" : "#1c1917",
+                    textDecoration: item.prepared ? "line-through wavy #6b7280" : "none",
+                    transition: "color 0.3s, text-decoration 0.3s",
+                  }}
+                >
+                  {item.product_name}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Progress bar */}
+        {ticket.kitchen_ticket_items.length > 0 && (
+          <div className="relative z-10 mt-1">
+            <div className="h-1 w-full rounded-full" style={{ backgroundColor: `${style.border}` }}>
+              <div
+                className="h-full rounded-full transition-all duration-700"
+                style={{
+                  width: `${(ticket.kitchen_ticket_items.filter(i => i.prepared).length / ticket.kitchen_ticket_items.length) * 100}%`,
+                  backgroundColor: style.tape,
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Stage action buttons */}
+        {!isCompleted && (
+          <div className="flex gap-2 mt-1 relative z-10">
+            {ticket.stage === "to_cook" && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onStageChange(ticket, "preparing"); }}
+                className="flex-1 py-1.5 rounded text-xs font-bold uppercase tracking-widest transition-all hover:opacity-80"
+                style={{ fontFamily: "DM Sans, sans-serif", backgroundColor: style.tape, color: style.labelColor, opacity: 0.85 }}
+              >
+                Start Cooking →
+              </button>
+            )}
+            {ticket.stage === "preparing" && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onStageChange(ticket, "completed"); }}
+                className="flex-1 py-1.5 rounded text-xs font-bold uppercase tracking-widest transition-all hover:opacity-80"
+                style={{ fontFamily: "DM Sans, sans-serif", backgroundColor: "#22c55e", color: "#fff", opacity: allPrepared ? 1 : 0.7 }}
+              >
+                Mark Done ✓
+              </button>
+            )}
+          </div>
+        )}
+
+        {isCompleted && (
+          <div
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            style={{ transform: "rotate(-12deg)" }}
+          >
+            <span
+              style={{
+                fontFamily: "'Caveat', cursive",
+                fontSize: 52,
+                fontWeight: 700,
+                color: "#16a34a",
+                opacity: 0.18,
+                letterSpacing: -1,
+              }}
+            >
+              DONE!
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Kitchen Display Page ─────────────────────────────────────────────────
 export const KitchenDisplayPage = () => {
-  const { user, accessToken } = useAuth();
+  const { accessToken } = useAuth();
   const [tickets, setTickets] = useState<KitchenTicket[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Filters state
   const [activeTab, setActiveTab] = useState<"All" | "to_cook" | "preparing" | "completed">("All");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
-  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
-  
-  // Pagination
-  const [page, setPage] = useState(1);
-  const itemsPerPage = 6; // Fits nicely
 
   const loadTickets = async () => {
     if (!accessToken) return;
     try {
       const res = await fetchKitchenTickets(accessToken);
       setTickets(res.tickets);
-      
-      // Auto-populate mockup data if completely empty
-      if (res.tickets.length === 0) {
-        // Generate 3 mock tickets
-        await Promise.all([
-          generateMockTicket(accessToken, ""),
-          generateMockTicket(accessToken, ""),
-          generateMockTicket(accessToken, "")
-        ]);
-        const refreshed = await fetchKitchenTickets(accessToken);
-        setTickets(refreshed.tickets);
-      }
     } catch (err) {
       console.error(err);
     } finally {
-      if (loading) setLoading(false);
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     loadTickets();
-    const interval = setInterval(loadTickets, 5000); 
+    const interval = setInterval(loadTickets, 5000);
     return () => clearInterval(interval);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken]);
 
-  const handleSendTestTicket = async () => {
+  const handleStageChange = async (t: KitchenTicket, next: string) => {
     if (!accessToken) return;
+    setTickets(prev => prev.map(pt => pt.id === t.id ? { ...pt, stage: next as typeof t.stage } : pt));
     try {
-      await generateMockTicket(accessToken, "");
+      await updateTicketStage(accessToken, t.id, next);
       loadTickets();
-    } catch (err: any) {
-      alert("Failed: " + err.message);
-    }
+    } catch { loadTickets(); }
   };
 
-  // Derive filters from current tickets
-  const availableProducts = useMemo(() => {
-    const prods = new Set<string>();
-    tickets.forEach(t => t.kitchen_ticket_items.forEach(i => prods.add(i.product_name)));
-    return Array.from(prods).sort();
-  }, [tickets]);
-
-  const availableCategories = useMemo(() => {
-    const cats = new Set<string>();
-    tickets.forEach(t => t.kitchen_ticket_items.forEach(i => {
-      const cname = i.order_lines?.products?.categories?.name;
-      if (cname) cats.add(cname);
-    }));
-    return Array.from(cats).sort();
-  }, [tickets]);
-
-  // Apply filters
-  const filteredTickets = useMemo(() => {
-    return tickets.filter(t => {
-      if (activeTab !== "All" && t.stage !== activeTab) return false;
-      if (searchQuery) {
-        const lowerQ = searchQuery.toLowerCase();
-        const matchNumber = t.order_number.toLowerCase().includes(lowerQ);
-        const matchProduct = t.kitchen_ticket_items.some(i => i.product_name.toLowerCase().includes(lowerQ));
-        if (!matchNumber && !matchProduct) return false;
-      }
-      if (selectedProducts.size > 0) {
-        if (!t.kitchen_ticket_items.some(i => selectedProducts.has(i.product_name))) return false;
-      }
-      if (selectedCategories.size > 0) {
-        if (!t.kitchen_ticket_items.some(i => {
-          const cname = i.order_lines?.products?.categories?.name;
-          return cname && selectedCategories.has(cname);
-        })) {
-          return false;
-        }
-      }
-      return true;
-    });
-  }, [tickets, activeTab, searchQuery, selectedProducts, selectedCategories]);
-
-  // Pagination
-  const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
-  const paginatedTickets = filteredTickets.slice((page - 1) * itemsPerPage, page * itemsPerPage);
-
-  useEffect(() => {
-    setPage(1);
-  }, [activeTab, searchQuery, selectedProducts, selectedCategories]);
-
-  const toggleProduct = (p: string) => {
-    const ns = new Set(selectedProducts);
-    if (ns.has(p)) ns.delete(p);
-    else ns.add(p);
-    setSelectedProducts(ns);
-  };
-
-  const toggleCategory = (c: string) => {
-    const ns = new Set(selectedCategories);
-    if (ns.has(c)) ns.delete(c);
-    else ns.add(c);
-    setSelectedCategories(ns);
-  };
-
-  const clearFilters = () => {
-    setSelectedProducts(new Set());
-    setSelectedCategories(new Set());
-  };
-
-  const handleItemClick = async (e: React.MouseEvent, tId: string, item: KitchenTicketItem) => {
+  const handleItemToggle = async (e: React.MouseEvent, tId: string, item: KitchenTicketItem) => {
     e.stopPropagation();
     if (!accessToken) return;
+    const newPrepared = !item.prepared;
+    // Optimistic update
+    setTickets(prev => prev.map(t => {
+      if (t.id !== tId) return t;
+      const updatedItems = t.kitchen_ticket_items.map(i => i.id === item.id ? { ...i, prepared: newPrepared } : i);
+      const allDone = updatedItems.every(i => i.prepared);
+      return { ...t, kitchen_ticket_items: updatedItems, stage: allDone ? "completed" : t.stage };
+    }));
     try {
-      setTickets(prev => prev.map(t => {
-        if (t.id === tId) {
-          return { ...t, kitchen_ticket_items: t.kitchen_ticket_items.map(i => i.id === item.id ? { ...i, prepared: !i.prepared } : i) };
-        }
-        return t;
-      }));
-      await updateItemPrepared(accessToken, tId, item.id, !item.prepared);
-      loadTickets();
-    } catch (err) {
-      console.error(err);
-      loadTickets();
-    }
+      await updateItemPrepared(accessToken, tId, item.id, newPrepared);
+      // Small delay then refresh to get server truth
+      setTimeout(loadTickets, 600);
+    } catch { loadTickets(); }
   };
 
-  const handleCardClick = async (t: KitchenTicket) => {
-    if (!accessToken) return;
-    let nextStage: typeof t.stage | null = null;
-    if (t.stage === "to_cook") nextStage = "preparing";
-    else if (t.stage === "preparing") nextStage = "completed";
-    
-    if (nextStage) {
-      try {
-        setTickets(prev => prev.map(pt => pt.id === t.id ? { ...pt, stage: nextStage as any } : pt));
-        await updateTicketStage(accessToken, t.id, nextStage);
-        loadTickets();
-      } catch (err) {
-        console.error(err);
-        loadTickets();
-      }
-    }
-  };
+  const filteredTickets = useMemo(() => {
+    if (activeTab === "All") return tickets;
+    return tickets.filter(t => t.stage === activeTab);
+  }, [tickets, activeTab]);
 
-  const countToCook = tickets.filter(t => t.stage === 'to_cook').length;
-  const countPreparing = tickets.filter(t => t.stage === 'preparing').length;
-  const countCompleted = tickets.filter(t => t.stage === 'completed').length;
+  const counts = useMemo(() => ({
+    all: tickets.length,
+    to_cook: tickets.filter(t => t.stage === "to_cook").length,
+    preparing: tickets.filter(t => t.stage === "preparing").length,
+    completed: tickets.filter(t => t.stage === "completed").length,
+  }), [tickets]);
 
-  if (loading) return <div className="text-muted">Loading Kitchen Display...</div>;
+  if (loading) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <RefreshCw className="animate-spin text-accent" size={32} />
+      </div>
+    );
+  }
+
+  const TAB_LABELS = [
+    { key: "All", label: "All", count: counts.all, color: "#1c1917", bg: "#e7e5e4" },
+    { key: "to_cook", label: "Pending", count: counts.to_cook, color: "#92400e", bg: "#fef3c7" },
+    { key: "preparing", label: "Preparing", count: counts.preparing, color: "#831843", bg: "#fce7f3" },
+    { key: "completed", label: "Done", count: counts.completed, color: "#14532d", bg: "#dcfce7" },
+  ] as const;
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 min-h-[75vh]">
-      {/* Sidebar Filters */}
-      <div className="w-full md:w-64 shrink-0 flex flex-col gap-4">
-        <div className="bg-panel rounded-xl border border-border shadow-sm overflow-hidden flex flex-col p-4">
-          <button 
-            onClick={clearFilters}
-            className="text-[var(--color-accent)] hover:text-orange-700 flex items-center justify-between w-full text-sm font-semibold mb-4 border-b border-border pb-3"
+    <div className="flex flex-col gap-6 min-h-[75vh]">
+      {/* Header bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
+        <div>
+          <h1 className="text-2xl font-black text-ink tracking-tight">Kitchen Display</h1>
+          <p className="text-sm text-muted mt-0.5">Tap an item to mark it prepared · Tap a button to advance the stage</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => void generateMockTicket(accessToken!, "").then(loadTickets)}
+            className="flex items-center gap-2 px-4 py-2 border border-dashed border-border rounded-xl text-sm font-semibold text-muted hover:text-ink hover:border-ink transition-all"
           >
-            Clear Filters <span>✕</span>
+            <Plus size={15} /> Add Test Ticket
           </button>
-          
-          <div className="flex-1 overflow-y-auto pr-1">
-            {/* Categories Filter */}
-            {availableCategories.length > 0 && (
-              <div className="mb-6">
-                <div className="text-xs uppercase tracking-widest text-muted font-bold mb-2">Categories</div>
-                <div className="flex flex-col gap-1.5">
-                  {availableCategories.map(c => (
-                    <label key={c} className="flex items-center cursor-pointer group">
-                      <input type="checkbox" className="hidden" checked={selectedCategories.has(c)} onChange={() => toggleCategory(c)} />
-                      <div className={`text-sm py-1.5 px-3 rounded-lg w-full font-medium transition-colors border ${selectedCategories.has(c) ? 'bg-panel border-[var(--color-accent)] text-ink' : 'border-transparent text-muted hover:bg-panel hover:text-ink'}`}>
-                        {c}
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Products Filter */}
-            {availableProducts.length > 0 && (
-              <div>
-                <div className="text-xs uppercase tracking-widest text-muted font-bold mb-2">Products</div>
-                <div className="flex flex-col gap-1.5">
-                  {availableProducts.map(p => (
-                    <label key={p} className="flex items-center cursor-pointer group">
-                      <input type="checkbox" className="hidden" checked={selectedProducts.has(p)} onChange={() => toggleProduct(p)} />
-                      <div className={`text-sm py-1.5 px-3 rounded-lg w-full font-medium transition-colors border ${selectedProducts.has(p) ? 'bg-panel border-[var(--color-accent)] text-ink' : 'border-transparent text-muted hover:bg-panel hover:text-ink'}`}>
-                        {p}
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+          <button
+            onClick={loadTickets}
+            className="flex items-center gap-2 px-4 py-2 border border-border rounded-xl text-sm font-semibold text-muted hover:text-accent hover:border-accent transition-all"
+          >
+            <RefreshCw size={15} /> Refresh
+          </button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col gap-4">
-        {/* Toolbar */}
-        <div className="bg-panel rounded-xl border border-border shadow-sm px-5 py-3 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-sm font-semibold">
-            <button 
-              onClick={() => setActiveTab("All")}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors ${activeTab === 'All' ? 'bg-[var(--color-ink)] text-white' : 'text-muted hover:bg-panel text-ink'}`}
+      {/* Stage Tab Pills */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {TAB_LABELS.map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key as typeof activeTab)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all border"
+            style={{
+              backgroundColor: activeTab === tab.key ? tab.bg : "transparent",
+              color: activeTab === tab.key ? tab.color : "#8b8074",
+              borderColor: activeTab === tab.key ? tab.bg : "#e8e2d9",
+              boxShadow: activeTab === tab.key ? "inset 0 1px 2px rgba(0,0,0,0.06)" : "none",
+            }}
+          >
+            {tab.label}
+            <span
+              className="min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full text-[10px] font-black"
+              style={{ backgroundColor: activeTab === tab.key ? tab.color + "22" : "#e7e5e4", color: tab.color }}
             >
-              All <span className="bg-white/20 px-1.5 rounded text-xs">{tickets.length}</span>
-            </button>
-            <button 
-              onClick={() => setActiveTab("to_cook")}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors ${activeTab === 'to_cook' ? 'bg-blue-600 text-white' : 'text-muted hover:bg-panel hover:text-blue-600'}`}
-            >
-              To Cook <span className="bg-white/20 px-1.5 rounded text-xs">{countToCook}</span>
-            </button>
-            <button 
-              onClick={() => setActiveTab("preparing")}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors ${activeTab === 'preparing' ? 'bg-[var(--color-accent)] text-white' : 'text-muted hover:bg-panel hover:text-[var(--color-accent)]'}`}
-            >
-              Preparing <span className="bg-white/20 px-1.5 rounded text-xs">{countPreparing}</span>
-            </button>
-            <button 
-              onClick={() => setActiveTab("completed")}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors ${activeTab === 'completed' ? 'bg-green-600 text-white' : 'text-muted hover:bg-panel hover:text-green-600'}`}
-            >
-              Completed <span className="bg-white/20 px-1.5 rounded text-xs">{countCompleted}</span>
-            </button>
-          </div>
-
-          <div className="flex items-center gap-3">
-             <button 
-              onClick={handleSendTestTicket}
-              className="bg-panel text-ink border border-border hover:bg-[var(--color-border)] px-3 py-1.5 rounded font-medium text-sm shadow-sm transition-colors flex items-center gap-2"
-            >
-              Send <span className="text-xs font-normal opacity-70">(Mock)</span>
-            </button>
-
-            <div className="relative">
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="bg-bg border border-border rounded-md px-3 py-1.5 text-sm w-40 focus:outline-none focus:border-[var(--color-accent)] text-ink placeholder-[var(--color-muted)]"
-              />
-            </div>
-            
-            <div className="flex items-center gap-1 text-sm text-muted font-medium bg-bg rounded-md border border-border px-1 py-1">
-              <span className="w-12 text-center text-xs">{filteredTickets.length === 0 ? '0' : `${Math.min((page - 1) * itemsPerPage + 1, filteredTickets.length)}-${Math.min(page * itemsPerPage, filteredTickets.length)}`}</span>
-              <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="hover:text-ink disabled:opacity-30 px-1.5">{'<'}</button>
-              <button disabled={page >= totalPages || totalPages === 0} onClick={() => setPage(p => p + 1)} className="hover:text-ink disabled:opacity-30 px-1.5">{'>'}</button>
-            </div>
-          </div>
-        </div>
-
-        {/* Board */}
-        <div className="flex-1 w-full relative">
-          {paginatedTickets.length === 0 ? (
-            <div className="text-center justify-center flex items-center h-40 bg-panel border border-dashed border-border rounded-xl">
-              <p className="text-muted font-medium">No tickets found.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
-              {paginatedTickets.map(t => (
-                <div 
-                  key={t.id} 
-                  onClick={() => handleCardClick(t)}
-                  className={`bg-panel rounded-xl p-5 cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all border shadow-sm flex flex-col gap-4 relative overflow-hidden
-                    ${t.stage === 'to_cook' ? 'border-blue-300' : 
-                      t.stage === 'preparing' ? 'border-[var(--color-accent)]' : 
-                      'border-green-400 opacity-80'}`}
-                >
-                  <div className={`absolute top-0 left-0 w-full h-1.5 
-                    ${t.stage === 'to_cook' ? 'bg-blue-500' : t.stage === 'preparing' ? 'bg-[var(--color-accent)]' : 'bg-green-500'}`} />
-                    
-                  <div className="flex items-center justify-between border-b border-border pb-2 pt-1">
-                    <h3 className="text-xl font-bold tracking-wide text-ink font-head">
-                      #{t.order_number.replace('MOCK-', '')}
-                    </h3>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider
-                      ${t.stage === 'to_cook' ? 'bg-blue-100 text-blue-800' : 
-                        t.stage === 'preparing' ? 'bg-orange-100 text-[var(--color-accent)]' : 
-                        'bg-green-100 text-green-800'}`}>
-                      {t.stage.replace('_', ' ')}
-                    </span>
-                  </div>
-                  
-                  <div className="flex flex-col gap-1.5 flex-1">
-                    {t.kitchen_ticket_items.map(item => (
-                      <div 
-                        key={item.id} 
-                        onClick={(e) => handleItemClick(e, t.id, item)}
-                        className={`flex items-start text-[14px] hover:bg-bg py-1.5 px-2 -mx-2 rounded transition-colors group ${item.prepared ? 'text-muted' : 'text-ink'}`}
-                      >
-                        <span className={`mr-2 font-bold w-5 text-right ${item.prepared ? 'opacity-40' : 'text-[var(--color-accent)]'}`}>
-                          {item.qty}
-                        </span>
-                        <span className="mr-2 text-muted opacity-50 font-sans">×</span>
-                        <span className={`flex-1 break-words font-medium ${item.prepared ? 'line-through decoration-[var(--color-muted)] decoration-2 opacity-60' : ''}`}>
-                          {item.product_name}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+              {tab.count}
+            </span>
+          </button>
+        ))}
       </div>
+
+      {/* Sticky notes grid */}
+      {filteredTickets.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-64 border border-dashed border-border/80 rounded-2xl">
+          <p style={{ fontFamily: "'Caveat', cursive", fontSize: 28, color: "#a8a29e" }}>
+            No tickets here yet…
+          </p>
+          <p className="text-sm text-muted mt-2">Orders sent to kitchen will appear as sticky notes</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          {filteredTickets.map(ticket => (
+            <StickyNote
+              key={ticket.id}
+              ticket={ticket}
+              onStageChange={handleStageChange}
+              onItemToggle={handleItemToggle}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

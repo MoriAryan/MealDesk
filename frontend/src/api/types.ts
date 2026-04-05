@@ -13,6 +13,13 @@ export type PosConfig = {
     closing_sale_total: number;
     status: "active" | "closed";
   }[];
+  _stats?: {
+    totalRevenue: number;
+    orderCount: number;
+    lastOrderAt: string | null;
+    lastOpenedAt: string | null;
+    sessionCount: number;
+  };
 };
 
 export type Category = {
