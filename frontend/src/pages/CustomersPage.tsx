@@ -6,16 +6,53 @@ import { useAuth } from "../auth/AuthProvider";
 
 // Indian states list
 const INDIAN_STATES = [
-  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
-  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka",
-  "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram",
-  "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu",
-  "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
-  "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu",
-  "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry",
+  "Andhra Pradesh",
+  "Arunachal Pradesh",
+  "Assam",
+  "Bihar",
+  "Chhattisgarh",
+  "Goa",
+  "Gujarat",
+  "Haryana",
+  "Himachal Pradesh",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Manipur",
+  "Meghalaya",
+  "Mizoram",
+  "Nagaland",
+  "Odisha",
+  "Punjab",
+  "Rajasthan",
+  "Sikkim",
+  "Tamil Nadu",
+  "Telangana",
+  "Tripura",
+  "Uttar Pradesh",
+  "Uttarakhand",
+  "West Bengal",
+  "Andaman and Nicobar Islands",
+  "Chandigarh",
+  "Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi",
+  "Jammu and Kashmir",
+  "Ladakh",
+  "Lakshadweep",
+  "Puducherry",
 ];
 
-const COUNTRIES = ["India", "United States", "United Kingdom", "UAE", "Canada", "Australia", "Other"];
+const COUNTRIES = [
+  "India",
+  "United States",
+  "United Kingdom",
+  "UAE",
+  "Canada",
+  "Australia",
+  "Other",
+];
 
 // ─── New Customer Modal ────────────────────────────────────────────────────────
 
@@ -45,7 +82,10 @@ function CustomerFormModal({
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (stateRef.current && !stateRef.current.contains(event.target as Node)) {
+      if (
+        stateRef.current &&
+        !stateRef.current.contains(event.target as Node)
+      ) {
         setStateDropOpen(false);
       }
     }
@@ -54,7 +94,7 @@ function CustomerFormModal({
   }, []);
 
   const filteredStates = INDIAN_STATES.filter((s) =>
-    s.toLowerCase().includes(stateSearch.toLowerCase())
+    s.toLowerCase().includes(stateSearch.toLowerCase()),
   );
 
   const handleChange = (field: keyof typeof form, value: string) => {
@@ -141,7 +181,9 @@ function CustomerFormModal({
             />
           </div>
 
-          <p className="text-xs font-semibold text-muted uppercase tracking-wider pt-1">Address</p>
+          <p className="text-xs font-semibold text-muted uppercase tracking-wider pt-1">
+            Address
+          </p>
 
           {/* Street 1 */}
           <input
@@ -181,7 +223,10 @@ function CustomerFormModal({
                 <span className={form.state ? "text-ink" : "text-muted"}>
                   {form.state || "State"}
                 </span>
-                <ChevronDown size={14} className={`text-muted transition-transform ${stateDropOpen ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  size={14}
+                  className={`text-muted transition-transform ${stateDropOpen ? "rotate-180" : ""}`}
+                />
               </button>
 
               {stateDropOpen && (
@@ -207,14 +252,18 @@ function CustomerFormModal({
                           setStateSearch("");
                         }}
                         className={`w-full text-left px-3 py-2 text-sm transition-colors ${
-                          form.state === s ? "bg-accent/10 text-accent font-medium" : "text-ink hover:bg-bg"
+                          form.state === s
+                            ? "bg-accent/10 text-accent font-medium"
+                            : "text-ink hover:bg-bg"
                         }`}
                       >
                         {s}
                       </button>
                     ))}
                     {filteredStates.length === 0 && (
-                      <p className="px-3 py-4 text-xs text-muted text-center">No results</p>
+                      <p className="px-3 py-4 text-xs text-muted text-center">
+                        No results
+                      </p>
                     )}
                   </div>
                 </div>
@@ -229,7 +278,9 @@ function CustomerFormModal({
             className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-accent transition-colors"
           >
             {COUNTRIES.map((c) => (
-              <option key={c} value={c}>{c}</option>
+              <option key={c} value={c}>
+                {c}
+              </option>
             ))}
           </select>
         </div>
@@ -288,15 +339,19 @@ export function CustomersPage() {
     setShowForm(false);
   };
 
-  const filtered = customers.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase()) ||
-    (c.email ?? "").toLowerCase().includes(search.toLowerCase())
+  const filtered = customers.filter(
+    (c) =>
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      (c.email ?? "").toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
     <section className="max-w-5xl">
       {showForm && (
-        <CustomerFormModal onClose={() => setShowForm(false)} onSave={handleSave} />
+        <CustomerFormModal
+          onClose={() => setShowForm(false)}
+          onSave={handleSave}
+        />
       )}
 
       <div className="flex items-center justify-between mb-6 pb-3 border-b border-border">
@@ -312,7 +367,10 @@ export function CustomersPage() {
 
         {/* Search */}
         <div className="relative">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+          <Search
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+          />
           <input
             type="text"
             placeholder="Search Customer…"
@@ -330,25 +388,40 @@ export function CustomersPage() {
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center py-20 text-muted text-sm">Loading customers…</div>
+        <div className="flex items-center justify-center py-20 text-muted text-sm">
+          Loading customers…
+        </div>
       ) : (
         <div className="rounded-xl border border-border overflow-hidden">
           <table className="min-w-full text-sm text-left">
             <thead>
               <tr className="bg-bg/60 border-b border-border">
                 <th className="px-4 py-3 w-10">
-                  <input type="checkbox" className="rounded border-border accent-[var(--color-accent)]" readOnly />
+                  <input type="checkbox" className="themed-checkbox" readOnly />
                 </th>
-                <th className="px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider">Name</th>
-                <th className="px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider">Contact</th>
-                <th className="px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider text-right">Total Sales</th>
+                <th className="px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider">
+                  Name
+                </th>
+                <th className="px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider">
+                  Contact
+                </th>
+                <th className="px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider text-right">
+                  Total Sales
+                </th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((c) => (
-                <tr key={c.id} className="border-b border-border hover:bg-panel transition-colors">
+                <tr
+                  key={c.id}
+                  className="border-b border-border hover:bg-panel transition-colors"
+                >
                   <td className="px-4 py-3">
-                    <input type="checkbox" className="rounded border-border accent-[var(--color-accent)]" readOnly />
+                    <input
+                      type="checkbox"
+                      className="themed-checkbox"
+                      readOnly
+                    />
                   </td>
                   <td className="px-4 py-3 font-medium text-ink">{c.name}</td>
                   <td className="px-4 py-3">
@@ -363,7 +436,9 @@ export function CustomersPage() {
                           <span className="text-[10px]">📞</span> {c.phone}
                         </span>
                       )}
-                      {!c.email && !c.phone && <span className="text-muted">—</span>}
+                      {!c.email && !c.phone && (
+                        <span className="text-muted">—</span>
+                      )}
                     </div>
                   </td>
                   <td className="px-4 py-3 text-right font-semibold text-ink">
@@ -373,8 +448,13 @@ export function CustomersPage() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-16 text-center text-muted text-sm">
-                    {search ? "No customers match your search." : "No customers yet."}
+                  <td
+                    colSpan={4}
+                    className="px-4 py-16 text-center text-muted text-sm"
+                  >
+                    {search
+                      ? "No customers match your search."
+                      : "No customers yet."}
                   </td>
                 </tr>
               )}

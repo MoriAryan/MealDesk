@@ -3,8 +3,19 @@ import type { FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { listCategories } from "../api/categories";
 import { listPosConfigs } from "../api/posConfig";
-import { createProduct, getProduct, listTaxRates, updateProduct } from "../api/products";
-import type { Category, PosConfig, Product, ProductVariant, TaxRate } from "../api/types";
+import {
+  createProduct,
+  getProduct,
+  listTaxRates,
+  updateProduct,
+} from "../api/products";
+import type {
+  Category,
+  PosConfig,
+  Product,
+  ProductVariant,
+  TaxRate,
+} from "../api/types";
 import { useAuth } from "../auth/AuthProvider";
 
 const units: Product["uom"][] = ["unit", "kg", "liter", "gram", "ml"];
@@ -42,8 +53,13 @@ export function ProductEditorPage() {
   const [error, setError] = useState<string | null>(null);
 
   const canSubmit = useMemo(
-    () => !!name.trim() && !!categoryId && !!taxRateId && !!posConfigId && price !== "",
-    [name, categoryId, taxRateId, posConfigId, price]
+    () =>
+      !!name.trim() &&
+      !!categoryId &&
+      !!taxRateId &&
+      !!posConfigId &&
+      price !== "",
+    [name, categoryId, taxRateId, posConfigId, price],
   );
 
   useEffect(() => {
@@ -51,13 +67,18 @@ export function ProductEditorPage() {
 
     const loadBase = async () => {
       try {
-        const [pos, tax] = await Promise.all([listPosConfigs(accessToken), listTaxRates(accessToken)]);
+        const [pos, tax] = await Promise.all([
+          listPosConfigs(accessToken),
+          listTaxRates(accessToken),
+        ]);
         setPosConfigs(pos.posConfigs);
         setTaxRates(tax.taxRates);
         const defaultPos = pos.posConfigs[0]?.id || "";
         setPosConfigId((current) => current || defaultPos);
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Failed to load product metadata");
+        setError(
+          e instanceof Error ? e.message : "Failed to load product metadata",
+        );
       }
     };
 
@@ -102,7 +123,7 @@ export function ProductEditorPage() {
             value: variant.value,
             unit: variant.unit,
             extraPrice: Number(variant.extra_price),
-          }))
+          })),
         );
       } catch (e) {
         setError(e instanceof Error ? e.message : "Failed to load product");
@@ -145,26 +166,38 @@ export function ProductEditorPage() {
     }
   };
 
-  const inputClass = "w-full bg-transparent border-0 border-b border-border px-1 py-1.5 focus:ring-0 focus:border-[var(--color-accent)] disabled:opacity-50 text-ink placeholder-[var(--color-muted)] rounded-none";
-  const selectClass = "w-full bg-transparent border-0 border-b border-border px-1 py-1.5 focus:ring-0 focus:border-[var(--color-accent)] disabled:opacity-50 text-ink rounded-none";
+  const inputClass =
+    "w-full bg-transparent border-0 border-b border-border px-1 py-1.5 focus:ring-0 focus:border-[var(--color-accent)] disabled:opacity-50 text-ink placeholder-[var(--color-muted)] rounded-none";
+  const selectClass =
+    "w-full bg-transparent border-0 border-b border-border px-1 py-1.5 focus:ring-0 focus:border-[var(--color-accent)] disabled:opacity-50 text-ink rounded-none";
 
   return (
     <section className="max-w-4xl">
       <div className="flex items-center gap-3 mb-8 border-b border-border pb-2 pt-2">
-        <Link to="/products" className="text-xl font-bold font-head text-muted hover:text-ink transition-colors">
+        <Link
+          to="/products"
+          className="text-xl font-bold font-head text-muted hover:text-ink transition-colors"
+        >
           Products
         </Link>
         <span className="text-xl font-bold font-head text-muted">/</span>
-        <span className="text-xl font-bold font-head text-ink">{isCreate ? 'New' : name || 'Unnamed Product'}</span>
+        <span className="text-xl font-bold font-head text-ink">
+          {isCreate ? "New" : name || "Unnamed Product"}
+        </span>
       </div>
 
-      {error && <p className="mb-4 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      {error && (
+        <p className="mb-4 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {error}
+        </p>
+      )}
 
       <form onSubmit={submit} className="flex flex-col gap-6">
-        
         {/* Global Product Name (Above Tabs) */}
         <div>
-          <label className="block text-sm font-semibold text-ink mb-1">Product</label>
+          <label className="block text-sm font-semibold text-ink mb-1">
+            Product
+          </label>
           <input
             disabled={!isAdmin}
             value={name}
@@ -179,34 +212,38 @@ export function ProductEditorPage() {
           <button
             type="button"
             onClick={() => setTab("general")}
-            className={`pb-2 text-sm font-semibold transition-colors border-b-2 ${tab === "general" ? "border-[var(--color-ink)] text-ink" : "border-transparent text-muted hover:text-ink"}`}
+            className={`pb-2 text-sm font-semibold transition-colors border-b-2 ${tab === "general" ? "border-ink text-ink" : "border-transparent text-muted hover:text-ink"}`}
           >
             General Info
           </button>
           <button
             type="button"
             onClick={() => setTab("variants")}
-            className={`pb-2 text-sm font-semibold transition-colors border-b-2 ${tab === "variants" ? "border-[var(--color-ink)] text-ink" : "border-transparent text-muted hover:text-ink"}`}
+            className={`pb-2 text-sm font-semibold transition-colors border-b-2 ${tab === "variants" ? "border-ink text-ink" : "border-transparent text-muted hover:text-ink"}`}
           >
             Variant
           </button>
         </div>
 
         {/* Tab Content */}
-        <div className="min-h-[300px]">
+        <div className="min-h-75">
           {tab === "general" && (
             <div className="grid md:grid-cols-2 gap-x-16 gap-y-8 mt-4">
               {/* Left Column */}
               <div className="flex flex-col gap-8">
                 <div>
-                  <label className="block text-sm font-semibold text-ink mb-1">Category</label>
+                  <label className="block text-sm font-semibold text-ink mb-1">
+                    Category
+                  </label>
                   <select
                     disabled={!isAdmin}
                     value={categoryId}
                     onChange={(event) => setCategoryId(event.target.value)}
                     className={selectClass}
                   >
-                    <option value="" disabled>Select category</option>
+                    <option value="" disabled>
+                      Select category
+                    </option>
                     {categories.map((category) => (
                       <option key={category.id} value={category.id}>
                         {category.name}
@@ -216,7 +253,9 @@ export function ProductEditorPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-ink mb-1">Product Description</label>
+                  <label className="block text-sm font-semibold text-ink mb-1">
+                    Product Description
+                  </label>
                   <input
                     disabled={!isAdmin}
                     value={description}
@@ -225,12 +264,16 @@ export function ProductEditorPage() {
                     className={inputClass}
                   />
                 </div>
-                
+
                 {/* Admin/Internal Settings placed here so they aren't totally lost, but styled cleanly */}
                 <div className="flex flex-col gap-4 mt-6 pt-6 border-t border-border border-dashed">
-                  <div className="text-xs uppercase tracking-widest text-muted font-bold mb-2">Internal Info</div>
+                  <div className="text-xs uppercase tracking-widest text-muted font-bold mb-2">
+                    Internal Info
+                  </div>
                   <div>
-                    <label className="block text-sm font-semibold text-ink mb-1">POS Terminal</label>
+                    <label className="block text-sm font-semibold text-ink mb-1">
+                      POS Terminal
+                    </label>
                     <select
                       disabled={!isAdmin || !isCreate}
                       value={posConfigId}
@@ -238,7 +281,9 @@ export function ProductEditorPage() {
                       className={selectClass + " text-sm"}
                     >
                       {posConfigs.map((pos) => (
-                        <option key={pos.id} value={pos.id}>{pos.name}</option>
+                        <option key={pos.id} value={pos.id}>
+                          {pos.name}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -248,7 +293,7 @@ export function ProductEditorPage() {
                       disabled={!isAdmin}
                       checked={active}
                       onChange={(event) => setActive(event.target.checked)}
-                      className="rounded border-border text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
+                      className="themed-checkbox"
                     />
                     Active Product
                   </label>
@@ -259,7 +304,9 @@ export function ProductEditorPage() {
               <div className="flex flex-col gap-8">
                 <div className="flex items-end gap-4">
                   <div className="flex-1">
-                    <label className="block text-sm font-semibold text-ink mb-1">Prices</label>
+                    <label className="block text-sm font-semibold text-ink mb-1">
+                      Prices
+                    </label>
                     <div className="flex items-baseline">
                       <span className="text-muted mr-1">$</span>
                       <input
@@ -267,7 +314,13 @@ export function ProductEditorPage() {
                         step="0.01"
                         disabled={!isAdmin}
                         value={price}
-                        onChange={(event) => setPrice(event.target.value === "" ? "" : Number(event.target.value))}
+                        onChange={(event) =>
+                          setPrice(
+                            event.target.value === ""
+                              ? ""
+                              : Number(event.target.value),
+                          )
+                        }
                         className={inputClass}
                       />
                     </div>
@@ -279,13 +332,19 @@ export function ProductEditorPage() {
                       onChange={(event) => {
                         const newUom = event.target.value as Product["uom"];
                         setUom(newUom);
-                        setVariants(prev => prev.map(v => ({...v, unit: newUom})));
+                        setVariants((prev) =>
+                          prev.map((v) => ({ ...v, unit: newUom })),
+                        );
                       }}
                       className={selectClass + " font-medium uppercase"}
                     >
                       {units.map((unit) => (
                         <option key={unit} value={unit}>
-                          {unit === "unit" ? "Unit" : unit === "kg" ? "K.G" : unit}
+                          {unit === "unit"
+                            ? "Unit"
+                            : unit === "kg"
+                              ? "K.G"
+                              : unit}
                         </option>
                       ))}
                     </select>
@@ -293,14 +352,18 @@ export function ProductEditorPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-ink mb-1">Tax</label>
+                  <label className="block text-sm font-semibold text-ink mb-1">
+                    Tax
+                  </label>
                   <select
                     disabled={!isAdmin}
                     value={taxRateId}
                     onChange={(event) => setTaxRateId(event.target.value)}
                     className={selectClass}
                   >
-                    <option value="" disabled>Select tax</option>
+                    <option value="" disabled>
+                      Select tax
+                    </option>
                     {taxRates.map((tax) => (
                       <option key={tax.id} value={tax.id}>
                         {tax.label}
@@ -324,13 +387,22 @@ export function ProductEditorPage() {
               </div>
 
               {variants.map((variant, index) => (
-                <div key={variant.id || `new-${index}`} className="grid grid-cols-12 gap-4 items-center group px-1">
+                <div
+                  key={variant.id || `new-${index}`}
+                  className="grid grid-cols-12 gap-4 items-center group px-1"
+                >
                   <div className="col-span-3">
                     <input
                       disabled={!isAdmin}
                       value={variant.attributeName}
                       onChange={(event) =>
-                        setVariants((prev) => prev.map((row, rowIndex) => (rowIndex === index ? { ...row, attributeName: event.target.value } : row)))
+                        setVariants((prev) =>
+                          prev.map((row, rowIndex) =>
+                            rowIndex === index
+                              ? { ...row, attributeName: event.target.value }
+                              : row,
+                          ),
+                        )
                       }
                       placeholder="e.g Pack"
                       className={inputClass}
@@ -341,7 +413,13 @@ export function ProductEditorPage() {
                       disabled={!isAdmin}
                       value={variant.value}
                       onChange={(event) =>
-                        setVariants((prev) => prev.map((row, rowIndex) => (rowIndex === index ? { ...row, value: event.target.value } : row)))
+                        setVariants((prev) =>
+                          prev.map((row, rowIndex) =>
+                            rowIndex === index
+                              ? { ...row, value: event.target.value }
+                              : row,
+                          ),
+                        )
                       }
                       placeholder="e.g 6"
                       className={inputClass}
@@ -354,21 +432,33 @@ export function ProductEditorPage() {
                       onChange={(event) =>
                         setVariants((prev) =>
                           prev.map((row, rowIndex) =>
-                            rowIndex === index ? { ...row, unit: event.target.value as ProductVariant["unit"] } : row
-                          )
+                            rowIndex === index
+                              ? {
+                                  ...row,
+                                  unit: event.target
+                                    .value as ProductVariant["unit"],
+                                }
+                              : row,
+                          ),
                         )
                       }
                       className={selectClass + " capitalize"}
                     >
                       {units.map((unit) => (
                         <option key={unit} value={unit}>
-                          {unit === "unit" ? "Unit" : unit === "kg" ? "K.G" : unit}
+                          {unit === "unit"
+                            ? "Unit"
+                            : unit === "kg"
+                              ? "K.G"
+                              : unit}
                         </option>
                       ))}
                     </select>
                   </div>
                   <div className="col-span-2 relative">
-                    <span className="absolute left-0 top-[10px] text-muted text-sm">$</span>
+                    <span className="absolute left-0 top-2.5 text-muted text-sm">
+                      $
+                    </span>
                     <input
                       type="number"
                       step="0.01"
@@ -377,8 +467,13 @@ export function ProductEditorPage() {
                       onChange={(event) =>
                         setVariants((prev) =>
                           prev.map((row, rowIndex) =>
-                            rowIndex === index ? { ...row, extraPrice: Number(event.target.value) } : row
-                          )
+                            rowIndex === index
+                              ? {
+                                  ...row,
+                                  extraPrice: Number(event.target.value),
+                                }
+                              : row,
+                          ),
                         )
                       }
                       className={inputClass + " pl-3"}
@@ -388,12 +483,28 @@ export function ProductEditorPage() {
                     {isAdmin && (
                       <button
                         type="button"
-                        onClick={() => setVariants((prev) => prev.filter((_, rowIndex) => rowIndex !== index))}
+                        onClick={() =>
+                          setVariants((prev) =>
+                            prev.filter((_, rowIndex) => rowIndex !== index),
+                          )
+                        }
                         className="text-muted hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-2"
                         title="Delete Variant"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M3 6h18"></path>
+                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
                         </svg>
                       </button>
                     )}
@@ -407,9 +518,17 @@ export function ProductEditorPage() {
                   <button
                     type="button"
                     onClick={() =>
-                      setVariants((prev) => [...prev, { attributeName: "", value: "", unit: uom, extraPrice: 0 }])
+                      setVariants((prev) => [
+                        ...prev,
+                        {
+                          attributeName: "",
+                          value: "",
+                          unit: uom,
+                          extraPrice: 0,
+                        },
+                      ])
                     }
-                    className="text-blue-600 hover:text-blue-800 font-medium px-1"
+                    className="px-1 font-medium text-accent transition-colors hover:text-accent-hover"
                   >
                     New
                   </button>
@@ -422,10 +541,10 @@ export function ProductEditorPage() {
         {/* Global Save Button */}
         {isAdmin && (
           <div className="pt-6 border-t border-border flex justify-end">
-             <button
+            <button
               disabled={!canSubmit}
               type="submit"
-              className="rounded-lg bg-[var(--color-accent)] px-8 py-2 font-medium text-white disabled:opacity-50 hover:bg-orange-800 transition-colors"
+              className="rounded-lg bg-accent px-8 py-2 font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
             >
               Save Product
             </button>

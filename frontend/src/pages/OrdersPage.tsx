@@ -14,7 +14,9 @@ function OrderDetailModal({
   order: Order;
   onClose: () => void;
 }) {
-  const [activeTab, setActiveTab] = useState<"product" | "extrainfo">("product");
+  const [activeTab, setActiveTab] = useState<"product" | "extrainfo">(
+    "product",
+  );
 
   const lines: OrderLine[] = order.order_lines || [];
 
@@ -22,8 +24,8 @@ function OrderDetailModal({
     order.status === "paid"
       ? { bg: "bg-green-500/10 border-green-500 text-green-500" }
       : order.status === "draft"
-      ? { bg: "bg-amber-500/10 border-amber-500 text-amber-500" }
-      : { bg: "bg-muted/10 border-border text-muted" };
+        ? { bg: "bg-amber-500/10 border-amber-500 text-amber-500" }
+        : { bg: "bg-muted/10 border-border text-muted" };
 
   return (
     <div
@@ -38,7 +40,9 @@ function OrderDetailModal({
         {/* Header */}
         <div className="flex items-start justify-between p-5 border-b border-border">
           <div>
-            <h2 className="text-lg font-bold text-ink">Order #{order.order_number}</h2>
+            <h2 className="text-lg font-bold text-ink">
+              Order #{order.order_number}
+            </h2>
             <p className="text-xs text-muted mt-0.5">
               {new Date(order.created_at).toLocaleDateString("en-IN", {
                 day: "numeric",
@@ -66,11 +70,17 @@ function OrderDetailModal({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border">
           {[
             { label: "Order No", value: order.order_number },
-            { label: "Date", value: new Date(order.created_at).toLocaleDateString("en-IN") },
+            {
+              label: "Date",
+              value: new Date(order.created_at).toLocaleDateString("en-IN"),
+            },
             {
               label: "Session",
               value: order.pos_sessions
-                ? new Date(order.pos_sessions.opened_at).toLocaleDateString("en-IN", { month: "short", day: "numeric" })
+                ? new Date(order.pos_sessions.opened_at).toLocaleDateString(
+                    "en-IN",
+                    { month: "short", day: "numeric" },
+                  )
                 : "—",
             },
             { label: "Customer", value: order.customers?.name || "Walk-in" },
@@ -107,8 +117,19 @@ function OrderDetailModal({
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-bg/50">
-                  {["Product", "QTY", "Amount", "Tax", "UOM", "Sub-Total", "Total"].map((h) => (
-                    <th key={h} className="px-4 py-2.5 text-left text-[11px] font-semibold text-muted uppercase tracking-wider">
+                  {[
+                    "Product",
+                    "QTY",
+                    "Amount",
+                    "Tax",
+                    "UOM",
+                    "Sub-Total",
+                    "Total",
+                  ].map((h) => (
+                    <th
+                      key={h}
+                      className="px-4 py-2.5 text-left text-[11px] font-semibold text-muted uppercase tracking-wider"
+                    >
                       {h}
                     </th>
                   ))}
@@ -117,20 +138,38 @@ function OrderDetailModal({
               <tbody>
                 {lines.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-8 text-center text-muted text-xs">
+                    <td
+                      colSpan={7}
+                      className="px-4 py-8 text-center text-muted text-xs"
+                    >
                       No items
                     </td>
                   </tr>
                 ) : (
                   lines.map((line) => (
-                    <tr key={line.id} className="border-b border-border/50 hover:bg-bg/50 transition-colors">
-                      <td className="px-4 py-2.5 font-medium text-accent">{line.product_name} →</td>
+                    <tr
+                      key={line.id}
+                      className="border-b border-border/50 hover:bg-bg/50 transition-colors"
+                    >
+                      <td className="px-4 py-2.5 font-medium text-accent">
+                        {line.product_name} →
+                      </td>
                       <td className="px-4 py-2.5 text-ink">{line.qty}</td>
-                      <td className="px-4 py-2.5 text-ink">${Number(line.unit_price).toFixed(2)}</td>
-                      <td className="px-4 py-2.5 text-muted">{Number(line.tax_rate).toFixed(0)}%</td>
-                      <td className="px-4 py-2.5 text-muted capitalize">{line.uom}</td>
-                      <td className="px-4 py-2.5 text-ink">${Number(line.subtotal).toFixed(2)}</td>
-                      <td className="px-4 py-2.5 text-ink font-medium">${Number(line.total).toFixed(2)}</td>
+                      <td className="px-4 py-2.5 text-ink">
+                        ${Number(line.unit_price).toFixed(2)}
+                      </td>
+                      <td className="px-4 py-2.5 text-muted">
+                        {Number(line.tax_rate).toFixed(0)}%
+                      </td>
+                      <td className="px-4 py-2.5 text-muted capitalize">
+                        {line.uom}
+                      </td>
+                      <td className="px-4 py-2.5 text-ink">
+                        ${Number(line.subtotal).toFixed(2)}
+                      </td>
+                      <td className="px-4 py-2.5 text-ink font-medium">
+                        ${Number(line.total).toFixed(2)}
+                      </td>
                     </tr>
                   ))
                 )}
@@ -140,16 +179,22 @@ function OrderDetailModal({
             <div className="p-5 space-y-3 text-sm">
               <div className="flex justify-between py-2 border-b border-border/50">
                 <span className="text-muted">Source</span>
-                <span className="text-ink uppercase text-xs font-semibold">{order.source}</span>
+                <span className="text-ink uppercase text-xs font-semibold">
+                  {order.source}
+                </span>
               </div>
               <div className="flex justify-between py-2 border-b border-border/50">
                 <span className="text-muted">Invoice</span>
-                <span className="text-ink">{order.is_invoice ? "Yes" : "No"}</span>
+                <span className="text-ink">
+                  {order.is_invoice ? "Yes" : "No"}
+                </span>
               </div>
               {order.notes && (
                 <div className="flex justify-between py-2 border-b border-border/50">
                   <span className="text-muted">Notes</span>
-                  <span className="text-ink max-w-xs text-right">{order.notes}</span>
+                  <span className="text-ink max-w-xs text-right">
+                    {order.notes}
+                  </span>
                 </div>
               )}
             </div>
@@ -161,15 +206,21 @@ function OrderDetailModal({
           <div className="max-w-xs ml-auto space-y-1.5 text-sm">
             <div className="flex justify-between">
               <span className="text-muted">Total w/t Tax</span>
-              <span className="text-ink font-medium">${Number(order.subtotal).toFixed(2)}</span>
+              <span className="text-ink font-medium">
+                ${Number(order.subtotal).toFixed(2)}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted">Tax</span>
-              <span className="text-ink">${Number(order.tax_total).toFixed(2)}</span>
+              <span className="text-ink">
+                ${Number(order.tax_total).toFixed(2)}
+              </span>
             </div>
             <div className="flex justify-between pt-2 border-t border-border">
               <span className="font-bold text-ink">Final Total</span>
-              <span className="font-bold text-accent text-base">${Number(order.total).toFixed(2)}</span>
+              <span className="font-bold text-accent text-base">
+                ${Number(order.total).toFixed(2)}
+              </span>
             </div>
           </div>
         </div>
@@ -194,7 +245,10 @@ export function OrdersPage() {
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (actionMenuRef.current && !actionMenuRef.current.contains(event.target as Node)) {
+      if (
+        actionMenuRef.current &&
+        !actionMenuRef.current.contains(event.target as Node)
+      ) {
         setActionMenuOpen(false);
       }
     }
@@ -217,7 +271,9 @@ export function OrdersPage() {
 
   // Auto-refresh every 10 seconds
   useEffect(() => {
-    const interval = setInterval(() => { void load(); }, 10_000);
+    const interval = setInterval(() => {
+      void load();
+    }, 10_000);
     return () => clearInterval(interval);
   }, [accessToken]);
 
@@ -226,7 +282,9 @@ export function OrdersPage() {
   }, [accessToken]);
 
   const toggleSelect = (id: string) => {
-    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+    );
   };
 
   const toggleSelectAll = () => {
@@ -238,7 +296,7 @@ export function OrdersPage() {
   };
 
   const draftSelectedIds = selectedIds.filter(
-    (id) => orders.find((o) => o.id === id)?.status === "draft"
+    (id) => orders.find((o) => o.id === id)?.status === "draft",
   );
 
   const bulkArchive = async () => {
@@ -249,8 +307,8 @@ export function OrdersPage() {
         fetch(`${appEnv.apiBaseUrl}/orders/${id}/archive`, {
           method: "PATCH",
           headers: { Authorization: `Bearer ${accessToken}` },
-        })
-      )
+        }),
+      ),
     );
     setSelectedIds([]);
     void load();
@@ -264,8 +322,8 @@ export function OrdersPage() {
         fetch(`${appEnv.apiBaseUrl}/orders/${id}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${accessToken}` },
-        })
-      )
+        }),
+      ),
     );
     setSelectedIds([]);
     void load();
@@ -274,7 +332,10 @@ export function OrdersPage() {
   return (
     <section className="max-w-6xl">
       {selectedOrder && (
-        <OrderDetailModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+        <OrderDetailModal
+          order={selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+        />
       )}
 
       <div className="flex items-center justify-between mb-6 pb-3 border-b border-border">
@@ -295,7 +356,10 @@ export function OrdersPage() {
                 className="flex items-center gap-2 text-sm font-semibold bg-panel text-ink px-3 py-1.5 rounded-lg border border-border hover:bg-bg transition-colors"
               >
                 <span>⚙</span> Action
-                <ChevronDown size={12} className={`transition-transform ${actionMenuOpen ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  size={12}
+                  className={`transition-transform ${actionMenuOpen ? "rotate-180" : ""}`}
+                />
               </button>
               {actionMenuOpen && (
                 <div className="absolute right-0 top-full mt-1 w-36 bg-panel border border-border rounded-xl shadow-lg z-50 py-1">
@@ -331,7 +395,9 @@ export function OrdersPage() {
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center py-20 text-muted text-sm">Loading orders…</div>
+        <div className="flex items-center justify-center py-20 text-muted text-sm">
+          Loading orders…
+        </div>
       ) : (
         <div className="rounded-xl border border-border overflow-hidden">
           <table className="min-w-full text-sm text-left">
@@ -340,17 +406,31 @@ export function OrdersPage() {
                 <th className="px-4 py-3">
                   <input
                     type="checkbox"
-                    checked={selectedIds.length === orders.length && orders.length > 0}
+                    checked={
+                      selectedIds.length === orders.length && orders.length > 0
+                    }
                     onChange={toggleSelectAll}
-                    className="rounded border-border accent-[var(--color-accent)]"
+                    className="themed-checkbox"
                   />
                 </th>
-                <th className="px-4 py-3 font-semibold text-muted text-xs uppercase tracking-wider">Order No</th>
-                <th className="px-4 py-3 font-semibold text-muted text-xs uppercase tracking-wider">Session</th>
-                <th className="px-4 py-3 font-semibold text-muted text-xs uppercase tracking-wider">Date</th>
-                <th className="px-4 py-3 font-semibold text-muted text-xs uppercase tracking-wider">Total</th>
-                <th className="px-4 py-3 font-semibold text-muted text-xs uppercase tracking-wider">Customer</th>
-                <th className="px-4 py-3 font-semibold text-muted text-xs uppercase tracking-wider">Status</th>
+                <th className="px-4 py-3 font-semibold text-muted text-xs uppercase tracking-wider">
+                  Order No
+                </th>
+                <th className="px-4 py-3 font-semibold text-muted text-xs uppercase tracking-wider">
+                  Session
+                </th>
+                <th className="px-4 py-3 font-semibold text-muted text-xs uppercase tracking-wider">
+                  Date
+                </th>
+                <th className="px-4 py-3 font-semibold text-muted text-xs uppercase tracking-wider">
+                  Total
+                </th>
+                <th className="px-4 py-3 font-semibold text-muted text-xs uppercase tracking-wider">
+                  Customer
+                </th>
+                <th className="px-4 py-3 font-semibold text-muted text-xs uppercase tracking-wider">
+                  Status
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -360,18 +440,26 @@ export function OrdersPage() {
                   className="border-b border-border hover:bg-panel transition-colors cursor-pointer"
                   onClick={() => setSelectedOrder(o)}
                 >
-                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                  <td
+                    className="px-4 py-3"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <input
                       type="checkbox"
                       checked={selectedIds.includes(o.id)}
                       onChange={() => toggleSelect(o.id)}
-                      className="rounded border-border accent-[var(--color-accent)]"
+                      className="themed-checkbox"
                     />
                   </td>
-                  <td className="px-4 py-3 font-medium text-ink">{o.order_number}</td>
+                  <td className="px-4 py-3 font-medium text-ink">
+                    {o.order_number}
+                  </td>
                   <td className="px-4 py-3 text-muted text-xs">
                     {o.pos_sessions
-                      ? new Date(o.pos_sessions.opened_at).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "2-digit" })
+                      ? new Date(o.pos_sessions.opened_at).toLocaleDateString(
+                          "en-IN",
+                          { month: "short", day: "numeric", year: "2-digit" },
+                        )
                       : "—"}
                   </td>
                   <td className="px-4 py-3 text-muted">
@@ -381,19 +469,23 @@ export function OrdersPage() {
                       year: "numeric",
                       hour: "numeric",
                       minute: "2-digit",
-                      second: "2-digit"
+                      second: "2-digit",
                     })}
                   </td>
-                  <td className="px-4 py-3 font-semibold text-ink">${Number(o.total).toFixed(2)}</td>
-                  <td className="px-4 py-3 text-muted">{o.customers?.name || "Walk-in"}</td>
+                  <td className="px-4 py-3 font-semibold text-ink">
+                    ${Number(o.total).toFixed(2)}
+                  </td>
+                  <td className="px-4 py-3 text-muted">
+                    {o.customers?.name || "Walk-in"}
+                  </td>
                   <td className="px-4 py-3">
                     <span
                       className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border capitalize ${
                         o.status === "paid"
                           ? "bg-green-500/10 border-green-500/40 text-green-500"
                           : o.status === "draft"
-                          ? "bg-amber-500/10 border-amber-500/40 text-amber-500"
-                          : "bg-muted/10 border-border text-muted"
+                            ? "bg-amber-500/10 border-amber-500/40 text-amber-500"
+                            : "bg-muted/10 border-border text-muted"
                       }`}
                     >
                       {o.status}
@@ -403,7 +495,10 @@ export function OrdersPage() {
               ))}
               {orders.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-16 text-center text-muted text-sm">
+                  <td
+                    colSpan={7}
+                    className="px-4 py-16 text-center text-muted text-sm"
+                  >
                     No orders found for this session.
                   </td>
                 </tr>
