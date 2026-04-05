@@ -184,6 +184,10 @@ export function OrdersPage() {
   const { accessToken } = useAuth();
 
   const [orders, setOrders] = useState<Order[]>([]);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const limit = 50;
+  
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -206,8 +210,9 @@ export function OrdersPage() {
     if (!accessToken) return;
     setLoading(true);
     try {
-      const res = await listOrders(accessToken);
+      const res = await listOrders(accessToken, currentPage, limit);
       setOrders(res.orders);
+      setTotalOrders(res.total);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load orders");
     } finally {
@@ -215,15 +220,16 @@ export function OrdersPage() {
     }
   };
 
-  // Auto-refresh every 10 seconds
+  // Auto-refresh every 15 seconds
   useEffect(() => {
-    const interval = setInterval(() => { void load(); }, 10_000);
+    const interval = setInterval(() => { void load(); }, 15_000);
     return () => clearInterval(interval);
-  }, [accessToken]);
+  }, [accessToken, currentPage]);
 
   useEffect(() => {
     void load();
-  }, [accessToken]);
+    setSelectedIds([]); // clear selection across paginations 
+  }, [accessToken, currentPage]);
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
@@ -410,6 +416,32 @@ export function OrdersPage() {
               )}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {!loading && totalOrders > 0 && (
+        <div className="flex items-center justify-between border border-border bg-panel px-5 py-3 rounded-xl mt-4 shadow-sm">
+          <span className="text-sm text-muted">
+            Viewing <span className="font-semibold text-ink">{(currentPage - 1) * limit + 1}</span> to <span className="font-semibold text-ink">{Math.min(currentPage * limit, totalOrders)}</span> of <span className="font-bold text-ink">{totalOrders}</span> orders
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              className="px-4 py-1.5 text-sm font-semibold rounded-lg bg-bg border border-border text-ink hover:text-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Previous
+            </button>
+            <span className="px-3 text-xs font-bold text-muted uppercase tracking-widest">Page {currentPage}</span>
+            <button
+              disabled={currentPage * limit >= totalOrders}
+              onClick={() => setCurrentPage(p => p + 1)}
+              className="px-4 py-1.5 text-sm font-semibold rounded-lg bg-bg border border-border text-ink hover:text-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
     </section>
