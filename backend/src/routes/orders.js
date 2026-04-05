@@ -7,7 +7,12 @@ router.use(requireAuth);
 
 router.get("/", async (req, res) => {
   try {
-    const { data, error } = await supabaseAdmin
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+    const start = (page - 1) * limit;
+    const end = start + limit - 1;
+
+    const { data, error, count } = await supabaseAdmin
       .from("orders")
       .select(`
         *,
@@ -16,12 +21,12 @@ router.get("/", async (req, res) => {
         order_lines (
           id, product_name, qty, unit_price, tax_rate, uom, discount, subtotal, total, notes
         )
-      `)
+      `, { count: "exact" })
       .order("created_at", { ascending: false })
-      .limit(50);
+      .range(start, end);
 
     if (error) throw error;
-    res.json({ orders: data || [] });
+    res.json({ orders: data || [], total: count || 0, page, limit });
   } catch (error) {
     res.status(500).json({ message: error.message || "Failed to fetch orders" });
   }

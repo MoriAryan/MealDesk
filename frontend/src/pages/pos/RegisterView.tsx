@@ -86,7 +86,7 @@ export function RegisterView({
       {/* Left Menu (Products) */}
       <div className="flex-1 flex flex-col relative pr-2 min-w-0 overflow-hidden">
          {/* Categories Bar */}
-         <div className="flex bg-bg pt-6 pb-4 px-6 gap-3 overflow-x-auto shrink-0 z-10 custom-scrollbar-hide items-center">
+         <div className="flex bg-bg pt-6 pb-4 px-6 gap-3 overflow-x-auto shrink-0 z-10 items-center" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
             <button 
               onClick={() => setActiveCategoryId("ALL")}
               className={`whitespace-nowrap px-5 py-2.5 rounded-xl font-semibold text-sm transition-all focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 ${
