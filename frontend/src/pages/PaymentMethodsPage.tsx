@@ -169,7 +169,7 @@ export function PaymentMethodsPage() {
           {isAdmin && (
             <button
               type="button"
-              className="text-sm font-semibold px-4 py-1.5 rounded bg-panel text-ink hover:bg-[var(--color-border)] transition-colors opacity-50 cursor-not-allowed"
+              className="text-sm font-semibold px-4 py-1.5 rounded bg-panel text-ink hover:bg-border transition-colors opacity-50 cursor-not-allowed"
               title="Payment methods are predefined. You cannot add new ones."
             >
               New
@@ -187,7 +187,7 @@ export function PaymentMethodsPage() {
             <div className="relative" ref={actionMenuRef}>
               <button
                 onClick={() => setActionMenuOpen(!actionMenuOpen)}
-                className="text-sm font-semibold bg-panel text-ink px-3 py-1 rounded border border-border hover:bg-[var(--color-border)] flex items-center gap-2"
+                className="text-sm font-semibold bg-panel text-ink px-3 py-1 rounded border border-border hover:bg-border flex items-center gap-2"
               >
                 <span>⚙</span> Action
               </button>
@@ -287,7 +287,7 @@ export function PaymentMethodsPage() {
                         disabled={!isAdmin}
                         onChange={(event) => setUpiId(event.target.value)}
                         placeholder="merchant@upi"
-                        className="bg-transparent border-0 border-b border-border focus:border-[var(--color-accent)] px-1 py-1 w-full max-w-[200px] text-ink focus:ring-0 text-sm"
+                        className="bg-transparent border-0 border-b border-border focus:border-accent px-1 py-1 w-full max-w-50 text-ink focus:ring-0 text-sm"
                       />
                     ) : (
                       <span className="text-muted">-</span>
