@@ -1,28 +1,32 @@
 import { useState, useRef, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
+import { useAuth } from "../auth/AuthProvider";
 
 type DropdownItem = {
   to: string;
   label: string;
+  adminOnly?: boolean;
 };
 
 type MenuConfig = {
   title: string;
+  adminOnly?: boolean;
   items: DropdownItem[];
 };
 
-const menus: MenuConfig[] = [
+const defaultMenus: MenuConfig[] = [
   {
     title: "Orders",
     items: [
       { to: "/orders", label: "Orders" },
       { to: "/payments", label: "Payments" },
-      { to: "/customers", label: "Customer" },
+      { to: "/customers", label: "Customer", adminOnly: true },
     ],
   },
   {
     title: "Products",
+    adminOnly: true,
     items: [
       { to: "/products", label: "Products" },
       { to: "/categories", label: "Category" },
@@ -30,6 +34,7 @@ const menus: MenuConfig[] = [
   },
   {
     title: "Dashboard",
+    adminOnly: true,
     items: [
       { to: "/dashboard", label: "Dashboard" },
     ],
@@ -37,6 +42,8 @@ const menus: MenuConfig[] = [
 ];
 
 export function TopNav() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const navRef = useRef<HTMLElement>(null);
 
@@ -50,9 +57,16 @@ export function TopNav() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const visibleMenus = defaultMenus
+    .filter(menu => !menu.adminOnly || isAdmin)
+    .map(menu => ({
+      ...menu,
+      items: menu.items.filter(item => !item.adminOnly || isAdmin)
+    }));
+
   return (
     <nav ref={navRef} className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-8">
-      {menus.map((menu) => (
+      {visibleMenus.map((menu) => (
         <div key={menu.title} className="relative group">
           <button
             onClick={() => setOpenMenu(openMenu === menu.title ? null : menu.title)}

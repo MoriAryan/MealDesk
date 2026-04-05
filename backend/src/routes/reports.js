@@ -1,16 +1,15 @@
-const express = require("express");
-const { supabaseAdmin } = require("../config/supabase");
-const { requireAuth } = require("../middleware/auth");
+import express from "express";
+import { supabaseAdmin } from "../config/supabase.js";
+import { requireAuth, requireRoles } from "../middleware/auth.js";
 
 const router = express.Router();
 router.use(requireAuth);
 
 // GET /api/reports/summary?from=&to=&pos_config_id=
-router.get("/summary", async (req, res) => {
+router.get("/summary", requireRoles("admin"), async (req, res) => {
   try {
     const { from, to, pos_config_id } = req.query;
 
-    // --- Current period orders ---
     let query = supabaseAdmin
       .from("orders")
       .select("id, total, subtotal, tax_total, status, source, created_at, pos_config_id")
@@ -23,7 +22,6 @@ router.get("/summary", async (req, res) => {
     const { data: orders, error } = await query;
     if (error) throw error;
 
-    // --- Previous period orders (for % change) ---
     let prevOrders = [];
     if (from && to) {
       const fromDate = new Date(from);
@@ -55,13 +53,20 @@ router.get("/summary", async (req, res) => {
     const pctOrders  = prevCount > 0 ? ((orders.length - prevCount) / prevCount) * 100 : null;
     const pctAvg     = prevAvg > 0 ? ((avgOrder - prevAvg) / prevAvg) * 100 : null;
 
-    // --- Order lines for top products & categories ---
-    const { data: lines, error: linesErr } = await supabaseAdmin
-      .from("order_lines")
-      .select("product_name, qty, subtotal, product_id, products(category_id, categories(name, color))")
-      .in("order_id", orders.map(o => o.id));
+    let lines = [];
+    const chunkSize = 25; // Supabase strict URL length limit safety
+    const orderIds = orders.map(o => o.id);
+    
+    for (let i = 0; i < orderIds.length; i += chunkSize) {
+      const chunk = orderIds.slice(i, i + chunkSize);
+      const { data: chunkLines, error: chunkErr } = await supabaseAdmin
+        .from("order_lines")
+        .select("product_name, qty, subtotal, product_id, products(category_id, categories(name, color))")
+        .in("order_id", chunk);
 
-    if (linesErr) throw linesErr;
+      if (chunkErr) throw chunkErr;
+      if (chunkLines) lines.push(...chunkLines);
+    }
 
     const productMap = {};
     const categoryMap = {};
@@ -89,7 +94,6 @@ router.get("/summary", async (req, res) => {
       .sort((a, b) => b[1].revenue - a[1].revenue)
       .map(([name, stats]) => ({ name, ...stats }));
 
-    // --- Sales trend (group by day, last 14 days) ---
     const salesByDay = {};
     for (const o of orders) {
       const day = o.created_at.slice(0, 10);
@@ -101,7 +105,6 @@ router.get("/summary", async (req, res) => {
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([date, d]) => ({ date, revenue: d.revenue, count: d.count }));
 
-    // --- Recent orders (top 5) ---
     const recentOrders = [...orders]
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       .slice(0, 5)
@@ -125,4 +128,4 @@ router.get("/summary", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

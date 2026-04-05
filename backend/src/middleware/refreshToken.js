@@ -1,10 +1,10 @@
-const crypto = require("crypto");
+import crypto from "crypto";
 
-function hashRefreshToken(token) {
+export function hashRefreshToken(token) {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-function extractRefreshToken(req) {
+export function extractRefreshToken(req) {
   if (req.cookies && req.cookies.refresh_token) {
     return req.cookies.refresh_token;
   }
@@ -15,8 +15,3 @@ function extractRefreshToken(req) {
 
   return null;
 }
-
-module.exports = {
-  hashRefreshToken,
-  extractRefreshToken,
-};

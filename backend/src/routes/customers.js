@@ -1,12 +1,12 @@
-const express = require("express");
-const { supabaseAdmin } = require("../config/supabase");
-const { requireAuth } = require("../middleware/auth");
+import express from "express";
+import { supabaseAdmin } from "../config/supabase.js";
+import { requireAuth, requireRoles } from "../middleware/auth.js";
 
 const router = express.Router();
-
 router.use(requireAuth);
+router.use(requireRoles("admin"));
 
-// GET /api/customers — list all customers with total sales
+// GET /api/customers -- list all customers
 router.get("/", async (req, res) => {
   try {
     const { data: customers, error } = await supabaseAdmin
@@ -16,7 +16,6 @@ router.get("/", async (req, res) => {
 
     if (error) throw error;
 
-    // Fetch total sales per customer from paid orders
     const customerIds = (customers || []).map((c) => c.id);
     let totalSalesMap = {};
 
@@ -44,7 +43,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// POST /api/customers — create a new customer
 router.post("/", async (req, res) => {
   try {
     const { name, email, phone, street1, street2, city, state, country } = req.body;
@@ -75,4 +73,4 @@ router.post("/", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

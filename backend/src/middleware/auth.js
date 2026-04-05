@@ -1,7 +1,7 @@
-const jwt = require("jsonwebtoken");
-const env = require("../config/env");
+import jwt from "jsonwebtoken";
+import env from "../config/env.js";
 
-function requireAuth(req, res, next) {
+export function requireAuth(req, res, next) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -24,7 +24,7 @@ function requireAuth(req, res, next) {
   }
 }
 
-function requireRoles(...allowedRoles) {
+export function requireRoles(...allowedRoles) {
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ message: "Unauthenticated" });
@@ -37,8 +37,3 @@ function requireRoles(...allowedRoles) {
     return next();
   };
 }
-
-module.exports = {
-  requireAuth,
-  requireRoles,
-};

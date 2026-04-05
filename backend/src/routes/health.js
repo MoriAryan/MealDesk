@@ -1,5 +1,5 @@
-const express = require("express");
-const { supabaseAdmin } = require("../config/supabase");
+import express from "express";
+import { supabaseAdmin } from "../config/supabase.js";
 
 const router = express.Router();
 
@@ -24,4 +24,4 @@ router.get("/health", async (_req, res) => {
   return res.json(response);
 });
 
-module.exports = router;
+export default router;

@@ -1,6 +1,6 @@
-const express = require("express");
-const { supabaseAdmin } = require("../config/supabase");
-const { requireAuth, requireRoles } = require("../middleware/auth");
+import express from "express";
+import { supabaseAdmin } from "../config/supabase.js";
+import { requireAuth, requireRoles } from "../middleware/auth.js";
 
 const router = express.Router();
 router.use(requireAuth);
@@ -64,4 +64,4 @@ router.delete("/:id", requireRoles("admin"), async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

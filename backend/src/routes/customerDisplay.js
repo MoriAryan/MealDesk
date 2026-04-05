@@ -1,11 +1,10 @@
-const express = require("express");
-const { supabaseAdmin } = require("../config/supabase");
-const { requireAuth } = require("../middleware/auth");
+import express from "express";
+import { supabaseAdmin } from "../config/supabase.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const router = express.Router();
 router.use(requireAuth);
 
-// Returns the most recent draft or paid order with its lines for the customer display
 router.get("/latest", async (req, res) => {
   try {
     const { data, error } = await supabaseAdmin
@@ -31,4 +30,4 @@ router.get("/latest", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

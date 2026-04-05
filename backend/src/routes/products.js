@@ -1,6 +1,6 @@
-const express = require("express");
-const { supabaseAdmin } = require("../config/supabase");
-const { requireAuth, requireRoles } = require("../middleware/auth");
+import express from "express";
+import { supabaseAdmin } from "../config/supabase.js";
+import { requireAuth, requireRoles } from "../middleware/auth.js";
 
 const router = express.Router();
 router.use(requireAuth);
@@ -20,7 +20,7 @@ router.get("/", async (req, res) => {
 
     const { data, error } = await query;
     if (error) throw error;
-    
+
     res.json({ products: data || [] });
   } catch (error) {
     res.status(500).json({ message: error.message || "Failed to fetch products" });
@@ -176,4 +176,4 @@ router.delete("/bulk-delete", requireRoles("admin"), async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

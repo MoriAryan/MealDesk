@@ -1,7 +1,7 @@
-const jwt = require("jsonwebtoken");
-const env = require("../config/env");
+import jwt from "jsonwebtoken";
+import env from "../config/env.js";
 
-function buildAccessToken(user) {
+export function buildAccessToken(user) {
   return jwt.sign(
     {
       role: user.role,
@@ -16,7 +16,7 @@ function buildAccessToken(user) {
   );
 }
 
-function buildRefreshToken(user) {
+export function buildRefreshToken(user) {
   return jwt.sign(
     {
       type: "refresh",
@@ -28,8 +28,3 @@ function buildRefreshToken(user) {
     }
   );
 }
-
-module.exports = {
-  buildAccessToken,
-  buildRefreshToken,
-};

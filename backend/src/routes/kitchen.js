@@ -1,10 +1,11 @@
-const express = require("express");
-const { supabaseAdmin } = require("../config/supabase");
-const { requireAuth, requireRoles } = require("../middleware/auth");
+import express from "express";
+import { supabaseAdmin } from "../config/supabase.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const router = express.Router();
 router.use(requireAuth);
 
+// GET /api/kitchen
 router.get("/", async (req, res) => {
   try {
     const { pos_config_id } = req.query;
@@ -53,16 +54,33 @@ router.put("/:id/stage", async (req, res) => {
 router.put("/:id/items/:itemId/prepared", async (req, res) => {
   try {
     const { prepared } = req.body;
+    const ticketId = req.params.id;
+
     const { data, error } = await supabaseAdmin
       .from("kitchen_ticket_items")
       .update({ prepared })
       .eq("id", req.params.itemId)
-      .eq("kitchen_ticket_id", req.params.id)
+      .eq("kitchen_ticket_id", ticketId)
       .select()
       .single();
 
     if (error) throw error;
-    res.json({ item: data });
+
+    // Auto-complete ticket if all items are prepared
+    const { data: allItems } = await supabaseAdmin
+      .from("kitchen_ticket_items")
+      .select("prepared")
+      .eq("kitchen_ticket_id", ticketId);
+
+    const allPrepared = allItems?.length > 0 && allItems.every(i => i.prepared);
+    if (allPrepared) {
+      await supabaseAdmin
+        .from("kitchen_tickets")
+        .update({ stage: "completed" })
+        .eq("id", ticketId);
+    }
+
+    res.json({ item: data, autoCompleted: allPrepared });
   } catch (error) {
     res.status(500).json({ message: error.message || "Failed to update item" });
   }
@@ -72,8 +90,7 @@ router.put("/:id/items/:itemId/prepared", async (req, res) => {
 router.post("/mock-ticket", async (req, res) => {
   try {
     let { posConfigId } = req.body;
-    
-    // Fallback to finding the first pos config for easy testing
+
     if (!posConfigId) {
       const { data: configs } = await supabaseAdmin.from("pos_config").select("id").limit(1);
       if (configs && configs.length > 0) posConfigId = configs[0].id;
@@ -86,7 +103,7 @@ router.post("/mock-ticket", async (req, res) => {
       .insert({
         order_number: orderNumber,
         pos_config_id: posConfigId,
-        status: "draft"
+        status: "draft",
       })
       .select()
       .single();
@@ -98,17 +115,16 @@ router.post("/mock-ticket", async (req, res) => {
         order_id: order.id,
         order_number: orderNumber,
         pos_config_id: posConfigId,
-        stage: "to_cook"
+        stage: "to_cook",
       })
       .select()
       .single();
     if (ticketError) throw ticketError;
 
-    // Shuffle products and grab 2 to 4 products for the ticket
     const { data: allProds } = await supabaseAdmin.from("products").select("*");
-    const numItems = Math.floor(Math.random() * 3) + 2; // 2 to 4 items
+    const numItems = Math.floor(Math.random() * 3) + 2;
     const prods = (allProds || []).sort(() => 0.5 - Math.random()).slice(0, numItems);
-    
+
     const lines = [];
     if (prods.length > 0) {
       for (const p of prods) {
@@ -119,7 +135,7 @@ router.post("/mock-ticket", async (req, res) => {
           unit_price: p.price,
           tax_rate: 5,
           uom: p.uom,
-          qty: Math.floor(Math.random() * 3) + 1
+          qty: Math.floor(Math.random() * 3) + 1,
         }).select().single();
         lines.push(line);
       }
@@ -132,7 +148,7 @@ router.post("/mock-ticket", async (req, res) => {
         order_line_id: l.id,
         product_name: l.product_name,
         qty: l.qty,
-        prepared: false
+        prepared: false,
       }).select().single();
       ticketItems.push(item);
     }
@@ -143,4 +159,4 @@ router.post("/mock-ticket", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

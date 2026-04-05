@@ -19,16 +19,12 @@ function PosConfigCard({ config }: { config: PosConfig }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  let lastOpenStr = "Never opened";
-  let lastSellAmt = 0;
+  // Use real stats from backend if available, fallback to session data
+  const lastOpenStr = config._stats?.lastOpenedAt
+    ? new Date(config._stats.lastOpenedAt).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })
+    : "Never opened";
 
-  if (config.pos_sessions && config.pos_sessions.length > 0) {
-    const recentSession = [...config.pos_sessions]
-      .sort((a, b) => new Date(b.opened_at).getTime() - new Date(a.opened_at).getTime())[0];
-
-    lastOpenStr = new Date(recentSession.opened_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
-    lastSellAmt = recentSession.closing_sale_total || 0;
-  }
+  const totalRevenue = config._stats?.totalRevenue ?? 0;
 
   return (
     <div className="group relative flex flex-col justify-between overflow-hidden rounded-[1.5rem] border border-border/80 bg-panel p-6 shadow-sm shadow-border hover:shadow-[var(--shadow-artisanal)] hover:border-accent/30 transition-all duration-300 min-h-[200px]">
@@ -50,7 +46,7 @@ function PosConfigCard({ config }: { config: PosConfig }) {
           </button>
 
           {menuOpen && (
-            <div className="absolute top-full right-0 mt-2 w-48 rounded-xl border border-border bg-panel/95 backdrop-blur-xl shadow-[var(--shadow-artisanal)] py-2 z-20 animate-in fade-in slide-in-from-top-2 duration-150">
+            <div className="absolute top-full right-0 mt-2 w-48 rounded-xl border border-border bg-panel/95 backdrop-blur-xl shadow-[var(--shadow-artisanal)] py-2 z-20">
               <Link
                 to="/pos-config"
                 className="flex items-center gap-2 px-4 py-2 text-sm text-muted hover:bg-bg hover:text-ink transition-colors"
@@ -84,7 +80,7 @@ function PosConfigCard({ config }: { config: PosConfig }) {
         </div>
         <div className="flex justify-between items-center px-4 py-2 rounded-lg bg-bg/50 border border-border/50">
            <span className="font-medium text-ink">Previous Sales</span>
-           <span className="font-bold text-ink">${Number(lastSellAmt).toFixed(2)}</span>
+           <span className="font-bold text-ink">${totalRevenue.toFixed(2)}</span>
         </div>
       </div>
 

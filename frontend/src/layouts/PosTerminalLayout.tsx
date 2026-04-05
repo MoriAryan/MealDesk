@@ -249,7 +249,7 @@ export function PosTerminalLayout() {
 
 
   return (
-    <div className="flex h-screen w-full flex-col bg-bg overflow-hidden">
+    <div className="flex h-full w-full flex-col bg-bg overflow-hidden relative">
       {/* Top Navigation Bar */}
       <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-panel px-6 shadow-sm z-10">
         {/* Left: view tabs */}

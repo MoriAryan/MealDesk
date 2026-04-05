@@ -1,18 +1,48 @@
-const express = require("express");
-const { supabaseAdmin } = require("../config/supabase");
-const { requireAuth, requireRoles } = require("../middleware/auth");
+import express from "express";
+import { supabaseAdmin } from "../config/supabase.js";
+import { requireAuth, requireRoles } from "../middleware/auth.js";
 
 const router = express.Router();
 router.use(requireAuth);
 
 router.get("/", async (req, res) => {
   try {
-    const { data, error } = await supabaseAdmin
+    const { data: configs, error } = await supabaseAdmin
       .from("pos_config")
-      .select("*, pos_sessions(opened_at, closing_sale_total, status)")
+      .select("*, pos_sessions(id, opened_at, closing_sale_total, status)")
       .order("created_at", { ascending: true });
     if (error) throw error;
-    res.json({ posConfigs: data || [] });
+
+    const enriched = await Promise.all((configs || []).map(async (cfg) => {
+      const { data: orders } = await supabaseAdmin
+        .from("orders")
+        .select("total, created_at, status")
+        .eq("pos_config_id", cfg.id)
+        .eq("status", "paid")
+        .order("created_at", { ascending: false });
+
+      const totalRevenue = (orders || []).reduce((sum, o) => sum + Number(o.total), 0);
+      const orderCount = (orders || []).length;
+      const lastOrderAt = orders?.[0]?.created_at || null;
+
+      const sessions = cfg.pos_sessions || [];
+      const lastSession = sessions.length > 0
+        ? [...sessions].sort((a, b) => new Date(b.opened_at).getTime() - new Date(a.opened_at).getTime())[0]
+        : null;
+
+      return {
+        ...cfg,
+        _stats: {
+          totalRevenue,
+          orderCount,
+          lastOrderAt,
+          lastOpenedAt: lastSession?.opened_at || null,
+          sessionCount: sessions.length,
+        },
+      };
+    }));
+
+    res.json({ posConfigs: enriched });
   } catch (error) {
     res.status(500).json({ message: error.message || "Failed to fetch POS terminals" });
   }
@@ -59,7 +89,7 @@ router.put("/:id", requireRoles("admin"), async (req, res) => {
         upi_id: upiId,
         self_ordering_enabled: selfOrderingEnabled,
         self_ordering_mode: selfOrderingMode,
-        bg_color: bgColor
+        bg_color: bgColor,
       })
       .eq("id", req.params.id)
       .select().single();
@@ -71,4 +101,4 @@ router.put("/:id", requireRoles("admin"), async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

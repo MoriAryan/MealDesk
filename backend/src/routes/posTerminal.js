@@ -1,9 +1,8 @@
-const express = require("express");
-const { supabaseAdmin } = require("../config/supabase");
-const { requireAuth } = require("../middleware/auth");
+import express from "express";
+import { supabaseAdmin } from "../config/supabase.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const router = express.Router();
-
 router.use(requireAuth);
 
 // POST /api/pos-terminal/order
@@ -17,7 +16,7 @@ router.post("/order", async (req, res) => {
       createKitchenTicket = false,
       posConfigId,
       customerId = null,
-      paymentMethod = null,    // "cash" | "digital" | "upi"
+      paymentMethod = null,
       posSessionId = null,
     } = req.body;
 
@@ -25,7 +24,6 @@ router.post("/order", async (req, res) => {
       return res.status(400).json({ message: "posConfigId is required." });
     }
 
-    // 1. Calculate totals
     let subtotal = 0;
     let tax_total = 0;
 
@@ -39,16 +37,13 @@ router.post("/order", async (req, res) => {
     }
     const total = subtotal + tax_total;
 
-    // 2. Generate an order number
     const orderNumber = `POS-${Date.now().toString().slice(-6)}`;
 
-    // Validate tableId — floor plan may use non-UUID dummy IDs
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const safeTableId = tableId && uuidRegex.test(tableId) ? tableId : null;
     const safeCustomerId = customerId && uuidRegex.test(customerId) ? customerId : null;
     const safeSessionId = posSessionId && uuidRegex.test(posSessionId) ? posSessionId : null;
 
-    // 3. Create the order
     const { data: order, error: orderError } = await supabaseAdmin
       .from("orders")
       .insert({
@@ -69,7 +64,6 @@ router.post("/order", async (req, res) => {
 
     if (orderError) throw orderError;
 
-    // 4. Create order lines
     const orderLines = items.map((item) => {
       const extraPrice = item.variant ? Number(item.variant.extra_price || 0) : 0;
       const unitPrice = Number(item.product.price) + extraPrice;
@@ -99,10 +93,9 @@ router.post("/order", async (req, res) => {
 
     if (linesError) throw linesError;
 
-    // 5. If status is paid, write a payment record
     let paymentData = null;
     if (status === "paid" && total > 0) {
-      const method = paymentMethod || "cash"; // default to cash if not specified
+      const method = paymentMethod || "cash";
       const { data: payment, error: paymentError } = await supabaseAdmin
         .from("payments")
         .insert({
@@ -118,7 +111,6 @@ router.post("/order", async (req, res) => {
       paymentData = payment;
     }
 
-    // 6. If send to kitchen, create a kitchen ticket
     let ticketData = null;
     if (createKitchenTicket) {
       const { data: ticket, error: ticketError } = await supabaseAdmin
@@ -135,7 +127,6 @@ router.post("/order", async (req, res) => {
       if (ticketError) throw ticketError;
       ticketData = ticket;
 
-      // Link order lines to kitchen items
       const ticketItems = insertedLines.map((line, index) => ({
         kitchen_ticket_id: ticket.id,
         order_line_id: line.id,
@@ -158,4 +149,4 @@ router.post("/order", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

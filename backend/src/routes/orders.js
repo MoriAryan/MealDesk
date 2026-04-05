@@ -1,12 +1,10 @@
-const express = require("express");
-const { supabaseAdmin } = require("../config/supabase");
-const { requireAuth } = require("../middleware/auth");
+import express from "express";
+import { supabaseAdmin } from "../config/supabase.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const router = express.Router();
-
 router.use(requireAuth);
 
-// GET /api/orders — list all orders with lines & customer name
 router.get("/", async (req, res) => {
   try {
     const { data, error } = await supabaseAdmin
@@ -19,7 +17,8 @@ router.get("/", async (req, res) => {
           id, product_name, qty, unit_price, tax_rate, uom, discount, subtotal, total, notes
         )
       `)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(50);
 
     if (error) throw error;
     res.json({ orders: data || [] });
@@ -28,7 +27,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// PATCH /api/orders/pay-draft — finds draft order for a table and pays it (avoids duplicates)
 router.patch("/pay-draft", async (req, res) => {
   try {
     const { posConfigId, tableId, paymentMethod = "cash", customerId = null } = req.body;
@@ -38,7 +36,6 @@ router.patch("/pay-draft", async (req, res) => {
     const safeCustomerId = customerId && uuidRegex.test(customerId) ? customerId : null;
     const safeTableId = tableId && uuidRegex.test(tableId) ? tableId : null;
 
-    // Find the most recent draft order for this config/table
     let query = supabaseAdmin
       .from("orders")
       .select("*")
@@ -52,14 +49,12 @@ router.patch("/pay-draft", async (req, res) => {
     const { data: drafts, error: draftError } = await query;
     if (draftError) throw draftError;
 
-    // No draft found — caller should create a fresh paid order instead
     if (!drafts || drafts.length === 0) {
       return res.status(404).json({ message: "No draft order found for this table" });
     }
 
     const existingOrder = drafts[0];
 
-    // Already paid (unlikely but handle it)
     if (existingOrder.status === "paid") {
       return res.json({ order: existingOrder, payment: null, alreadyPaid: true });
     }
@@ -98,7 +93,6 @@ router.patch("/:id/pay", async (req, res) => {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const safeCustomerId = customerId && uuidRegex.test(customerId) ? customerId : null;
 
-    // Fetch the order first to verify it exists
     const { data: existingOrder, error: fetchError } = await supabaseAdmin
       .from("orders")
       .select("*")
@@ -109,7 +103,6 @@ router.patch("/:id/pay", async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    // If already paid, just return it (idempotent — safe to call multiple times)
     if (existingOrder.status === "paid") {
       const { data: existingPayment } = await supabaseAdmin
         .from("payments")
@@ -120,7 +113,6 @@ router.patch("/:id/pay", async (req, res) => {
       return res.json({ order: existingOrder, payment: existingPayment || null });
     }
 
-    // Build update fields
     const updateFields = { status: "paid", updated_at: new Date().toISOString() };
     if (safeCustomerId) updateFields.customer_id = safeCustomerId;
 
@@ -133,7 +125,6 @@ router.patch("/:id/pay", async (req, res) => {
 
     if (orderError) throw orderError;
 
-    // Write payment record
     const { data: payment, error: paymentError } = await supabaseAdmin
       .from("payments")
       .insert({
@@ -153,13 +144,10 @@ router.patch("/:id/pay", async (req, res) => {
   }
 });
 
-
-// DELETE /api/orders/:id — delete a draft order
 router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Only allow deleting draft orders
     const { data: order, error: fetchError } = await supabaseAdmin
       .from("orders")
       .select("id, status")
@@ -172,7 +160,6 @@ router.delete("/:id", async (req, res) => {
       return res.status(400).json({ message: "Only draft orders can be deleted" });
     }
 
-    // Delete lines first (FK constraint)
     await supabaseAdmin.from("order_lines").delete().eq("order_id", id);
     const { error } = await supabaseAdmin.from("orders").delete().eq("id", id);
     if (error) throw error;
@@ -183,7 +170,6 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// PATCH /api/orders/:id/archive — archive a draft order
 router.patch("/:id/archive", async (req, res) => {
   try {
     const { id } = req.params;
@@ -203,4 +189,4 @@ router.patch("/:id/archive", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

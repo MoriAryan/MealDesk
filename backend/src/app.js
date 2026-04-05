@@ -1,21 +1,21 @@
-const express = require("express");
-const cors = require("cors");
-const cookieParser = require("cookie-parser");
-const env = require("./config/env");
-const healthRoutes = require("./routes/health");
-const authRoutes = require("./routes/auth");
-const categoriesRoutes = require("./routes/categories");
-const productsRouter = require("./routes/products");
-const paymentMethodsRouter = require("./routes/paymentMethods");
-const posConfigRouter = require("./routes/posConfig");
-const taxRatesRouter = require("./routes/taxRates");
-const kitchenRouter = require("./routes/kitchen");
-const customersRouter = require("./routes/customers");
-const ordersRouter = require("./routes/orders");
-const posTerminalRouter = require("./routes/posTerminal");
-const customerDisplayRouter = require("./routes/customerDisplay");
-const reportsRouter = require("./routes/reports");
-const paymentsRouter = require("./routes/payments");
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import env from "./config/env.js";
+import healthRoutes from "./routes/health.js";
+import authRoutes from "./routes/auth.js";
+import categoriesRoutes from "./routes/categories.js";
+import productsRouter from "./routes/products.js";
+import paymentMethodsRouter from "./routes/paymentMethods.js";
+import posConfigRouter from "./routes/posConfig.js";
+import taxRatesRouter from "./routes/taxRates.js";
+import kitchenRouter from "./routes/kitchen.js";
+import customersRouter from "./routes/customers.js";
+import ordersRouter from "./routes/orders.js";
+import posTerminalRouter from "./routes/posTerminal.js";
+import customerDisplayRouter from "./routes/customerDisplay.js";
+import reportsRouter from "./routes/reports.js";
+import paymentsRouter from "./routes/payments.js";
 
 const app = express();
 
@@ -52,4 +52,4 @@ app.get("/", (_req, res) => {
   });
 });
 
-module.exports = app;
+export default app;

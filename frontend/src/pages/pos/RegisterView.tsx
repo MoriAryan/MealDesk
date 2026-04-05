@@ -82,9 +82,9 @@ export function RegisterView({
   }, [cartItems]);
 
   return (
-    <div className="flex h-full w-full bg-bg">
+    <div className="flex h-full w-full bg-bg overflow-hidden relative">
       {/* Left Menu (Products) */}
-      <div className="flex-1 flex flex-col relative pr-2">
+      <div className="flex-1 flex flex-col relative pr-2 min-w-0 overflow-hidden">
          {/* Categories Bar */}
          <div className="flex bg-bg pt-6 pb-4 px-6 gap-3 overflow-x-auto shrink-0 z-10 custom-scrollbar-hide items-center">
             <button 
@@ -114,8 +114,8 @@ export function RegisterView({
          </div>
 
          {/* Product Grid */}
-         <div className="flex-1 overflow-y-auto px-8 pb-24 custom-scrollbar">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
+         <div className="flex-1 overflow-y-auto px-6 pb-24 custom-scrollbar min-w-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-8">
                {filteredProducts.map(product => {
                   const cat = categories.find(c => c.id === product.category_id);
                   const color = cat?.color || '#cbd5e1';
@@ -123,19 +123,19 @@ export function RegisterView({
                     <button 
                       key={product.id}
                       onClick={() => handleProductClick(product)}
-                      className="flex flex-col text-left aspect-[4/5] bg-panel rounded-[24px] shadow-sm border border-border/40 overflow-hidden hover:shadow-[var(--shadow-artisanal)] hover:border-border transition-all active:scale-[0.97] group focus:outline-none focus:ring-2 focus:ring-accent relative"
+                      className="flex flex-col text-left h-[300px] bg-panel rounded-[24px] shadow-[var(--shadow-artisanal)] border border-border/60 overflow-hidden hover:border-accent/50 transition-all active:scale-[0.97] group focus:outline-none focus:ring-2 focus:ring-accent relative"
                     >
-                      {/* Vibrant Image Placeholder */}
+                      {/* Massive Breathing Room for Image */}
                       <div 
-                        className="h-[75%] w-full flex items-center justify-center p-8 relative overflow-hidden transition-transform group-hover:scale-105 duration-500 ease-out"
+                        className="flex-1 w-full flex flex-col items-center justify-center p-8 relative overflow-hidden transition-transform group-hover:scale-[1.03] duration-500 ease-out"
                         style={{ background: `linear-gradient(145deg, ${color}33, ${color}11)` }}
                       >
-                         <span className="text-[7rem] opacity-20 font-black tracking-tighter mix-blend-multiply" style={{ color }}>
+                         <span className="text-[120px] opacity-15 font-black tracking-tighter mix-blend-multiply leading-none" style={{ color }}>
                            {product.name.charAt(0).toUpperCase()}
                          </span>
                          {cat && (
                             <div 
-                              className="absolute top-4 left-4 px-3 py-1.5 rounded-[10px] border text-[10px] font-bold tracking-widest uppercase shadow-sm"
+                              className="absolute top-4 left-4 px-3 py-1.5 rounded-xl border text-[10px] font-bold tracking-widest uppercase shadow-sm"
                               style={{ backgroundColor: `${color}EE`, color: '#fff', borderColor: `${color}40` }}
                             >
                               {cat.name}
@@ -144,16 +144,16 @@ export function RegisterView({
                       </div>
                       
                       {/* Product Details */}
-                      <div className="flex-1 p-3 px-4 flex flex-col justify-between w-full bg-panel z-10">
-                        <span className="font-bold text-ink leading-tight line-clamp-2 group-hover:text-accent transition-colors text-[14px]">
+                      <div className="flex shrink-0 p-5 flex-col justify-between w-full bg-panel z-10 border-t border-border/50">
+                        <span className="font-bold text-ink leading-tight line-clamp-2 group-hover:text-accent transition-colors text-[16px]">
                            {product.name}
                         </span>
                         <div className="flex items-center justify-between w-full mt-2">
-                           <span className="font-extrabold text-[17px] text-ink drop-shadow-sm">
+                           <span className="font-black text-[18px] text-ink drop-shadow-sm">
                              ${Number(product.price).toFixed(2)}
                            </span>
                            {product.product_variants && product.product_variants.length > 0 && (
-                             <span className="text-[9px] font-bold text-ink bg-bg px-2 py-1.5 rounded-md uppercase tracking-widest border border-border/80 shadow-sm">
+                             <span className="text-[9px] font-bold text-ink bg-bg px-2 py-1.5 rounded-lg uppercase tracking-widest border border-border/80 shadow-sm shrink-0">
                                Variants
                              </span>
                            )}
@@ -176,7 +176,7 @@ export function RegisterView({
       </div>
 
       {/* Right Cart (Order Lines) */}
-      <div className="w-[400px] xl:w-[440px] flex shrink-0 flex-col bg-panel border-l border-border shadow-[var(--shadow-artisanal)] z-20 h-[calc(100vh-64px)]">
+      <div className="w-[400px] xl:w-[440px] flex shrink-0 flex-col bg-panel border-l border-border shadow-[var(--shadow-artisanal)] z-20 h-full">
         <div className="px-6 py-5 border-b border-border/60 flex items-center justify-between bg-panel/50 backdrop-blur-sm">
           <div>
             <h3 className="font-bold text-xl text-ink tracking-tight">Active Order</h3>

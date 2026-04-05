@@ -6,8 +6,8 @@ import type { PosConfig, Product } from "../api/types";
 import { useAuth } from "../auth/AuthProvider";
 
 export function ProductsPage() {
-  const { accessToken } = useAuth();
-  const isAdmin = true; // Temporary prototype unlock
+  const { accessToken, user } = useAuth();
+  const isAdmin = user?.role === "admin";
 
   const [posConfigs, setPosConfigs] = useState<PosConfig[]>([]);
   const [products, setProducts] = useState<Product[]>([]);

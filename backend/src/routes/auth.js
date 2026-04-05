@@ -1,11 +1,11 @@
-const express = require("express");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const env = require("../config/env");
-const { supabaseAdmin } = require("../config/supabase");
-const { buildAccessToken, buildRefreshToken } = require("../utils/token");
-const { requireAuth } = require("../middleware/auth");
-const { extractRefreshToken, hashRefreshToken } = require("../middleware/refreshToken");
+import express from "express";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import env from "../config/env.js";
+import { supabaseAdmin } from "../config/supabase.js";
+import { buildAccessToken, buildRefreshToken } from "../utils/token.js";
+import { requireAuth } from "../middleware/auth.js";
+import { extractRefreshToken, hashRefreshToken } from "../middleware/refreshToken.js";
 
 const router = express.Router();
 const refreshCookieName = "refresh_token";
@@ -14,7 +14,7 @@ function setRefreshCookie(res, refreshToken, expiresAt) {
   res.cookie(refreshCookieName, refreshToken, {
     httpOnly: true,
     sameSite: "lax",
-    secure: env.nodeEnv === 'production',
+    secure: env.nodeEnv === "production",
     maxAge: Math.max(1, expiresAt.getTime() - Date.now()),
   });
 }
@@ -55,7 +55,7 @@ router.post("/signup", async (req, res) => {
 
     const normalizedEmail = email.trim().toLowerCase();
     const { count } = await supabaseAdmin.from("users").select("id", { count: "exact", head: true });
-    
+
     const roleCode = (count || 0) === 0 ? "admin" : "cashier";
     const [roleId, passwordHash] = await Promise.all([getRoleIdByCode(roleCode), bcrypt.hash(password, 10)]);
 
@@ -155,4 +155,4 @@ router.post("/dev-token", (req, res) => {
   return res.json({ accessToken: buildAccessToken(user), refreshToken: buildRefreshToken(user) });
 });
 
-module.exports = router;
+export default router;
