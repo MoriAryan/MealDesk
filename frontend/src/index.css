@@ -1,5 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=DM+Sans:wght@400;500;600;700;800;900&display=swap");
-@import "tailwindcss";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
   :root {
@@ -12,6 +15,15 @@
     --color-accent: #c15b3d;
     --color-accent-hover: #a14c33;
     --color-success: #8a9a5b;
+    --color-bg-rgb: 250 248 245;
+    --color-panel-rgb: 255 255 255;
+    --color-border-rgb: 232 226 217;
+    --color-ink-rgb: 44 36 27;
+    --color-muted-rgb: 139 128 116;
+    --color-accent-rgb: 193 91 61;
+    --color-accent-hover-rgb: 161 76 51;
+    --color-success-rgb: 138 154 91;
+    --font-sans: "DM Sans", sans-serif;
     --shadow-artisanal:
       0 4px 12px rgba(44, 36, 27, 0.04), 0 1px 2px rgba(44, 36, 27, 0.02);
   }
@@ -26,22 +38,18 @@
     --color-accent: #d97736;
     --color-accent-hover: #e58d51;
     --color-success: #4e664f;
+    --color-bg-rgb: 26 22 20;
+    --color-panel-rgb: 36 32 29;
+    --color-border-rgb: 59 51 45;
+    --color-ink-rgb: 230 223 211;
+    --color-muted-rgb: 139 133 127;
+    --color-accent-rgb: 217 119 54;
+    --color-accent-hover-rgb: 229 141 81;
+    --color-success-rgb: 78 102 79;
+    --font-sans: "DM Sans", sans-serif;
     --shadow-artisanal:
       0 8px 24px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3);
   }
-}
-
-@theme {
-  --color-bg: var(--color-bg);
-  --color-panel: var(--color-panel);
-  --color-ink: var(--color-ink);
-  --color-muted: var(--color-muted);
-  --color-accent: var(--color-accent);
-  --color-accent-hover: var(--color-accent-hover);
-  --color-success: var(--color-success);
-  --color-border: var(--color-border);
-  --shadow-artisanal: var(--shadow-artisanal);
-  --font-sans: "DM Sans", sans-serif;
 }
 
 body {
