@@ -24,6 +24,7 @@ export function createProduct(
     description?: string;
     price: number;
     uom: Product["uom"];
+    imageUrl?: string | null;
     variants: Array<{
       attributeName: string;
       value: string;
@@ -50,6 +51,7 @@ export function updateProduct(
     price?: number;
     uom?: Product["uom"];
     active?: boolean;
+    imageUrl?: string | null;
     variants?: Array<{
       id?: string;
       attributeName: string;

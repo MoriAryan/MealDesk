@@ -4,10 +4,9 @@ import {
   fetchKitchenTickets,
   updateTicketStage,
   updateItemPrepared,
-  generateMockTicket,
 } from "../api/kitchen";
 import type { KitchenTicket, KitchenTicketItem } from "../api/kitchen";
-import { RefreshCw, Plus } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 
 // ─── Sticky Note Colors per stage ─────────────────────────────────────────────
 const STAGE_STYLES = {
@@ -61,7 +60,7 @@ function StickyNote({
   onItemToggle,
 }: {
   ticket: KitchenTicket;
-  onStageChange: (t: KitchenTicket, next: string) => void;
+  onStageChange: (t: KitchenTicket, next: KitchenTicket["stage"]) => void;
   onItemToggle: (
     e: React.MouseEvent,
     tId: string,
@@ -73,30 +72,28 @@ function StickyNote({
     STAGE_STYLES.to_cook;
   const isCompleted = ticket.stage === "completed";
   const allPrepared = ticket.kitchen_ticket_items.every((i) => i.prepared);
-  const someStarted = ticket.kitchen_ticket_items.some((i) => i.prepared);
+  const sentAtLabel = ticket.sent_at
+    ? new Date(ticket.sent_at).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
 
-  // Time since created
-  const sentAgo = (() => {
-    const sent = ticket.sent_at ? new Date(ticket.sent_at) : null;
-    if (!sent) return null;
-    const mins = Math.floor((Date.now() - sent.getTime()) / 60000);
-    if (mins < 1) return "just now";
-    if (mins < 60) return `${mins}m ago`;
-    return `${Math.floor(mins / 60)}h ${mins % 60}m ago`;
-  })();
+  const rotationSeed = Array.from(ticket.id).reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  const baseRotation = ((rotationSeed % 5) - 2) * 0.5;
 
   return (
     <div
       className="relative mt-5 select-none"
       style={{
-        transform: `rotate(${Math.random() * 2 - 1}deg)`,
+        transform: `rotate(${baseRotation}deg)`,
         transition: "transform 0.2s ease, box-shadow 0.2s ease",
       }}
       onMouseEnter={(e) =>
         (e.currentTarget.style.transform = "rotate(0deg) scale(1.01)")
       }
       onMouseLeave={(e) =>
-        (e.currentTarget.style.transform = `rotate(${Math.random() * 2 - 1}deg)`)
+        (e.currentTarget.style.transform = `rotate(${baseRotation}deg)`)
       }
     >
       {/* Tape */}
@@ -138,7 +135,7 @@ function StickyNote({
             >
               #{ticket.order_number.replace("MOCK-", "").replace("POS-", "")}
             </p>
-            {sentAgo && (
+            {sentAtLabel && (
               <p
                 style={{
                   fontFamily: "'Caveat', cursive",
@@ -146,7 +143,7 @@ function StickyNote({
                   color: "#78716c",
                 }}
               >
-                {sentAgo}
+                {sentAtLabel}
               </p>
             )}
           </div>
@@ -332,7 +329,7 @@ export const KitchenDisplayPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken]);
 
-  const handleStageChange = async (t: KitchenTicket, next: string) => {
+  const handleStageChange = async (t: KitchenTicket, next: KitchenTicket["stage"]) => {
     if (!accessToken) return;
     setTickets((prev) =>
       prev.map((pt) =>
@@ -446,14 +443,6 @@ export const KitchenDisplayPage = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button
-            onClick={() =>
-              void generateMockTicket(accessToken!, "").then(loadTickets)
-            }
-            className="flex items-center gap-2 px-4 py-2 border border-dashed border-border rounded-xl text-sm font-semibold text-muted hover:text-ink hover:border-ink transition-all"
-          >
-            <Plus size={15} /> Add Test Ticket
-          </button>
           <button
             onClick={loadTickets}
             className="flex items-center gap-2 px-4 py-2 border border-border rounded-xl text-sm font-semibold text-muted hover:text-accent hover:border-accent transition-all"

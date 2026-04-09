@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
 import { AppLayout } from "./layouts/AppLayout";
 import { LoginPage } from "./pages/LoginPage";
+import { LandingPage } from "./pages/LandingPage";
 import { CategoriesPage } from "./pages/CategoriesPage";
 import { PaymentMethodsPage } from "./pages/PaymentMethodsPage";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
@@ -21,6 +22,8 @@ import { ReportsPage } from "./pages/ReportsPage";
 function App() {
   return (
     <Routes>
+      {/* Public entry points */}
+      <Route path="/landing" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
 
       <Route
@@ -64,7 +67,8 @@ function App() {
         <Route path="/reports" element={<ReportsPage />} />
       </Route>
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Fallback — send everyone to landing */}
+      <Route path="*" element={<Navigate to="/landing" replace />} />
     </Routes>
   );
 }

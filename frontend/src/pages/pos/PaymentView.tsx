@@ -1,13 +1,15 @@
 import { useState, useMemo } from "react";
 import type { CartItem } from "../../layouts/PosTerminalLayout";
+import type { PaymentMethod } from "../../api/types";
 
 interface Props {
   cartItems: CartItem[];
+  paymentMethods?: PaymentMethod[];
   onCancel: () => void;
   onPaymentSuccess: (method: "cash" | "digital" | "upi") => Promise<void>;
 }
 
-export function PaymentView({ cartItems, onCancel, onPaymentSuccess }: Props) {
+export function PaymentView({ cartItems, paymentMethods, onCancel, onPaymentSuccess }: Props) {
   const [selectedMethod, setSelectedMethod] = useState<"cash" | "digital" | "upi">("cash");
   const [processing, setProcessing] = useState(false);
 
@@ -21,6 +23,9 @@ export function PaymentView({ cartItems, onCancel, onPaymentSuccess }: Props) {
     return sub;
   }, [cartItems]);
 
+  const upiMethod = paymentMethods?.find((method) => method.method === "upi" && method.enabled);
+  const upiId = upiMethod?.upi_id || "merchant@ybl";
+
   const handleValidate = async () => {
     if (processing) return;
     setProcessing(true);
@@ -32,29 +37,29 @@ export function PaymentView({ cartItems, onCancel, onPaymentSuccess }: Props) {
   };
 
   return (
-    <div className="flex h-full w-full bg-bg p-4 md:p-8 justify-center items-center overflow-y-auto">
-      <div className="w-full max-w-4xl bg-panel/80 backdrop-blur-3xl rounded-[2rem] border border-border/80 shadow-[var(--shadow-artisanal)] overflow-hidden flex flex-col md:flex-row min-h-[500px]">
+    <div className="flex h-full w-full items-center justify-center overflow-y-auto bg-bg px-4 py-6 md:px-6 md:py-8">
+      <div className="flex min-h-[560px] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-border bg-panel shadow-[var(--shadow-artisanal)] md:flex-row">
 
         {/* Left Side: Methods */}
-        <div className="w-full md:w-1/3 bg-bg/50 border-r border-border/50 p-6 xl:p-8 flex flex-col">
-          <h3 className="text-xs font-black uppercase tracking-widest text-muted mb-6">Payment Method</h3>
-          <div className="flex flex-col gap-3">
+        <div className="flex w-full flex-col border-b border-border/60 bg-bg/45 p-5 md:w-[320px] md:border-b-0 md:border-r md:p-6">
+          <h3 className="mb-4 text-xs font-black uppercase tracking-[0.16em] text-muted">Payment Method</h3>
+          <div className="flex flex-col gap-2.5">
             {(["cash", "digital", "upi"] as const).map((method) => (
               <button
                 key={method}
                 onClick={() => setSelectedMethod(method)}
                 disabled={processing}
-                className={`py-4 px-6 rounded-2xl font-bold text-lg text-left transition-all duration-300 disabled:opacity-50 relative overflow-hidden group ${
+                className={`group relative overflow-hidden rounded-lg border px-4 py-3.5 text-left text-base font-semibold transition-all duration-200 disabled:opacity-50 ${
                   selectedMethod === method
-                    ? "bg-accent text-white shadow-lg shadow-accent/20 scale-[1.02] border-transparent"
-                    : "bg-panel text-muted hover:bg-bg border border-border/60 hover:border-border hover:shadow-sm"
+                    ? "border-accent bg-accent text-white"
+                    : "border-border/70 bg-panel text-muted hover:border-accent/35 hover:text-ink"
                 }`}
               >
                 {selectedMethod === method && (
                    <div className="absolute inset-0 bg-white/20 blur-md rounded-full -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
                 )}
                 <div className="flex items-center gap-3 relative z-10">
-                   <span className="text-xl">
+                   <span className="text-lg">
                       {method === "cash" ? "💵" : method === "digital" ? "💳" : "📱"}
                    </span>
                    <span>
@@ -67,33 +72,33 @@ export function PaymentView({ cartItems, onCancel, onPaymentSuccess }: Props) {
         </div>
 
         {/* Right Side: Total & Confirmation */}
-        <div className="flex-1 flex flex-col p-8 xl:p-10 relative overflow-hidden">
+        <div className="relative flex flex-1 flex-col overflow-hidden p-5 md:p-8">
           {/* Subtle background glow */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
 
-          <h2 className="text-3xl font-black text-ink mb-10 text-center tracking-tight z-10">Complete Checkout</h2>
+          <h2 className="z-10 mb-7 text-center text-3xl font-black tracking-tight text-ink">Complete Checkout</h2>
 
-          <div className="bg-bg/40 p-10 rounded-[2rem] mb-auto text-center border border-border/50 shadow-inner z-10 backdrop-blur-sm">
-            <p className="text-muted text-xs font-bold uppercase tracking-widest mb-3">Total Due</p>
-            <p className="text-7xl font-black text-ink tracking-tighter drop-shadow-sm">${total.toFixed(2)}</p>
+          <div className="z-10 mb-6 rounded-2xl border border-border/60 bg-bg/35 p-8 text-center shadow-inner backdrop-blur-sm">
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-muted">Total Due</p>
+            <p className="text-6xl font-black tracking-tight text-ink md:text-7xl">${total.toFixed(2)}</p>
           </div>
 
           {/* Dynamic Content based on Method */}
-          <div className="min-h-[140px] flex flex-col items-center justify-center z-10">
+          <div className="z-10 flex min-h-[170px] flex-col items-center justify-center rounded-xl border border-border/40 bg-panel/45 px-4 py-6">
              {selectedMethod === "upi" ? (
-               <div className="flex flex-col items-center justify-center my-6">
-                 <div className="p-4 bg-white rounded-3xl shadow-xl border border-gray-100 mb-5 inline-block transform hover:scale-105 transition-transform duration-500">
+               <div className="my-2 flex flex-col items-center justify-center">
+                 <div className="mb-4 inline-block rounded-2xl border border-gray-100 bg-white p-3 shadow-lg transition-transform duration-300 hover:scale-105">
                    <img
-                     src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=4&data=${encodeURIComponent(`upi://pay?pa=merchant@ybl&pn=CafePOS&am=${total.toFixed(2)}&cu=INR&tn=CafeOrder`)}`}
+                     src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=4&data=${encodeURIComponent(`upi://pay?pa=${upiId}&pn=CafePOS&am=${total.toFixed(2)}&cu=INR&tn=CafeOrder`)}`}
                      alt="UPI QR Code"
                      width={160}
                      height={160}
                      className="rounded-xl"
                    />
                  </div>
-                 <p className="text-xl font-black text-ink mb-1">Scan to Pay via UPI</p>
-                 <p className="text-sm font-semibold text-muted mb-4 opacity-70">merchant@ybl · ₹{total.toFixed(2)}</p>
-                 <div className="flex items-center gap-2">
+                 <p className="mb-1 text-xl font-black text-ink">Scan to Pay via UPI</p>
+                 <p className="mb-3 text-sm font-semibold text-muted/80">{upiId} · ₹{total.toFixed(2)}</p>
+                 <div className="flex flex-wrap items-center justify-center gap-2">
                    <span className="text-[10px] uppercase tracking-wider bg-green-500/10 text-green-500 px-3 py-1 rounded-full font-bold">BHIM</span>
                    <span className="text-[10px] uppercase tracking-wider bg-indigo-500/10 text-indigo-500 px-3 py-1 rounded-full font-bold">PhonePe</span>
                    <span className="text-[10px] uppercase tracking-wider bg-sky-500/10 text-sky-500 px-3 py-1 rounded-full font-bold">GPay</span>
@@ -101,7 +106,7 @@ export function PaymentView({ cartItems, onCancel, onPaymentSuccess }: Props) {
                  </div>
                </div>
              ) : (
-               <div className="text-center w-full">
+               <div className="w-full text-center">
                  {processing ? (
                    <div className="flex flex-col items-center gap-3">
                       <div className="w-8 h-8 border-4 border-accent border-r-transparent rounded-full animate-spin" />
@@ -115,18 +120,18 @@ export function PaymentView({ cartItems, onCancel, onPaymentSuccess }: Props) {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-4 mt-8 z-10 w-full">
+          <div className="z-10 mt-6 flex w-full gap-3">
             <button
               onClick={onCancel}
               disabled={processing}
-              className="w-1/3 py-4 md:py-5 px-4 rounded-2xl border-2 border-border/80 bg-panel hover:bg-bg text-ink font-bold text-sm md:text-base tracking-wide uppercase transition-all shadow-sm active:scale-95 disabled:opacity-50"
+              className="w-[180px] rounded-lg border border-border/80 bg-panel px-4 py-3.5 text-sm font-bold uppercase tracking-wide text-ink transition-colors hover:border-accent/30 hover:bg-bg active:scale-95 disabled:opacity-50"
             >
               Go Back
             </button>
             <button
               onClick={handleValidate}
               disabled={processing}
-              className="flex-1 py-4 md:py-5 px-4 rounded-2xl bg-green-500 hover:bg-green-400 text-white font-black text-lg md:text-xl tracking-widest uppercase transition-all shadow-[0_8px_30px_rgb(34,197,94,0.3)] hover:shadow-[0_8px_40px_rgb(34,197,94,0.5)] border border-green-400/50 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+              className="flex-1 rounded-lg border border-green-400/50 bg-green-500 px-4 py-3.5 text-base font-black uppercase tracking-[0.14em] text-white transition-all hover:bg-green-400 hover:shadow-[0_6px_24px_rgb(34,197,94,0.35)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
             >
               {processing ? "Processing…" : selectedMethod === "upi" ? "Confirm QR Scanned" : "Validate Payment"}
             </button>

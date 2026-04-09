@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Users, Info, MousePointerClick, LayoutDashboard } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Users, MousePointerClick, LayoutDashboard } from "lucide-react";
+import type { DiningTable, Floor } from "../../api/types";
 
 type TableShape = "round" | "square" | "rectangle";
 
@@ -23,6 +24,8 @@ const DEFAULT_TABLES: TableDef[] = [
 ];
 
 interface Props {
+  floors?: Floor[];
+  tables?: DiningTable[];
   activeTableId: string | null;
   setActiveTableId: (id: string) => void;
 }
@@ -76,15 +79,45 @@ function GraphicTable({ shape, seats, isActive }: { shape: TableShape; seats: nu
   );
 }
 
-export function FloorView({ activeTableId, setActiveTableId }: Props) {
-  const floors = Array.from(new Set(DEFAULT_TABLES.map(t => t.floor)));
+export function FloorView({ floors: inputFloors, tables: inputTables, activeTableId, setActiveTableId }: Props) {
+  const hasRealData = Boolean(inputFloors?.length && inputTables?.length);
+
+  const floorNames = useMemo(
+    () => (hasRealData
+      ? (inputFloors || []).map((floor) => floor.name)
+      : Array.from(new Set(DEFAULT_TABLES.map((table) => table.floor)))),
+    [hasRealData, inputFloors]
+  );
+
+  const [selectedFloor, setSelectedFloor] = useState<string>(floorNames[0] || "Main Floor");
+  const activeFloor = floorNames.includes(selectedFloor) ? selectedFloor : (floorNames[0] || "Main Floor");
+
+  const getTablesForFloor = (floorName: string): TableDef[] => {
+    if (!hasRealData) {
+      return DEFAULT_TABLES.filter((table) => table.floor === floorName);
+    }
+
+    const floor = (inputFloors || []).find((item) => item.name === floorName);
+    if (!floor) return [];
+
+    return (inputTables || [])
+      .filter((table) => table.floor_id === floor.id)
+      .map((table) => ({
+        id: table.id,
+        name: table.table_number,
+        seats: table.seats,
+        shape: table.seats >= 6 ? "rectangle" : table.seats >= 4 ? "square" : "round",
+        status: table.active ? "free" : "occupied",
+        floor: floorName,
+      }));
+  };
 
   return (
     <div className="h-full w-full p-6 md:p-10 lg:p-12 bg-bg overflow-y-auto">
       <div className="max-w-[1400px] mx-auto">
         <div className="flex flex-col md:flex-row items-baseline justify-between mb-8 gap-4">
           <div>
-             <h2 className="text-4xl font-black text-ink tracking-tight">Main Floor Plan</h2>
+             <h2 className="text-4xl font-black text-ink tracking-tight">{activeFloor} Plan</h2>
              <p className="text-muted mt-2 font-medium flex items-center gap-2">
                 <MousePointerClick size={16} /> Select a table to open the register.
              </p>
@@ -98,10 +131,29 @@ export function FloorView({ activeTableId, setActiveTableId }: Props) {
              </div>
           </div>
         </div>
+
+        <div className="mb-8 flex flex-wrap items-center gap-2">
+          {floorNames.map((floor) => {
+            const isActive = floor === activeFloor;
+            return (
+              <button
+                key={floor}
+                onClick={() => setSelectedFloor(floor)}
+                className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider border transition-all ${
+                  isActive
+                    ? "bg-accent text-white border-accent"
+                    : "bg-panel text-muted border-border hover:text-ink hover:border-accent/45"
+                }`}
+              >
+                {floor}
+              </button>
+            );
+          })}
+        </div>
         
         {/* Render sections by Floor */}
         <div className="flex flex-col gap-12">
-          {floors.map(floorName => (
+          {[activeFloor].map((floorName) => (
             <div key={floorName} className="flex flex-col gap-6">
               <div className="flex items-center gap-3">
                  <LayoutDashboard className="text-accent" size={24} />
@@ -109,7 +161,7 @@ export function FloorView({ activeTableId, setActiveTableId }: Props) {
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-12 gap-y-16 mt-4">
-                {DEFAULT_TABLES.filter(t => t.floor === floorName).map((table) => {
+                {getTablesForFloor(floorName).map((table) => {
                   const isActive = activeTableId === table.id;
                   return (
                     <button

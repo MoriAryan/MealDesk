@@ -43,7 +43,7 @@ router.get("/:id", async (req, res) => {
 
 router.post("/", requireRoles("admin"), async (req, res) => {
   try {
-    const { posConfigId, categoryId, taxRateId, name, description, price, uom, variants = [] } = req.body;
+    const { posConfigId, categoryId, taxRateId, name, description, price, uom, imageUrl = null, variants = [] } = req.body;
 
     if (!posConfigId || !categoryId || !taxRateId || !name || price == null || !uom) {
       return res.status(400).json({ message: "posConfigId, categoryId, taxRateId, name, price and uom are required" });
@@ -59,6 +59,7 @@ router.post("/", requireRoles("admin"), async (req, res) => {
         description,
         price,
         uom,
+        image_url: imageUrl,
         active: true,
       })
       .select().single();
@@ -88,7 +89,7 @@ router.post("/", requireRoles("admin"), async (req, res) => {
 
 router.put("/:id", requireRoles("admin"), async (req, res) => {
   try {
-    const { categoryId, taxRateId, name, description, price, uom, active, variants = [] } = req.body;
+    const { categoryId, taxRateId, name, description, price, uom, active, imageUrl, variants = [] } = req.body;
 
     const { data: product, error: productError } = await supabaseAdmin
       .from("products")
@@ -100,6 +101,7 @@ router.put("/:id", requireRoles("admin"), async (req, res) => {
         price,
         uom,
         active,
+        image_url: imageUrl !== undefined ? imageUrl : undefined,
       })
       .eq("id", req.params.id)
       .select().single();

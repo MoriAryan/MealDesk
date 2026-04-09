@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { X, ChevronDown } from "lucide-react";
 import { listOrders } from "../api/orders";
 import { appEnv } from "../config/env";
@@ -256,7 +256,7 @@ export function OrdersPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     if (!accessToken) return;
     setLoading(true);
     try {
@@ -267,7 +267,7 @@ export function OrdersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [accessToken]);
 
   // Auto-refresh every 10 seconds
   useEffect(() => {
@@ -275,11 +275,11 @@ export function OrdersPage() {
       void load();
     }, 10_000);
     return () => clearInterval(interval);
-  }, [accessToken]);
+  }, [load]);
 
   useEffect(() => {
     void load();
-  }, [accessToken]);
+  }, [load]);
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>

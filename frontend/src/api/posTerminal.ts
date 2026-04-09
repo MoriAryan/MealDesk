@@ -41,13 +41,14 @@ export function payOrder(
 export function payDraftOrder(
   token: string,
   posConfigId: string,
+  posSessionId: string,
   tableId: string | null,
   paymentMethod: "cash" | "digital" | "upi",
   customerId?: string | null
 ): Promise<{ order: Order; payment: unknown }> {
   return requestJson<{ order: Order; payment: unknown }>(
     `/orders/pay-draft`,
-    { method: "PATCH", token, body: { posConfigId, tableId, paymentMethod, customerId: customerId ?? null } }
+    { method: "PATCH", token, body: { posConfigId, posSessionId, tableId, paymentMethod, customerId: customerId ?? null } }
   );
 }
 

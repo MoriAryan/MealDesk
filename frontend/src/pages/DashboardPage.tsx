@@ -161,15 +161,15 @@ function CategoryDonut({
   const cx = 80;
   const cy = 80;
   const circumference = 2 * Math.PI * R;
-  let offset = 0;
-  const slices = categories.map((cat) => {
+  const slices = categories.reduce<Array<typeof categories[number] & { dash: number; gap: number; offset: number; frac: number }>>((acc, cat) => {
+    const previous = acc[acc.length - 1];
+    const offset = previous ? previous.offset + previous.dash : 0;
     const frac = cat.revenue / total;
     const dash = frac * circumference;
     const gap = circumference - dash;
-    const slice = { ...cat, dash, gap, offset, frac };
-    offset += dash;
-    return slice;
-  });
+    acc.push({ ...cat, dash, gap, offset, frac });
+    return acc;
+  }, []);
 
   return (
     <div className="flex items-center gap-6">

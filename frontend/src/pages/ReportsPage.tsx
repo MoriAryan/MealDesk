@@ -1,15 +1,24 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { requestJson } from "../api/client";
 import { listPosConfigs } from "../api/posConfig";
+import { getSessions, type PosSession } from "../api/sessions";
+import { listProducts } from "../api/products";
 import type { PosConfig } from "../api/types";
+import type { Product } from "../api/types";
 import { useAuth } from "../auth/AuthProvider";
 
 interface ReportSummary {
   totalOrders: number;
+  paidOrders?: number;
+  draftOrders?: number;
   totalRevenue: number;
   totalTax: number;
   avgOrder: number;
+  pctRevenue?: number | null;
+  pctOrders?: number | null;
+  pctAvg?: number | null;
   topProducts: { name: string; qty: number; revenue: number }[];
+  recentOrders?: { id: string; total: number; created_at: string; source: string; status?: string }[];
 }
 
 type Period = "today" | "week" | "month" | "custom";
@@ -42,6 +51,11 @@ export function ReportsPage() {
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
   const [report, setReport] = useState<ReportSummary | null>(null);
+  const [sessions, setSessions] = useState<PosSession[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selectedSessionId, setSelectedSessionId] = useState("");
+  const [selectedOpenedBy, setSelectedOpenedBy] = useState("");
+  const [selectedProductId, setSelectedProductId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,6 +65,32 @@ export function ReportsPage() {
       .then(res => setPosConfigs(res.posConfigs))
       .catch(() => {});
   }, [accessToken]);
+
+  useEffect(() => {
+    if (!accessToken || !selectedConfigId) {
+      setSessions([]);
+      setProducts([]);
+      setSelectedSessionId("");
+      setSelectedOpenedBy("");
+      setSelectedProductId("");
+      return;
+    }
+
+    const loadFilterData = async () => {
+      try {
+        const [sessionsRes, productsRes] = await Promise.all([
+          getSessions(accessToken, selectedConfigId),
+          listProducts(accessToken, { posConfigId: selectedConfigId }),
+        ]);
+        setSessions(sessionsRes);
+        setProducts(productsRes.products);
+      } catch {
+        // best effort
+      }
+    };
+
+    void loadFilterData();
+  }, [accessToken, selectedConfigId]);
 
   const fetchReport = async () => {
     if (!accessToken) return;
@@ -62,6 +102,9 @@ export function ReportsPage() {
       if (from) params.set("from", from);
       if (to) params.set("to", to);
       if (selectedConfigId) params.set("pos_config_id", selectedConfigId);
+      if (selectedSessionId) params.set("pos_session_id", selectedSessionId);
+      if (selectedOpenedBy) params.set("opened_by", selectedOpenedBy);
+      if (selectedProductId) params.set("product_id", selectedProductId);
 
       const res = await requestJson<ReportSummary>(`/reports/summary?${params.toString()}`, {
         token: accessToken,
@@ -77,7 +120,77 @@ export function ReportsPage() {
   useEffect(() => {
     void fetchReport();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accessToken, period, selectedConfigId]);
+  }, [accessToken, period, selectedConfigId, selectedSessionId, selectedOpenedBy, selectedProductId]);
+
+  const responsibleUsers = useMemo(() => {
+    const seen = new Set<string>();
+    const items: string[] = [];
+    for (const s of sessions) {
+      if (!s.opened_by || seen.has(s.opened_by)) continue;
+      seen.add(s.opened_by);
+      items.push(s.opened_by);
+    }
+    return items;
+  }, [sessions]);
+
+  const exportReportCsv = () => {
+    if (!report) return;
+    const rows: string[][] = [
+      ["Metric", "Value"],
+      ["Total Orders", String(report.totalOrders)],
+      ["Paid Orders", String(report.paidOrders ?? 0)],
+      ["Draft Orders", String(report.draftOrders ?? 0)],
+      ["Total Revenue", String(report.totalRevenue.toFixed(2))],
+      ["Total Tax", String(report.totalTax.toFixed(2))],
+      ["Average Order", String(report.avgOrder.toFixed(2))],
+      [],
+      ["Top Products", "Qty", "Revenue"],
+      ...report.topProducts.map((p) => [p.name, String(p.qty), String(p.revenue.toFixed(2))]),
+    ];
+
+    const csv = rows
+      .map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `report-${period}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportReportXls = () => {
+    if (!report) return;
+    const xlsRows = [
+      ["Metric", "Value"],
+      ["Total Orders", report.totalOrders],
+      ["Paid Orders", report.paidOrders ?? 0],
+      ["Draft Orders", report.draftOrders ?? 0],
+      ["Total Revenue", report.totalRevenue.toFixed(2)],
+      ["Total Tax", report.totalTax.toFixed(2)],
+      ["Average Order", report.avgOrder.toFixed(2)],
+    ];
+
+    const tableHtml = `
+      <table>
+        ${xlsRows.map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join("")}</tr>`).join("")}
+      </table>
+    `;
+
+    const blob = new Blob([tableHtml], { type: "application/vnd.ms-excel" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `report-${period}.xls`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportReportPdf = () => {
+    window.print();
+  };
 
   const maxQty = useMemo(
     () => Math.max(1, ...(report?.topProducts.map(p => p.qty) ?? [1])),
@@ -89,13 +202,18 @@ export function ReportsPage() {
       {/* Header */}
       <div className="flex items-center justify-between pb-2 border-b border-border">
         <span className="text-xl font-bold font-head text-ink">Reports & Analytics</span>
-        <button
-          onClick={() => void fetchReport()}
-          disabled={loading}
-          className="text-sm font-semibold px-4 py-1.5 rounded bg-[var(--color-accent)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
-        >
-          {loading ? "Loading…" : "↻ Refresh"}
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={exportReportCsv} disabled={!report} className="text-xs font-semibold px-3 py-1.5 rounded border border-border text-ink disabled:opacity-50">CSV</button>
+          <button onClick={exportReportXls} disabled={!report} className="text-xs font-semibold px-3 py-1.5 rounded border border-border text-ink disabled:opacity-50">XLS</button>
+          <button onClick={exportReportPdf} disabled={!report} className="text-xs font-semibold px-3 py-1.5 rounded border border-border text-ink disabled:opacity-50">PDF</button>
+          <button
+            onClick={() => void fetchReport()}
+            disabled={loading}
+            className="text-sm font-semibold px-4 py-1.5 rounded bg-[var(--color-accent)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+          >
+            {loading ? "Loading…" : "↻ Refresh"}
+          </button>
+        </div>
       </div>
 
       {/* Filters Row */}
@@ -125,6 +243,41 @@ export function ReportsPage() {
         >
           <option value="">All Terminals</option>
           {posConfigs.map(p => (
+            <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+        </select>
+
+        <select
+          value={selectedSessionId}
+          onChange={(e) => setSelectedSessionId(e.target.value)}
+          className="text-sm bg-panel border border-border rounded-lg px-3 py-1.5 text-ink focus:ring-1 focus:ring-[var(--color-accent)]"
+        >
+          <option value="">All Sessions</option>
+          {sessions.map((s) => (
+            <option key={s.id} value={s.id}>
+              {new Date(s.opened_at).toLocaleString()} ({s.status})
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={selectedOpenedBy}
+          onChange={(e) => setSelectedOpenedBy(e.target.value)}
+          className="text-sm bg-panel border border-border rounded-lg px-3 py-1.5 text-ink focus:ring-1 focus:ring-[var(--color-accent)]"
+        >
+          <option value="">All Responsible</option>
+          {responsibleUsers.map((uid) => (
+            <option key={uid} value={uid}>User {uid.slice(0, 8)}</option>
+          ))}
+        </select>
+
+        <select
+          value={selectedProductId}
+          onChange={(e) => setSelectedProductId(e.target.value)}
+          className="text-sm bg-panel border border-border rounded-lg px-3 py-1.5 text-ink focus:ring-1 focus:ring-[var(--color-accent)]"
+        >
+          <option value="">All Products</option>
+          {products.map((p) => (
             <option key={p.id} value={p.id}>{p.name}</option>
           ))}
         </select>
@@ -165,9 +318,10 @@ export function ReportsPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { label: "Total Orders", value: report.totalOrders.toString(), suffix: "" },
+              { label: "Paid Orders", value: String(report.paidOrders ?? 0), suffix: "" },
+              { label: "Draft Orders", value: String(report.draftOrders ?? 0), suffix: "" },
               { label: "Total Revenue", value: `$${report.totalRevenue.toFixed(2)}`, suffix: "" },
               { label: "Avg Order", value: `$${report.avgOrder.toFixed(2)}`, suffix: "" },
-              { label: "Total Tax", value: `$${report.totalTax.toFixed(2)}`, suffix: "" },
             ].map(kpi => (
               <div
                 key={kpi.label}

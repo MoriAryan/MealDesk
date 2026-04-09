@@ -1,6 +1,7 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import rateLimit from "express-rate-limit";
 import env from "../config/env.js";
 import { supabaseAdmin } from "../config/supabase.js";
 import { buildAccessToken, buildRefreshToken } from "../utils/token.js";
@@ -9,14 +10,28 @@ import { extractRefreshToken, hashRefreshToken } from "../middleware/refreshToke
 
 const router = express.Router();
 const refreshCookieName = "refresh_token";
+const authAttemptLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    message: "Too many auth attempts. Please try again later.",
+  },
+});
+
+function getRefreshCookieOptions(expiresAt) {
+  return {
+    httpOnly: true,
+    sameSite: env.nodeEnv === "production" ? "none" : "lax",
+    secure: env.nodeEnv === "production",
+    path: "/",
+    maxAge: Math.max(1, expiresAt.getTime() - Date.now()),
+  };
+}
 
 function setRefreshCookie(res, refreshToken, expiresAt) {
-  res.cookie(refreshCookieName, refreshToken, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: env.nodeEnv === "production",
-    maxAge: Math.max(1, expiresAt.getTime() - Date.now()),
-  });
+  res.cookie(refreshCookieName, refreshToken, getRefreshCookieOptions(expiresAt));
 }
 
 async function getRoleIdByCode(code) {
@@ -47,7 +62,7 @@ async function issueSession(user) {
   return { accessToken, refreshToken, refreshExpiresAt: expiresAt };
 }
 
-router.post("/signup", async (req, res) => {
+router.post("/signup", authAttemptLimiter, async (req, res) => {
   try {
     const { name, email, password } = req.body;
     if (!name || !email || !password) return res.status(400).json({ message: "name, email, and password are required" });
@@ -77,7 +92,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", authAttemptLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ message: "email and password are required" });
@@ -102,7 +117,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.post("/refresh", async (req, res) => {
+router.post("/refresh", authAttemptLimiter, async (req, res) => {
   try {
     const refreshToken = extractRefreshToken(req);
     if (!refreshToken) return res.status(400).json({ message: "Missing refresh token" });
@@ -141,18 +156,20 @@ router.post("/logout", async (req, res) => {
   if (refreshToken) {
     await supabaseAdmin.from("refresh_tokens").update({ revoked: true }).eq("token_hash", hashRefreshToken(refreshToken));
   }
-  res.clearCookie(refreshCookieName);
+  res.clearCookie(refreshCookieName, getRefreshCookieOptions(new Date()));
   return res.status(204).send();
 });
 
 router.get("/me", requireAuth, (req, res) => res.json({ user: req.user }));
 
-router.post("/dev-token", (req, res) => {
-  const { id, email, role, name } = req.body;
-  if (!id || !email || !role) return res.status(400).json({ message: "id, email, and role are required" });
+if (env.nodeEnv !== "production") {
+  router.post("/dev-token", (req, res) => {
+    const { id, email, role, name } = req.body;
+    if (!id || !email || !role) return res.status(400).json({ message: "id, email, and role are required" });
 
-  const user = { id, email, role, name: name || "Dev User" };
-  return res.json({ accessToken: buildAccessToken(user), refreshToken: buildRefreshToken(user) });
-});
+    const user = { id, email, role, name: name || "Dev User" };
+    return res.json({ accessToken: buildAccessToken(user), refreshToken: buildRefreshToken(user) });
+  });
+}
 
 export default router;
