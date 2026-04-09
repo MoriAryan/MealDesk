@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import { useTheme } from "../theme/ThemeProvider";
@@ -8,12 +8,16 @@ import {
   BarChart3,
   CheckCircle2,
   ChefHat,
+  Clock3,
+  CreditCard,
   Layers,
   MonitorSmartphone,
   Moon,
   QrCode,
   Shield,
+  Sparkles,
   Sun,
+  TimerReset,
 } from "lucide-react";
 
 type Feature = {
@@ -22,44 +26,87 @@ type Feature = {
   description: string;
 };
 
+type ComparisonRow = {
+  label: string;
+  mealDesk: string;
+  traditional: string;
+};
+
 const FEATURES: Feature[] = [
   {
     icon: Layers,
     title: "Table-first workflow",
     description:
-      "See floor status instantly, open any table in one tap, and move from seating to billing without context switching.",
+      "Select a floor, open the exact table, and move from seating to billing without losing context.",
   },
   {
     icon: ChefHat,
-    title: "Kitchen dispatch clarity",
+    title: "Kitchen clarity",
     description:
-      "Tickets appear in real time on kitchen display so prep flow stays calm even during rush hours.",
+      "Draft orders and prepared items stay visible on the kitchen board so prep feels controlled during rush hours.",
   },
   {
     icon: QrCode,
     title: "UPI-friendly checkout",
     description:
-      "Cash, UPI, and digital methods are all native, with fast settlement and fewer counter delays.",
+      "Cash, digital, and UPI payment modes are built in, with QR flows that keep queues moving.",
   },
   {
     icon: MonitorSmartphone,
-    title: "Live customer-facing view",
+    title: "Guest-facing display",
     description:
-      "Let guests follow order totals and status updates on a dedicated display screen.",
+      "Show the live bill and payment state on a separate customer screen so the counter can stay focused.",
   },
   {
     icon: BarChart3,
     title: "Decision-ready reporting",
     description:
-      "Track best sellers, session revenue, and payment mix in dashboards your team can actually use.",
+      "Filter by terminal, session, person, or product and get reports that are actually useful for the next shift.",
   },
   {
     icon: Shield,
     title: "Role-based controls",
     description:
-      "Managers configure critical settings while day-to-day operations remain safe and focused for staff.",
+      "Managers configure critical actions while staff only see the flows they need to finish service safely.",
   },
 ];
+
+const COMPARISON: ComparisonRow[] = [
+  {
+    label: "Kitchen updates",
+    mealDesk: "Live board and ticket state",
+    traditional: "Manual calls or delayed sync",
+  },
+  {
+    label: "Table handling",
+    mealDesk: "Floor plan with active tables",
+    traditional: "Static list or paper register",
+  },
+  {
+    label: "Payments",
+    mealDesk: "Cash, digital, and UPI in one flow",
+    traditional: "Separate processor workflow",
+  },
+  {
+    label: "Reports",
+    mealDesk: "Session, product, and terminal filters",
+    traditional: "Basic daily totals only",
+  },
+  {
+    label: "Access",
+    mealDesk: "Role-aware controls",
+    traditional: "Shared admin login",
+  },
+];
+
+function SectionLabel({ children }: { children: string }) {
+  return (
+    <div className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-4 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-accent">
+      <Sparkles size={10} />
+      {children}
+    </div>
+  );
+}
 
 export function LandingPage() {
   const { user, loading } = useAuth();
@@ -70,6 +117,15 @@ export function LandingPage() {
     const id = window.setTimeout(() => setReady(true), 80);
     return () => window.clearTimeout(id);
   }, []);
+
+  const productProof = useMemo(
+    () => [
+      { value: "1 flow", label: "for floor, kitchen, and billing" },
+      { value: "3 surfaces", label: "terminal, guest display, reports" },
+      { value: "Role-aware", label: "controls for admin and staff" },
+    ],
+    []
+  );
 
   if (!loading && user) return <Navigate to="/" replace />;
 
@@ -115,16 +171,25 @@ export function LandingPage() {
         }}
       />
 
-      <header className="sticky top-0 z-50 border-b border-border/80 bg-panel/85 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-border/80 bg-panel/88 backdrop-blur-md">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-3.5">
-          <Link to="/landing" className="flex items-center hover:opacity-85 transition-opacity">
+          <Link to="/landing" className="flex items-center transition-opacity hover:opacity-85">
             <MealDeskWordmark size="text-xl" showTagline={false} />
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-muted">
-            <a href="#why" className="hover:text-ink transition-colors">Why MealDesk</a>
-            <a href="#workflow" className="hover:text-ink transition-colors">Workflow</a>
-            <a href="#features" className="hover:text-ink transition-colors">Capabilities</a>
+          <nav className="hidden items-center gap-8 text-sm font-semibold text-muted md:flex">
+            <a href="#why" className="transition-colors hover:text-ink">
+              Why MealDesk
+            </a>
+            <a href="#comparison" className="transition-colors hover:text-ink">
+              Compare
+            </a>
+            <a href="#workflow" className="transition-colors hover:text-ink">
+              Workflow
+            </a>
+            <a href="#features" className="transition-colors hover:text-ink">
+              Capabilities
+            </a>
           </nav>
 
           <div className="flex items-center gap-2.5">
@@ -137,46 +202,44 @@ export function LandingPage() {
             </button>
             <Link
               to="/login"
-              className="hidden sm:inline-flex rounded-full border border-border px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent"
+              className="hidden rounded-full border border-border px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent sm:inline-flex"
             >
-              Sign In
+              Sign in
             </Link>
             <Link
               to="/login"
-              className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-bold text-white"
+              className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-black text-white"
               style={{
                 background: "linear-gradient(135deg, var(--color-accent), #f97316)",
                 boxShadow: "0 8px 24px rgba(193,91,61,0.3)",
               }}
             >
-              Start Now <ArrowRight size={14} />
+              Open demo <ArrowRight size={14} />
             </Link>
           </div>
         </div>
       </header>
 
       <main className="relative z-10">
-        <section className="mx-auto grid w-full max-w-7xl gap-10 px-6 pb-16 pt-20 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pb-24">
+        <section className="mx-auto grid w-full max-w-7xl gap-10 px-6 pb-16 pt-16 lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:pb-24 lg:pt-20">
           <div
             style={{
               opacity: ready ? 1 : 0,
               animation: ready ? "md-rise 0.7s ease both" : "none",
             }}
           >
-            <div className="mb-7">
+            <SectionLabel>Built for cafes, counters, and kitchens</SectionLabel>
+            <div className="mt-5 mb-6">
               <MealDeskSplitReveal size={132} />
             </div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-accent/35 bg-accent/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-accent">
-              Built for modern cafe teams
-            </div>
-            <h1 className="max-w-3xl text-4xl font-black leading-[1.04] tracking-tight md:text-6xl">
-              A premium POS that feels calm at peak hours.
+            <h1 className="max-w-3xl text-4xl font-black leading-[1.02] tracking-tight md:text-6xl">
+              Run your cafe in one live order flow.
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted md:text-lg">
-              MealDesk gives your counter, kitchen, and floor team one coherent system. Faster service, cleaner handoff, and a UI that stays focused under pressure.
+              MealDesk replaces separate POS, kitchen, and guest-display tools with one product that keeps the counter fast, the kitchen calm, and the reports useful.
             </p>
 
-            <div className="mt-9 flex flex-wrap items-center gap-3.5">
+            <div className="mt-8 flex flex-wrap items-center gap-3.5">
               <Link
                 to="/login"
                 className="inline-flex items-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-black text-white"
@@ -185,18 +248,33 @@ export function LandingPage() {
                   boxShadow: "0 10px 28px rgba(193,91,61,0.33)",
                 }}
               >
-                Open MealDesk
+                Launch the demo
                 <ArrowRight size={16} />
               </Link>
               <a
-                href="#features"
+                href="#comparison"
                 className="rounded-2xl border border-border px-6 py-3.5 text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent"
               >
-                Explore Product
+                See why it wins
+              </a>
+              <a
+                href="#workflow"
+                className="rounded-2xl border border-border px-6 py-3.5 text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent"
+              >
+                Watch the flow
               </a>
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold uppercase tracking-wider text-muted">
+            <div className="mt-8 grid max-w-2xl gap-3 sm:grid-cols-3">
+              {productProof.map((item) => (
+                <div key={item.label} className="rounded-2xl border border-border bg-panel/85 p-4 shadow-[var(--shadow-artisanal)]">
+                  <p className="text-2xl font-black tracking-tight text-ink">{item.value}</p>
+                  <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted">{item.label}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold uppercase tracking-wider text-muted">
               {[
                 "Role-aware access",
                 "Fast table turnover",
@@ -228,20 +306,14 @@ export function LandingPage() {
 
             <div className="grid grid-cols-5 gap-3" style={{ animation: "md-float-soft 6.5s ease-in-out infinite" }}>
               <div className="col-span-3 rounded-2xl border border-border bg-bg p-3">
-                <div className="mb-3 flex flex-wrap gap-2">
-                  {["Coffee", "Food", "Desserts", "Quick"].map((chip, i) => (
-                    <span
-                      key={chip}
-                      className="rounded-full px-3 py-1 text-[11px] font-bold"
-                      style={
-                        i === 0
-                          ? { background: "var(--color-accent)", color: "white" }
-                          : { background: "var(--color-panel)", color: "var(--color-muted)", border: "1px solid var(--color-border)" }
-                      }
-                    >
-                      {chip}
-                    </span>
-                  ))}
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-accent">Live terminal</p>
+                    <p className="text-sm font-bold text-ink">Counter, kitchen, and payment in one place</p>
+                  </div>
+                  <div className="rounded-full border border-accent/20 bg-accent/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-accent">
+                    2 secs
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2.5 text-xs">
                   {[
@@ -253,6 +325,18 @@ export function LandingPage() {
                     <div key={name} className="rounded-xl border border-border bg-panel px-3 py-2.5">
                       <p className="font-semibold text-ink">{name}</p>
                       <p className="text-muted">INR {amount}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 grid grid-cols-3 gap-2 text-[10px] font-bold uppercase tracking-widest text-muted">
+                  {[
+                    [Clock3, "Live"],
+                    [TimerReset, "Fast"],
+                    [CreditCard, "Ready"],
+                  ].map(([Icon, label]) => (
+                    <div key={label as string} className="flex items-center gap-1.5 rounded-full border border-border bg-panel px-2.5 py-1.5">
+                      <Icon size={11} className="text-accent" />
+                      {label as string}
                     </div>
                   ))}
                 </div>
@@ -292,7 +376,7 @@ export function LandingPage() {
         <section id="why" className="border-y border-border bg-panel/70 py-14">
           <div className="mx-auto grid w-full max-w-7xl gap-5 px-6 md:grid-cols-3">
             {[
-              ["Single operator flow", "Counter staff can run floor, billing, and payment from one place."],
+              ["One operator flow", "Counter staff can run floor, billing, and payment from one place."],
               ["Less training overhead", "Clear layouts shorten onboarding and reduce accidental actions."],
               ["Consistent visual language", "Shared surfaces and controls make every module feel connected."],
             ].map(([title, copy]) => (
@@ -304,10 +388,34 @@ export function LandingPage() {
           </div>
         </section>
 
+        <section id="comparison" className="mx-auto w-full max-w-7xl px-6 py-18">
+          <div className="mb-7 max-w-2xl">
+            <SectionLabel>Positioning</SectionLabel>
+            <h2 className="mt-4 text-3xl font-black tracking-tight md:text-4xl">Why MealDesk over a traditional POS?</h2>
+            <p className="mt-3 text-muted">Users need a reason to switch. This section makes the difference explicit.</p>
+          </div>
+
+          <div className="overflow-hidden rounded-[2rem] border border-border bg-panel shadow-[var(--shadow-artisanal)]">
+            <div className="grid grid-cols-[1.2fr_1fr_1fr] border-b border-border bg-bg/60 px-6 py-3 text-[10px] font-black uppercase tracking-[0.22em] text-muted">
+              <div>Capability</div>
+              <div className="text-accent">MealDesk</div>
+              <div>Traditional POS</div>
+            </div>
+            {COMPARISON.map((row, index) => (
+              <div key={row.label} className={`grid grid-cols-[1.2fr_1fr_1fr] px-6 py-4 ${index !== COMPARISON.length - 1 ? "border-b border-border/70" : ""}`}>
+                <div className="text-sm font-semibold text-ink">{row.label}</div>
+                <div className="text-sm text-ink">{row.mealDesk}</div>
+                <div className="text-sm text-muted">{row.traditional}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <section id="workflow" className="mx-auto w-full max-w-7xl px-6 py-18">
           <div className="mb-7 max-w-2xl">
-            <h2 className="text-3xl font-black tracking-tight md:text-4xl">A practical workflow from order to payout</h2>
-            <p className="mt-3 text-muted">MealDesk keeps each step obvious so your team can move faster without visual overload.</p>
+            <SectionLabel>Story</SectionLabel>
+            <h2 className="mt-4 text-3xl font-black tracking-tight md:text-4xl">A practical workflow from order to payout</h2>
+            <p className="mt-3 text-muted">The page should tell a story in the same order the restaurant experiences it.</p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-4">
@@ -329,8 +437,9 @@ export function LandingPage() {
         <section id="features" className="border-t border-border bg-panel/70 py-18">
           <div className="mx-auto w-full max-w-7xl px-6">
             <div className="mb-8 max-w-2xl">
-              <h2 className="text-3xl font-black tracking-tight md:text-4xl">Core capabilities, presented clearly</h2>
-              <p className="mt-3 text-muted">Premium does not mean noisy. Every block below has a clear operational purpose.</p>
+              <SectionLabel>Capabilities</SectionLabel>
+              <h2 className="mt-4 text-3xl font-black tracking-tight md:text-4xl">Core capabilities, presented clearly</h2>
+              <p className="mt-3 text-muted">This needs to feel like product value, not a feature dump.</p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -347,10 +456,13 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-4xl px-6 py-20 text-center">
-          <h2 className="text-4xl font-black leading-tight tracking-tight md:text-5xl">MealDesk makes busy service feel controlled.</h2>
+        <section className="mx-auto w-full max-w-5xl px-6 py-20 text-center">
+          <SectionLabel>CTA</SectionLabel>
+          <h2 className="mt-5 text-4xl font-black leading-tight tracking-tight md:text-5xl">
+            MealDesk makes busy service feel controlled.
+          </h2>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted">
-            Launch your next shift on a UI designed for speed, readability, and confident operations.
+            Launch a demo that shows the full restaurant flow instead of just a static dashboard.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
@@ -362,10 +474,10 @@ export function LandingPage() {
               <ArrowRight size={16} />
             </Link>
             <a
-              href="#why"
+              href="#comparison"
               className="rounded-2xl border border-border px-6 py-3 text-sm font-semibold text-ink transition-colors hover:border-accent hover:text-accent"
             >
-              See why teams switch
+              Compare the difference
             </a>
           </div>
         </section>
