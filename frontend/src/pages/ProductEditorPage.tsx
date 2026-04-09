@@ -17,6 +17,7 @@ import type {
   TaxRate,
 } from "../api/types";
 import { useAuth } from "../auth/AuthProvider";
+import { Upload, Image as ImageIcon, X } from "lucide-react";
 
 const units: Product["uom"][] = ["unit", "kg", "liter", "gram", "ml"];
 
@@ -49,6 +50,7 @@ export function ProductEditorPage() {
   const [price, setPrice] = useState<number | "">(0);
   const [uom, setUom] = useState<Product["uom"]>("unit");
   const [active, setActive] = useState(true);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [variants, setVariants] = useState<VariantInput[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -116,6 +118,7 @@ export function ProductEditorPage() {
         setPrice(Number(product.price));
         setUom(product.uom);
         setActive(product.active);
+        setImageUrl(product.image_url || null);
         setVariants(
           response.variants.map((variant) => ({
             id: variant.id,
@@ -133,10 +136,44 @@ export function ProductEditorPage() {
     void loadProduct();
   }, [accessToken, isCreate, productId]);
 
-  useEffect(() => {
-    if (!taxRates.length || taxRateId) return;
-    setTaxRateId(taxRates[0].id);
-  }, [taxRates, taxRateId]);
+  const readImageFile = async (file: File) => {
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(new Error("Failed to read image file"));
+      reader.readAsDataURL(file);
+    });
+
+    return dataUrl;
+  };
+
+  const handleImageUpload = async (file: File | null) => {
+    if (!file) return;
+
+    try {
+      const nextImageUrl = await readImageFile(file);
+      setImageUrl(nextImageUrl);
+
+      if (!isCreate && accessToken && productId && isAdmin) {
+        await updateProduct(accessToken, productId, { imageUrl: nextImageUrl });
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load image");
+    }
+  };
+
+  const removeImage = async () => {
+    setImageUrl(null);
+    if (!isCreate && accessToken && productId && isAdmin) {
+      try {
+        await updateProduct(accessToken, productId, { imageUrl: null });
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to clear image");
+      }
+    }
+  };
+
+  const effectiveTaxRateId = taxRateId || taxRates[0]?.id || "";
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -145,12 +182,13 @@ export function ProductEditorPage() {
     const payload = {
       posConfigId,
       categoryId,
-      taxRateId,
+      taxRateId: effectiveTaxRateId,
       name,
       description,
       price: Number(price),
       uom,
       active,
+      imageUrl,
       variants,
     };
 
@@ -193,6 +231,72 @@ export function ProductEditorPage() {
       )}
 
       <form onSubmit={submit} className="flex flex-col gap-6">
+        <div className="rounded-3xl border border-border bg-panel p-5 shadow-sm">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-accent">Media</p>
+              <h3 className="mt-1 text-lg font-bold text-ink">Product image</h3>
+            </div>
+            {imageUrl && isAdmin && (
+              <button
+                type="button"
+                onClick={() => void removeImage()}
+                className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-muted transition-colors hover:border-red-500/40 hover:text-red-500"
+              >
+                <X size={12} /> Remove
+              </button>
+            )}
+          </div>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-[220px_1fr] md:items-center">
+            <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-bg/40">
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt={name || "Product preview"}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-center text-muted">
+                  <ImageIcon size={28} />
+                  <span className="text-xs font-semibold uppercase tracking-widest">No image</span>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <label className="flex cursor-pointer flex-col gap-2 rounded-2xl border border-dashed border-border bg-bg/35 px-4 py-5 transition-colors hover:border-accent/40 hover:bg-bg/55">
+                <span className="inline-flex items-center gap-2 text-sm font-semibold text-ink">
+                  <Upload size={14} className="text-accent" /> Upload or replace image
+                </span>
+                <span className="text-xs text-muted">
+                  PNG, JPG, or WEBP. Existing products save the image immediately.
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  disabled={!isAdmin}
+                  className="hidden"
+                  onChange={(event) => void handleImageUpload(event.target.files?.[0] || null)}
+                />
+              </label>
+
+              <label className="block text-sm">
+                <span className="mb-1 block text-xs uppercase tracking-wider text-muted">
+                  Or paste an image URL
+                </span>
+                <input
+                  disabled={!isAdmin}
+                  value={imageUrl || ""}
+                  onChange={(event) => setImageUrl(event.target.value || null)}
+                  className={inputClass}
+                  placeholder="https://..."
+                />
+              </label>
+            </div>
+          </div>
+        </div>
+
         {/* Global Product Name (Above Tabs) */}
         <div>
           <label className="block text-sm font-semibold text-ink mb-1">
@@ -357,7 +461,7 @@ export function ProductEditorPage() {
                   </label>
                   <select
                     disabled={!isAdmin}
-                    value={taxRateId}
+                    value={effectiveTaxRateId}
                     onChange={(event) => setTaxRateId(event.target.value)}
                     className={selectClass}
                   >

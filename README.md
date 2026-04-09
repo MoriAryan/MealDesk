@@ -72,19 +72,19 @@ You need Node.js and a Supabase (PostgreSQL) instance. Copy the env files and fi
 # Backend
 cd backend
 cp .env.example .env
-# fill in your Supabase URL, DB connection string, JWT secret
+# fill in your Supabase URL, API keys, JWT secrets, and FRONTEND_URL
 npm install
 npm run dev
 
 # Frontend (separate terminal)
 cd frontend
 cp .env.example .env
-# fill in VITE_API_URL pointing to your backend
+# fill in VITE_API_BASE_URL pointing to your backend
 npm install
 npm run dev
 ```
 
-Frontend runs on `http://localhost:5173`, backend on `http://localhost:3000`.
+Frontend runs on `http://localhost:5173`, backend on `http://localhost:4000`.
 
 To seed the database with initial data:
 ```bash
@@ -92,6 +92,18 @@ cd backend
 npm run db:migrate
 npm run db:seed
 ```
+
+## Production checklist
+
+Before deploying, complete these items:
+- Create the Supabase project and run the migration and seed scripts.
+- Set backend env vars: PORT, FRONTEND_URL, SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_KEY, JWT_ACCESS_SECRET, JWT_REFRESH_SECRET.
+- Set frontend env vars: VITE_API_BASE_URL and VITE_SOCKET_BASE_URL if needed.
+- Verify `npm run build` succeeds in `frontend/`.
+- Verify the backend starts cleanly with production env values.
+- Test login, order creation, kitchen flow, payment flow, and reports end to end.
+- Deploy frontend on Vercel and backend on Render, both over HTTPS.
+- Confirm cookies and CORS work across the two deployed domains.
 
 ---
 

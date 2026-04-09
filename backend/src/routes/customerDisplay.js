@@ -7,7 +7,9 @@ router.use(requireAuth);
 
 router.get("/latest", async (req, res) => {
   try {
-    const { data, error } = await supabaseAdmin
+    const { pos_config_id, pos_session_id } = req.query;
+
+    let query = supabaseAdmin
       .from("orders")
       .select(`
         *,
@@ -20,8 +22,16 @@ router.get("/latest", async (req, res) => {
       `)
       .in("status", ["draft", "paid"])
       .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .limit(1);
+
+    if (pos_config_id) {
+      query = query.eq("pos_config_id", pos_config_id);
+    }
+    if (pos_session_id) {
+      query = query.eq("pos_session_id", pos_session_id);
+    }
+
+    const { data, error } = await query.maybeSingle();
 
     if (error) throw error;
     res.json({ order: data || null });

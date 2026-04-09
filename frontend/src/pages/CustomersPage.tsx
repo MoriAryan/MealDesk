@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { X, Search, ChevronDown } from "lucide-react";
 import { listCustomers, createCustomer } from "../api/customers";
 import type { Customer } from "../api/types";
@@ -317,7 +317,7 @@ export function CustomersPage() {
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     if (!accessToken) return;
     setLoading(true);
     try {
@@ -328,11 +328,11 @@ export function CustomersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [accessToken]);
 
   useEffect(() => {
     void load();
-  }, [accessToken]);
+  }, [load]);
 
   const handleSave = (newCustomer: Customer) => {
     setCustomers((prev) => [newCustomer, ...prev]);

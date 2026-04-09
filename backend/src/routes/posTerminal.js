@@ -24,6 +24,28 @@ router.post("/order", async (req, res) => {
       return res.status(400).json({ message: "posConfigId is required." });
     }
 
+    if (!posSessionId) {
+      return res.status(400).json({ message: "An active posSessionId is required." });
+    }
+
+    const { data: activeSession, error: sessionError } = await supabaseAdmin
+      .from("pos_sessions")
+      .select("id, status, pos_config_id")
+      .eq("id", posSessionId)
+      .single();
+
+    if (sessionError || !activeSession) {
+      return res.status(400).json({ message: "POS session not found." });
+    }
+
+    if (activeSession.status !== "active") {
+      return res.status(400).json({ message: "POS session is not active." });
+    }
+
+    if (activeSession.pos_config_id !== posConfigId) {
+      return res.status(400).json({ message: "Session does not belong to this POS config." });
+    }
+
     let subtotal = 0;
     let tax_total = 0;
 

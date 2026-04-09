@@ -2,6 +2,8 @@ import { config } from "dotenv";
 
 config();
 
+const nodeEnv = process.env.NODE_ENV || "development";
+
 const requiredEnv = [
   "PORT",
   "FRONTEND_URL",
@@ -47,6 +49,7 @@ for (const entry of supabaseKeysToValidate) {
 }
 
 export default {
+  nodeEnv,
   port: Number(process.env.PORT || 4000),
   frontendUrl: process.env.FRONTEND_URL,
   supabase: {

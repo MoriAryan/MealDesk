@@ -9,7 +9,13 @@ export type PosConfig = {
   self_ordering_mode: "qr" | "token" | null;
   bg_color: string | null;
   pos_sessions?: {
+    id: string;
+    pos_config_id?: string;
+    opened_by?: string | null;
     opened_at: string;
+    closed_at?: string | null;
+    opening_cash?: number | null;
+    closing_cash?: number | null;
     closing_sale_total: number;
     status: "active" | "closed";
   }[];
@@ -20,6 +26,31 @@ export type PosConfig = {
     lastOpenedAt: string | null;
     sessionCount: number;
   };
+};
+
+export type Floor = {
+  id: string;
+  pos_config_id: string;
+  name: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type DiningTable = {
+  id: string;
+  floor_id: string;
+  table_number: string;
+  seats: number;
+  active: boolean;
+  appointment_resource?: string | null;
+  qr_token?: string;
+  created_at?: string;
+  updated_at?: string;
+  floors?: {
+    id: string;
+    name: string;
+    pos_config_id: string;
+  } | null;
 };
 
 export type Category = {
@@ -53,6 +84,7 @@ export type Product = {
   price: number;
   uom: "unit" | "kg" | "liter" | "gram" | "ml";
   active: boolean;
+  image_url: string | null;
   categories?: { name: string; color: string } | null;
   tax_rates?: { label: string; rate: number } | null;
   product_variants?: ProductVariant[];

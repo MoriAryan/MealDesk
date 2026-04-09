@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { ChevronDown } from "lucide-react";
 import {
   createPosConfig,
+  deletePosConfig,
   listPosConfigs,
   updatePosConfig,
 } from "../api/posConfig";
@@ -75,6 +76,21 @@ export function PosConfigPage() {
       setIsCreateModalOpen(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to create terminal");
+    }
+  };
+
+  const onDelete = async () => {
+    if (!accessToken || !isAdmin || !selected) return;
+    if (!window.confirm(`Delete terminal "${selected.name}"? This cannot be undone.`)) return;
+
+    try {
+      await deletePosConfig(accessToken, selected.id);
+      const remaining = items.filter((item) => item.id !== selected.id);
+      setItems(remaining);
+      setSelectedId(remaining[0]?.id || "");
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete terminal");
     }
   };
 
@@ -321,12 +337,20 @@ export function PosConfigPage() {
             </label>
 
             {isAdmin && (
-              <button
-                onClick={() => void saveSelected()}
-                className="rounded-lg bg-accent px-4 py-2 font-medium text-white transition-colors hover:bg-accent-hover"
-              >
-                Save Terminal
-              </button>
+              <div className="flex flex-wrap items-center gap-2 pt-2">
+                <button
+                  onClick={() => void saveSelected()}
+                  className="rounded-lg bg-accent px-4 py-2 font-medium text-white transition-colors hover:bg-accent-hover"
+                >
+                  Save Terminal
+                </button>
+                <button
+                  onClick={onDelete}
+                  className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 font-medium text-red-500 transition-colors hover:bg-red-500/20"
+                >
+                  Delete Terminal
+                </button>
+              </div>
             )}
           </div>
         )}

@@ -33,3 +33,10 @@ export function updatePosConfig(
     body: payload,
   });
 }
+
+export function deletePosConfig(token: string, id: string) {
+  return requestJson<void>(`/pos-config/${id}`, {
+    method: "DELETE",
+    token,
+  });
+}

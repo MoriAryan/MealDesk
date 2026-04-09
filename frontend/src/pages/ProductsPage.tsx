@@ -292,8 +292,9 @@ export function ProductsPage() {
                       <span
                         className="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-widest uppercase border"
                         style={{
-                          backgroundColor:
-                            `${product.categories.color}15` || "transparent",
+                          backgroundColor: product.categories.color
+                            ? `${product.categories.color}15`
+                            : "transparent",
                           borderColor: `${product.categories.color}40`,
                           color: product.categories.color,
                         }}

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import {
   createContext,
   useCallback,
@@ -29,6 +30,17 @@ function persistSession(data: AuthResponse) {
 
 function clearSession() {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
+}
+
+function isTokenLikelyExpired(token: string) {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1] || "")) as { exp?: number };
+    if (!payload.exp) return false;
+    const nowSeconds = Math.floor(Date.now() / 1000);
+    return payload.exp <= nowSeconds + 10;
+  } catch {
+    return false;
+  }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -79,9 +91,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       try {
-        const me = await getProfile(storedToken);
-        setAccessToken(storedToken);
-        setUser(me.user);
+        if (isTokenLikelyExpired(storedToken)) {
+          const refreshed = await refreshSession();
+          applySession(refreshed);
+        } else {
+          const me = await getProfile(storedToken);
+          setAccessToken(storedToken);
+          setUser(me.user);
+        }
       } catch {
         try {
           const refreshed = await refreshSession();

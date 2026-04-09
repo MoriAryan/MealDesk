@@ -101,4 +101,26 @@ router.put("/:id", requireRoles("admin"), async (req, res) => {
   }
 });
 
+router.delete("/:id", requireRoles("admin"), async (req, res) => {
+  try {
+    const { count, error: ordersError } = await supabaseAdmin
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("pos_config_id", req.params.id);
+
+    if (ordersError) throw ordersError;
+
+    if ((count || 0) > 0) {
+      return res.status(409).json({ message: "This terminal has orders and cannot be deleted." });
+    }
+
+    const { error } = await supabaseAdmin.from("pos_config").delete().eq("id", req.params.id);
+    if (error) throw error;
+
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Failed to delete POS terminal" });
+  }
+});
+
 export default router;

@@ -52,10 +52,3 @@ export function updateItemPrepared(token: string, ticketId: string, itemId: stri
   });
 }
 
-export function generateMockTicket(token: string, posConfigId: string) {
-  return requestJson<{ ticket: KitchenTicket; items: KitchenTicketItem[] }>("/kitchen/mock-ticket", {
-    method: "POST",
-    token,
-    body: { posConfigId },
-  });
-}

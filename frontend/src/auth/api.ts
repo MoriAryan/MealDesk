@@ -16,12 +16,17 @@ async function requestJson<T>(path: string, options: JsonRequestOptions = {}): P
     headers.Authorization = `Bearer ${options.token}`;
   }
 
-  const response = await fetch(`${appEnv.apiBaseUrl}${path}`, {
-    method: options.method || "GET",
-    headers,
-    credentials: "include",
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${appEnv.apiBaseUrl}${path}`, {
+      method: options.method || "GET",
+      headers,
+      credentials: "include",
+      body: options.body ? JSON.stringify(options.body) : undefined,
+    });
+  } catch {
+    throw new Error(`Unable to connect to API at ${appEnv.apiBaseUrl}. Please start backend server.`);
+  }
 
   if (!response.ok) {
     let message = `Request failed: ${response.status}`;

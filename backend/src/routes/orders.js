@@ -34,8 +34,27 @@ router.get("/", async (req, res) => {
 
 router.patch("/pay-draft", async (req, res) => {
   try {
-    const { posConfigId, tableId, paymentMethod = "cash", customerId = null } = req.body;
+    const { posConfigId, tableId, paymentMethod = "cash", customerId = null, posSessionId = null } = req.body;
     if (!posConfigId) return res.status(400).json({ message: "posConfigId required" });
+    if (!posSessionId) return res.status(400).json({ message: "posSessionId required" });
+
+    const { data: activeSession, error: sessionError } = await supabaseAdmin
+      .from("pos_sessions")
+      .select("id, status, pos_config_id")
+      .eq("id", posSessionId)
+      .single();
+
+    if (sessionError || !activeSession) {
+      return res.status(400).json({ message: "POS session not found" });
+    }
+
+    if (activeSession.status !== "active") {
+      return res.status(400).json({ message: "POS session is not active" });
+    }
+
+    if (activeSession.pos_config_id !== posConfigId) {
+      return res.status(400).json({ message: "Session does not belong to this POS config" });
+    }
 
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const safeCustomerId = customerId && uuidRegex.test(customerId) ? customerId : null;

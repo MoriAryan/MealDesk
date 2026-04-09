@@ -3,7 +3,7 @@ import { useAuth } from "../auth/AuthProvider";
 import { listPosConfigs } from "../api/posConfig";
 import type { PosConfig } from "../api/types";
 import { Link } from "react-router-dom";
-import { MoreHorizontal, Power, Settings, Monitor, MonitorPlay, Activity } from "lucide-react";
+import { MoreHorizontal, Power, Settings, Monitor, MonitorPlay, Activity, Plus, LayoutDashboard } from "lucide-react";
 
 function PosConfigCard({ config }: { config: PosConfig }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -52,21 +52,21 @@ function PosConfigCard({ config }: { config: PosConfig }) {
                 className="flex items-center gap-2 px-4 py-2 text-sm text-muted hover:bg-bg hover:text-ink transition-colors"
                 onClick={() => setMenuOpen(false)}
               >
-                <Settings size={14} /> Settings
+                <Settings size={14} /> Session Setup
               </Link>
               <Link
                 to="/kitchen-display"
                 className="flex items-center gap-2 px-4 py-2 text-sm text-muted hover:bg-bg hover:text-ink transition-colors"
                 onClick={() => setMenuOpen(false)}
               >
-                <MonitorPlay size={14} /> Kitchen Display
+                <MonitorPlay size={14} /> Kitchen Board
               </Link>
               <Link
                 to="/customer-display"
                 className="flex items-center gap-2 px-4 py-2 text-sm text-muted hover:bg-bg hover:text-ink transition-colors"
                 onClick={() => setMenuOpen(false)}
               >
-                <MonitorPlay size={14} /> Customer Display
+                <MonitorPlay size={14} /> Guest Screen
               </Link>
             </div>
           )}
@@ -97,7 +97,8 @@ function PosConfigCard({ config }: { config: PosConfig }) {
 }
 
 export function HomePage() {
-  const { accessToken } = useAuth();
+  const { accessToken, user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const [configs, setConfigs] = useState<PosConfig[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -133,6 +134,81 @@ export function HomePage() {
         <h1 className="text-3xl font-bold tracking-tight text-ink">Terminal Overview</h1>
         <p className="text-muted text-lg">Manage your registers and access active sessions.</p>
       </div>
+
+      <section className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+        <div className="relative overflow-hidden rounded-[2rem] border border-border bg-panel p-6 shadow-[var(--shadow-artisanal)]">
+          <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-accent/10 blur-3xl" />
+          <div className="relative flex items-start justify-between gap-6">
+            <div className="max-w-xl">
+              <p className="text-[10px] font-black uppercase tracking-[0.28em] text-accent">Session Dock</p>
+              <h2 className="mt-2 text-2xl font-black tracking-tight text-ink">One place for the live shift tools.</h2>
+              <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted">
+                Keep the busy session flows out of the global navigation. Open the terminal, kitchen board, guest display, or setup from here.
+              </p>
+            </div>
+            <div className="hidden md:flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/10 text-accent">
+              <LayoutDashboard size={22} />
+            </div>
+          </div>
+
+          <div className="relative mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            {[
+              { title: "Open Terminal", to: "/pos", icon: Power, tone: "bg-ink text-panel" },
+              { title: "Kitchen Board", to: "/kitchen-display", icon: MonitorPlay, tone: "bg-bg text-ink" },
+              { title: "Guest Screen", to: "/customer-display", icon: Monitor, tone: "bg-bg text-ink" },
+              { title: "Setup", to: "/pos-config", icon: Settings, tone: "bg-bg text-ink" },
+            ].map((item) => (
+              <Link
+                key={item.title}
+                to={item.to}
+                className={`group flex items-center justify-between rounded-2xl border border-border px-4 py-4 transition-all hover:-translate-y-0.5 hover:border-accent/40 ${item.tone}`}
+              >
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] opacity-60">Quick Open</p>
+                  <h3 className="mt-1 font-bold">{item.title}</h3>
+                </div>
+                <item.icon size={18} className="transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-[2rem] border border-border bg-panel p-6 shadow-[var(--shadow-artisanal)]">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.28em] text-accent">Admin Tools</p>
+              <h3 className="mt-2 text-xl font-black tracking-tight text-ink">Terminals</h3>
+            </div>
+            {isAdmin && (
+              <Link
+                to="/pos-config"
+                className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-xs font-bold text-ink transition-colors hover:border-accent/40 hover:text-accent"
+              >
+                <Plus size={14} /> New POS
+              </Link>
+            )}
+          </div>
+
+          <div className="mt-4 space-y-3">
+            {configs.slice(0, 3).map((cfg) => (
+              <div key={cfg.id} className="flex items-center justify-between rounded-2xl border border-border bg-bg/45 px-4 py-3">
+                <div>
+                  <p className="text-sm font-bold text-ink">{cfg.name}</p>
+                  <p className="text-xs text-muted">{cfg._stats?.sessionCount ?? 0} sessions · {cfg._stats?.orderCount ?? 0} orders</p>
+                </div>
+                <Link to="/pos-config" className="text-xs font-bold uppercase tracking-widest text-accent hover:underline">
+                  Manage
+                </Link>
+              </div>
+            ))}
+            {!configs.length && (
+              <p className="rounded-2xl border border-dashed border-border px-4 py-6 text-center text-sm text-muted">
+                No terminals yet. Create one from POS Setup.
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
 
       {configs.length === 0 ? (
         <div className="py-20 px-6 border border-dashed border-border/80 bg-panel/30 rounded-[2rem] text-center flex flex-col items-center justify-center max-w-2xl mx-auto shadow-inner">
