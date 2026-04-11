@@ -392,8 +392,8 @@ export function CustomersPage() {
           Loading customers…
         </div>
       ) : (
-        <div className="rounded-xl border border-border overflow-hidden">
-          <table className="min-w-full text-sm text-left">
+        <div className="rounded-xl border border-border overflow-x-auto">
+          <table className="min-w-full text-sm text-left whitespace-nowrap">
             <thead>
               <tr className="bg-bg/60 border-b border-border">
                 <th className="px-4 py-3 w-10">

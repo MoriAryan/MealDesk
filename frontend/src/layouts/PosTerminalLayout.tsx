@@ -292,26 +292,36 @@ export function PosTerminalLayout() {
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden bg-bg">
       {/* Top Navigation Bar */}
-      <header className="z-10 flex h-[68px] shrink-0 items-center justify-between border-b border-border bg-panel px-4 md:px-6">
+      <header className="z-10 flex h-[60px] md:h-[68px] shrink-0 items-center justify-between border-b border-border bg-panel px-3 md:px-6">
         {/* Left: view tabs */}
-        <div className="flex h-full items-center gap-4 md:gap-6">
-          <span className="text-2xl font-bold tracking-tight text-ink">Terminal</span>
+        <div className="flex h-full items-center gap-2 md:gap-6">
+          <span className="hidden sm:block text-2xl font-bold tracking-tight text-ink">Terminal</span>
 
-          <div className="flex h-full items-center gap-1 ml-0 md:ml-2">
+          <div className="flex h-full items-center gap-1 sm:ml-2">
             <button
               onClick={() => setCurrentView("FLOOR")}
-              className={`flex h-full items-center justify-center border-b-2 px-4 text-sm font-semibold tracking-wide transition-colors md:px-6 ${
+              className={`flex h-full items-center justify-center border-b-2 px-3 text-xs md:text-sm font-semibold tracking-wide transition-colors md:px-6 ${
                 currentView === "FLOOR"
-                  ? "border-accent text-ink"
-                  : "border-transparent text-muted hover:border-border hover:text-ink"
+                  ? "border-accent text-ink hidden sm:flex"
+                  : "border-transparent text-muted hover:border-border hover:text-ink hidden sm:flex"
               }`}
             >
               Floor Plan
             </button>
+            {/* Show icons on compact mobile instead of full text if needed, but floor/register are short enough. Keep text but reduce padding */}
+            <button
+              onClick={() => setCurrentView("FLOOR")}
+              className={`sm:hidden flex h-full items-center justify-center border-b-2 px-3 text-xs font-semibold tracking-wide transition-colors ${
+                currentView === "FLOOR" ? "border-accent text-ink" : "border-transparent text-muted"
+              }`}
+            >
+              Floors
+            </button>
+
             <button
               onClick={() => setCurrentView("REGISTER")}
               disabled={!activeTableId && currentView !== "REGISTER"}
-              className={`flex h-full items-center justify-center border-b-2 px-4 text-sm font-semibold tracking-wide transition-colors md:px-6 ${
+              className={`flex h-full items-center justify-center border-b-2 px-3 text-xs md:text-sm font-semibold tracking-wide transition-colors md:px-6 ${
                 currentView !== "FLOOR"
                   ? "border-accent text-ink"
                   : "border-transparent text-muted hover:border-border hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
@@ -326,18 +336,20 @@ export function PosTerminalLayout() {
         <div className="flex items-center gap-2 md:gap-3">
           {/* Customer picker — visible only in REGISTER view */}
           {(currentView === "REGISTER" || currentView === "PAYMENT") && (
-            <CustomerPicker
-              customers={customers}
-              selectedCustomer={selectedCustomer}
-              onSelect={setSelectedCustomer}
-              onClear={() => setSelectedCustomer(null)}
-            />
+            <div className="max-w-[140px] sm:max-w-none">
+              <CustomerPicker
+                customers={customers}
+                selectedCustomer={selectedCustomer}
+                onSelect={setSelectedCustomer}
+                onClear={() => setSelectedCustomer(null)}
+              />
+            </div>
           )}
 
           <button
             onClick={loadData}
             title="Reload Data"
-            className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-bg text-muted transition-colors hover:border-accent/40 hover:text-accent"
+            className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-md border border-border bg-bg text-muted transition-colors hover:border-accent/40 hover:text-accent"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
@@ -354,9 +366,9 @@ export function PosTerminalLayout() {
           <div className="mx-1 hidden h-5 w-px bg-border sm:block" />
           <button
             onClick={closeRegister}
-            className="flex items-center gap-2 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-500 transition-colors hover:bg-red-500/20"
+            className="flex items-center gap-2 rounded-md border border-red-500/30 bg-red-500/10 px-2 py-1.5 md:px-3 text-[10px] md:text-xs font-semibold text-red-500 transition-colors hover:bg-red-500/20"
           >
-            Close Session
+            Close
           </button>
         </div>
       </header>

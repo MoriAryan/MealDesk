@@ -64,7 +64,7 @@ export function AppLayout() {
       <main className={
         isPos
           ? "w-full flex-1 flex overflow-hidden min-h-0"
-          : "mx-auto w-full flex-1 max-w-7xl px-4 py-8 md:px-6 md:py-10"
+          : "mx-auto w-full flex-1 max-w-7xl px-4 py-6 md:px-6 md:py-10"
       }>
         <Outlet />
       </main>

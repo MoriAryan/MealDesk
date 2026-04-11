@@ -399,7 +399,7 @@ export function OrdersPage() {
           Loading orders…
         </div>
       ) : (
-        <div className="rounded-xl border border-border overflow-hidden">
+        <div className="rounded-xl border border-border overflow-x-auto">
           <table className="min-w-full text-sm text-left">
             <thead>
               <tr className="bg-bg/60 border-b border-border">
