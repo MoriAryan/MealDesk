@@ -88,4 +88,4 @@ npm run db:seed
 | Member | Aftab |
 | Member | Matin |
 
-*Built for the Odoo × Indus University Hackathon — 2026*
+*Built with love for the Odoo × Indus University Hackathon — 2026*
