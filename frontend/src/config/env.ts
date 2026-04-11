@@ -4,7 +4,12 @@ const getEnv = (key: string, fallback: string) => {
 };
 
 const normalizeApiBaseUrl = (value: string) => {
-  const trimmed = value.trim().replace(/\/+$/, "");
+  let trimmed = value.trim().replace(/\/+$/, "");
+  // Guard: if no protocol is present, assume https to prevent the URL being
+  // treated as a relative path and prepended with the Vercel origin.
+  if (trimmed && !trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
+    trimmed = `https://${trimmed}`;
+  }
   return trimmed.endsWith("/api") ? trimmed : `${trimmed}/api`;
 };
 
