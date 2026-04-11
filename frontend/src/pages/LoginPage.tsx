@@ -13,37 +13,99 @@ type AuthTab = "login" | "signup";
 /* ─────────────────────────────────────────────
    POST-LOGIN SPLASH — Initials to Wordmark
 ───────────────────────────────────────────── */
-const GatheringSplash = () => (
-  <div
-    className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden"
-    style={{ background: "var(--color-bg)" }}
-  >
-    <style>{`
-      @keyframes md-soft-pulse {
-        0%, 100% { transform: scale(1); opacity: 0.4; }
-        50% { transform: scale(1.08); opacity: 0.18; }
-      }
-    `}</style>
+const GatheringSplash = () => {
+  // Small, fast inline SVG paths for the converging scatter effect
+  const ICONS = [
+    <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z M6 1v3 M10 1v3 M14 1v3" />, // Coffee
+    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2 M7 2v20 M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />, // Utensils
+    <path d="M12 2v20 M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />, // Dollar
+    <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z M16 14h-6 M16 10h-8" />, // Receipt
+    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 6v6l4 2" />, // Clock
+    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />, // Flame
+    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z M3 6h18 M16 10a4 4 0 0 1-8 0" />, // Bag
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /> // Shield
+  ];
 
+  // Scatter positions: [tx, ty, delay, duration]
+  // Made durations longer (e.g., 1.4s - 1.8s) so the animation is smoother and less overwhelming.
+  const SCATTER = [
+    [-240, -160, 0.1, 1.6], [220, -180, 0.3, 1.5], [-200, 200, 0.4, 1.7],
+    [240, 160, 0.2, 1.6], [0, -240, 0.0, 1.8], [0, 260, 0.35, 1.65],
+    [-260, 0, 0.25, 1.7], [280, 30, 0.15, 1.75]
+  ];
+
+  return (
     <div
-      className="absolute h-[340px] w-[340px] rounded-full"
-      style={{
-        background: "radial-gradient(circle, rgba(217,119,54,0.2) 0%, rgba(217,119,54,0) 68%)",
-        animation: "md-soft-pulse 2.8s ease-in-out infinite",
-      }}
-    />
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden"
+      style={{ background: "var(--color-bg)" }}
+    >
+      <style>{`
+        @keyframes md-soft-pulse {
+          0%, 100% { transform: scale(1); opacity: 0.4; }
+          50% { transform: scale(1.08); opacity: 0.18; }
+        }
+        @keyframes orbit-converge {
+          0% { transform: translate(var(--tx), var(--ty)) scale(1.8); opacity: 0; }
+          20% { transform: translate(calc(var(--tx) * 0.8), calc(var(--ty) * 0.8)) scale(1.8); opacity: 0.7; }
+          75% { transform: translate(calc(var(--tx) * 0.2), calc(var(--ty) * 0.2)) scale(0.6); opacity: 0.3; }
+          100% { transform: translate(0px, 0px) scale(0); opacity: 0; }
+        }
+        @keyframes splash-fade-in {
+          0% { opacity: 0; transform: translateY(10px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
 
-    <div className="relative flex flex-col items-center">
-      <MealDeskSplitReveal size={120} />
-      <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: "var(--color-muted)" }}>
-        Preparing your workspace
-      </p>
-      <div className="mt-5 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-ink">
-        <CheckCircle size={16} color="var(--color-accent)" /> Session ready
+      {/* Radial Glow */}
+      <div
+        className="absolute h-[340px] w-[340px] rounded-full"
+        style={{
+          background: "radial-gradient(circle, rgba(217,119,54,0.15) 0%, rgba(217,119,54,0) 68%)",
+          animation: "md-soft-pulse 2.8s ease-in-out infinite",
+        }}
+      />
+
+      <div className="relative flex flex-col items-center">
+        {/* Converging Icons Layer (z-0 to ensure it goes BEHIND the text) */}
+        <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+          {SCATTER.map((pos, i) => (
+            <div
+              key={i}
+              className="absolute text-accent opacity-0"
+              style={{
+                "--tx": `${pos[0]}px`,
+                "--ty": `${pos[1]}px`,
+                animation: `orbit-converge ${pos[3]}s cubic-bezier(0.2, 0.8, 0.2, 1) ${pos[2]}s forwards`,
+              } as React.CSSProperties}
+            >
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round">
+                {ICONS[i]}
+              </svg>
+            </div>
+          ))}
+        </div>
+
+        {/* The Text Layer (z-10 to stay IN FRONT of the flying icons) */}
+        <div className="relative z-10">
+          <MealDeskSplitReveal size={120} />
+        </div>
+        
+        <p 
+          className="mt-4 text-[11px] font-bold uppercase tracking-[0.2em]" 
+          style={{ color: "var(--color-muted)", animation: "splash-fade-in 0.5s ease 0.6s backwards" }}
+        >
+          Preparing your workspace
+        </p>
+        <div 
+          className="mt-5 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-ink"
+          style={{ animation: "splash-fade-in 0.5s ease 1s backwards" }}
+        >
+          <CheckCircle size={16} color="var(--color-accent)" /> Session ready
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 /* ─────────────────────────────────────────────
    ANIMATED BACKGROUND GRID
@@ -127,11 +189,9 @@ function LeftPanel() {
 
         {/* Headline */}
         <h1
-          className="mb-4 text-4xl xl:text-5xl font-black leading-[1.08] tracking-tight text-white"
+          className="mb-4 text-4xl xl:text-5xl font-black leading-[1.08] tracking-tight text-white max-w-[420px] text-balance"
         >
-          Every order, every
-          <br />
-          table, every{" "}
+          Every order, every table, every{" "}
           <span style={{
             background: "linear-gradient(135deg, #c15b3d, #f97316)",
             WebkitBackgroundClip: "text",
@@ -352,7 +412,7 @@ export function LoginPage() {
 
         {/* Auth card */}
         <div
-          className="relative z-10 w-full max-w-md"
+          className="relative z-10 w-full max-w-[380px]"
           style={{
             opacity: formVisible ? 1 : 0,
             transform: formVisible ? "translateY(0)" : "translateY(24px)",
@@ -360,11 +420,11 @@ export function LoginPage() {
           }}
         >
           {/* Heading */}
-          <div className="mb-8">
+          <div className="mb-8 text-center pt-2">
             <h2 className="text-3xl font-black tracking-tight mb-2" style={{ color: "var(--color-ink)" }}>
               {activeTab === "login" ? "Welcome back." : "Start your journey."}
             </h2>
-            <p className="text-sm font-medium" style={{ color: "var(--color-muted)" }}>
+            <p className="text-sm font-medium leading-relaxed" style={{ color: "var(--color-muted)" }}>
               {activeTab === "login"
                 ? "Sign in to open your POS session and manage your cafe."
                 : "Create your manager account. It takes less than a minute."}

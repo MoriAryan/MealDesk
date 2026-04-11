@@ -1,23 +1,22 @@
 import { useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
+import { LayoutDashboard, ReceiptText, ChefHat, BarChart3, FolderTree } from "lucide-react";
 
 type NavItem = {
   to: string;
   label: string;
+  icon: React.ElementType;
   adminOnly?: boolean;
   end?: boolean;
 };
 
 const navItems: NavItem[] = [
-  { to: "/", label: "Overview", end: true },
-  { to: "/orders", label: "Order Log" },
-  { to: "/payments", label: "Payments" },
-  { to: "/reports", label: "Insights", adminOnly: true },
-  { to: "/customers", label: "Guests", adminOnly: true },
-  { to: "/products", label: "Menu", adminOnly: true },
-  { to: "/categories", label: "Categories", adminOnly: true },
-  { to: "/payment-methods", label: "Tender Types", adminOnly: true },
+  { to: "/", label: "Overview", icon: LayoutDashboard, end: true },
+  { to: "/orders", label: "Records", icon: ReceiptText },
+  { to: "/categories", label: "Categories", icon: FolderTree, adminOnly: true },
+  { to: "/products", label: "Catalog", icon: ChefHat, adminOnly: true },
+  { to: "/reports", label: "Insights", icon: BarChart3, adminOnly: true },
 ];
 
 export function TopNav() {
@@ -30,22 +29,27 @@ export function TopNav() {
   );
 
   return (
-    <nav className="w-full overflow-x-auto scrollbar-cafe">
-      <div className="flex min-w-max items-center gap-1 py-0.5">
+    <nav className="w-auto overflow-x-auto scrollbar-cafe bg-panel py-2 px-2 rounded-xl border border-border/60 shadow-sm inline-flex max-w-full">
+      <div className="flex items-center gap-1.5">
         {visibleItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.end}
             className={({ isActive }) =>
-              `whitespace-nowrap border-b-2 px-3 py-2 text-[12px] font-semibold tracking-wide transition-all duration-200 ${
+              `group relative flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all duration-300 ${
                 isActive
-                  ? "border-accent text-ink"
-                  : "border-transparent text-muted hover:border-border hover:text-ink"
+                  ? "bg-ink text-panel shadow-sm"
+                  : "text-muted hover:bg-bg hover:text-ink focus:outline-none focus:ring-2 focus:ring-accent/50"
               }`
             }
           >
-            {item.label}
+            {({ isActive }) => (
+               <>
+                 <item.icon size={16} strokeWidth={isActive ? 3 : 2} className={isActive ? "text-panel" : "text-muted group-hover:text-ink transition-colors"} />
+                 {item.label}
+               </>
+            )}
           </NavLink>
         ))}
       </div>

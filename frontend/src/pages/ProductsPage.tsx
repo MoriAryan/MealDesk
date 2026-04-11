@@ -49,8 +49,9 @@ export function ProductsPage() {
   }, []);
 
   const activePosConfigName =
-    posConfigs.find((pos) => pos.id === activePosConfigId)?.name ||
-    "Select POS Terminal";
+    activePosConfigId === "" 
+      ? "All Terminals"
+      : posConfigs.find((pos) => pos.id === activePosConfigId)?.name || "All Terminals";
 
   const filters = useMemo(
     () => ({
@@ -66,8 +67,8 @@ export function ProductsPage() {
       try {
         const pos = await listPosConfigs(accessToken);
         setPosConfigs(pos.posConfigs);
-        const resolvedId = pos.posConfigs[0]?.id || "";
-        setActivePosConfigId((current) => current || resolvedId);
+        // Default to "" to show all products globally unless previously set
+        setActivePosConfigId((current) => current || "");
       } catch (e) {
         setError(
           e instanceof Error
@@ -81,7 +82,7 @@ export function ProductsPage() {
   }, [accessToken]);
 
   useEffect(() => {
-    if (!accessToken || !activePosConfigId) return;
+    if (!accessToken) return;
 
     const load = async () => {
       try {
@@ -93,7 +94,7 @@ export function ProductsPage() {
     };
 
     void load();
-  }, [accessToken, activePosConfigId, filters]);
+  }, [accessToken, filters]);
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>
@@ -215,6 +216,18 @@ export function ProductsPage() {
           {posMenuOpen && (
             <div className="absolute z-20 mt-2 min-w-full overflow-hidden rounded-xl border border-border bg-panel shadow-lg">
               <ul role="listbox" className="py-1">
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActivePosConfigId("");
+                      setPosMenuOpen(false);
+                    }}
+                    className={`w-full px-4 py-2 text-left text-sm transition-colors ${activePosConfigId === "" ? "bg-accent/20 font-semibold text-ink" : "text-ink hover:bg-bg/60"}`}
+                  >
+                    All Terminals
+                  </button>
+                </li>
                 {posConfigs.map((pos) => (
                   <li key={pos.id}>
                     <button

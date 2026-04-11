@@ -10,19 +10,26 @@
     --color-bg: #faf8f5;
     --color-panel: #ffffff;
     --color-border: #e8e2d9;
-    --color-ink: #2c241b;
-    --color-muted: #8b8074;
+    --color-ink: #1e293b; /* Softer charcoal instead of harsh black */
+    --color-muted: #64748b; /* Better contrast muted text */
     --color-accent: #c15b3d;
     --color-accent-hover: #a14c33;
-    --color-success: #8a9a5b;
+    --color-success: #16a34a; /* Semantic green */
+    --color-danger: #ef4444; /* Semantic red */
+    --color-warning: #f59e0b; /* Semantic amber */
+    --color-info: #3b82f6; /* Semantic blue */
+    
     --color-bg-rgb: 250 248 245;
     --color-panel-rgb: 255 255 255;
     --color-border-rgb: 232 226 217;
-    --color-ink-rgb: 44 36 27;
-    --color-muted-rgb: 139 128 116;
+    --color-ink-rgb: 30 41 59;
+    --color-muted-rgb: 100 116 139;
     --color-accent-rgb: 193 91 61;
     --color-accent-hover-rgb: 161 76 51;
-    --color-success-rgb: 138 154 91;
+    --color-success-rgb: 22 163 74;
+    --color-danger-rgb: 239 68 68;
+    --color-warning-rgb: 245 158 11;
+    --color-info-rgb: 59 130 246;
     --font-sans: "DM Sans", sans-serif;
     --shadow-artisanal:
       0 4px 12px rgba(44, 36, 27, 0.04), 0 1px 2px rgba(44, 36, 27, 0.02);
@@ -33,19 +40,26 @@
     --color-bg: #1a1614;
     --color-panel: #24201d;
     --color-border: #3b332d;
-    --color-ink: #e6dfd3;
-    --color-muted: #8b857f;
+    --color-ink: #f8fafc; /* Crisp off-white */
+    --color-muted: #94a3b8; /* Cool gray for less eye strain */
     --color-accent: #d97736;
     --color-accent-hover: #e58d51;
-    --color-success: #4e664f;
+    --color-success: #22c55e;
+    --color-danger: #f87171;
+    --color-warning: #fbbf24;
+    --color-info: #60a5fa;
+
     --color-bg-rgb: 26 22 20;
     --color-panel-rgb: 36 32 29;
     --color-border-rgb: 59 51 45;
-    --color-ink-rgb: 230 223 211;
-    --color-muted-rgb: 139 133 127;
+    --color-ink-rgb: 248 250 252;
+    --color-muted-rgb: 148 163 184;
     --color-accent-rgb: 217 119 54;
     --color-accent-hover-rgb: 229 141 81;
-    --color-success-rgb: 78 102 79;
+    --color-success-rgb: 34 197 94;
+    --color-danger-rgb: 248 113 113;
+    --color-warning-rgb: 251 191 36;
+    --color-info-rgb: 96 165 250;
     --font-sans: "DM Sans", sans-serif;
     --shadow-artisanal:
       0 8px 24px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3);

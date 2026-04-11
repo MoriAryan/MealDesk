@@ -15,6 +15,9 @@ export default {
         accent: "rgb(var(--color-accent-rgb) / <alpha-value>)",
         "accent-hover": "rgb(var(--color-accent-hover-rgb) / <alpha-value>)",
         success: "rgb(var(--color-success-rgb) / <alpha-value>)",
+        danger: "rgb(var(--color-danger-rgb) / <alpha-value>)",
+        warning: "rgb(var(--color-warning-rgb) / <alpha-value>)",
+        info: "rgb(var(--color-info-rgb) / <alpha-value>)",
       },
       boxShadow: {
         artisanal: "var(--shadow-artisanal)",
@@ -25,6 +28,21 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addUtilities }) {
+      addUtilities({
+        '.preserve-3d': {
+          'transform-style': 'preserve-3d',
+        },
+        '.perspective-none': {
+          'perspective': 'none',
+        },
+        '.backface-hidden': {
+          'backface-visibility': 'hidden',
+        },
+      });
+    },
+  ],
 }
+
 

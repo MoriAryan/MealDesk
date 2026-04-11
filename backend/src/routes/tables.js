@@ -69,4 +69,40 @@ router.post("/", requireRoles("admin"), async (req, res) => {
   }
 });
 
+router.patch("/:id", requireRoles("admin"), async (req, res) => {
+  try {
+    const { tableNumber, seats, active } = req.body;
+    const updates = {};
+    if (tableNumber !== undefined) updates.table_number = String(tableNumber).trim();
+    if (seats !== undefined) updates.seats = Number(seats);
+    if (active !== undefined) updates.active = Boolean(active);
+
+    const { data, error } = await supabaseAdmin
+      .from("tables")
+      .update(updates)
+      .eq("id", req.params.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json({ table: data });
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Failed to update table" });
+  }
+});
+
+router.delete("/:id", requireRoles("admin"), async (req, res) => {
+  try {
+    const { error } = await supabaseAdmin
+      .from("tables")
+      .delete()
+      .eq("id", req.params.id);
+
+    if (error) throw error;
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Failed to delete table" });
+  }
+});
+
 export default router;

@@ -1,6 +1,82 @@
-# Odoo POS Cafe
+# MealDesk: Odoo POS Cafe ☕️
 
-Built for the **Odoo × Indus University Hackathon** — a 24-hour sprint to prototype a production-grade restaurant Point of Sale system on top of Odoo's ecosystem.
+**A lightning-fast, production-ready Point of Sale system built from scratch in 24 hours.**
+
+We built this for the **Odoo × Indus University Hackathon**. The challenge was massive: architect a complete restaurant POS workflow—from a cashier at the register ringing up an order, to a live ticket board in the kitchen, down to final payment and analytics. We didn't want to just string together a mock UI that "looked" like it worked. We wanted to build a real, breathing system.
+
+So we built MealDesk.
+
+---
+
+## 📖 The Story
+
+When looking at modern cafe POS systems, we noticed they generally fall into two camps: overwhelmingly complex legacy software, or pretty but utterly simplified iPad apps that fall apart under the rush of a Friday night service. 
+
+We wanted the sweet spot. An interface that feels premium, tactile, and instantly responsive, backed by rigid data structures specifically designed to handle peak restaurant hours. 
+
+We threw out the templates and scaffolding tools. Instead, we manually wrote every screen, every REST endpoint, and every database relationship over a single, heavily caffeinated 24-hour sprint. 
+
+---
+
+## ✨ Features (What it actually does)
+
+This is not a prototype filled with fake state. Every interaction talks to a live PostgreSQL database, meaning orders actually flow from the front-of-house to the kitchen in real-time.
+
+**Front of House (Cashier Flow)**
+- **Interactive Floor Plan**: A custom-built, interactive 3D layout view. Cashiers can visually tap on Level 1, 2, or 3, pick a table, and open a POS session instantly.
+- **Smart POS Terminal**: Tap products to add them to the cart. If an image is missing, the system dynamically generates a beautiful, vibrant fallback icon based on the item's name. It seamlessly handles item variants and automatically calculates precise tax rates.
+- **Frictionless Checkout**: Flow through Cash, Digital, or UPI payments. Selecting UPI generates a live, immediately scannable QR code encoded with the total amount.
+
+**Back of House (Kitchen Flow)**
+- **Live KDS (Kitchen Display System)**: The second the cashier taps "Send to Kitchen", the ticket lands on the kitchen's digital board. Chefs can advance tickets through *To Cook* → *Preparing* → *Completed*.
+
+**Back Office (Manager Flow)**
+- **Analytics Dashboard**: Real-time sales tracking, generating beautiful charts and reports that can be dynamically filtered and exported to PDF/XLS.
+- **Menu & Floor Routing**: Total control over creating products, configuring categories, establishing floor capacities, and registering actual terminal hardware.
+
+---
+
+## 🛠 Under the Hood
+
+We kept the stack deliberate, modern, and type-safe to ensure that when the cashier taps "Pay", things don't break.
+
+- **Frontend:** React 19 + TypeScript, styled completely with Tailwind CSS v4. We used Framer Motion to craft premium, buttery-smooth animations—like the converging restaurant icons on the login splash screen and the interactive 3D floor states.
+- **Backend:** Node.js + Express v5. Fast, lightweight, and written explicitly for this system.
+- **Database:** PostgreSQL (via Supabase). We bypassed ORMs and wrote the raw SQL schemas to maintain absolute control over the dense relationships between `pos_sessions`, `orders`, `order_lines`, and `employees`.
+- **Security:** We implemented hand-rolled, HTTP-only JWT authentication with strict role-based access control (Admin vs Staff).
+
+---
+
+## 🚀 Running it yourself
+
+Want to see it breathe? Here is how to spin it up locally. You'll need Node.js and a Supabase (PostgreSQL) instance.
+
+### 1. Backend Setup
+```bash
+cd backend
+cp .env.example .env
+# Open .env and fill in your Supabase URL, API keys, JWT secrets, and FRONTEND_URL
+npm install
+npm run dev
+```
+
+### 2. Frontend Setup (Keep backend running in a separate terminal)
+```bash
+cd frontend
+cp .env.example .env
+# Make sure VITE_API_BASE_URL points to your backend (default is http://localhost:4000/api)
+npm install
+npm run dev
+```
+
+### 3. Database Migration & Seeding
+From your Supabase SQL Editor, run the `schema.sql` file to build the massive table relations. Then, seed it the initial data directly from your backend terminal:
+```bash
+cd backend
+npm run db:seed
+```
+
+*(Note: Ensure you've also run the explicit `ALTER TABLE public.products ALTER COLUMN image_url TYPE TEXT;` SQL command from the Supabase dashboard to support long CDN image URLs).*
 
 ---
 
@@ -12,129 +88,4 @@ Built for the **Odoo × Indus University Hackathon** — a 24-hour sprint to pro
 | Member | Aftab |
 | Member | Matin |
 
----
-
-## What is this?
-
-A full-stack POS (Point of Sale) system designed for cafes and restaurants. The idea was to cover the complete order lifecycle — from a customer sitting down at a table, to the kitchen getting the ticket, to the payment going through, all visible in real time.
-
-We built it from scratch in one day. It is not a demo with fake data — everything talks to a real database, orders actually flow to the kitchen display, and payments actually get recorded.
-
----
-
-## What it can do
-
-**For the cashier at the register:**
-- Open a session and pick a table from the floor plan
-- Browse products by category, add them to the cart
-- Send the order to the kitchen with one tap
-- Collect payment — cash, card/digital, or UPI QR code (generates a live QR from the saved UPI ID)
-- Customer-facing display updates automatically during checkout
-
-**For the kitchen:**
-- Live ticket board — new orders land here the moment the cashier hits Send
-- Move tickets through stages: To Cook → Preparing → Completed
-- Mark individual items as done
-
-**For management:**
-- Product and category management
-- Payment method configuration (enable/disable cash, digital, UPI)
-- Floor plan editor — create floors, add tables
-- POS terminal setup and session control
-- Reports dashboard with filters by date, session, staff, or product
-- Export to PDF / XLS
-
----
-
-## Tech Stack
-
-**Frontend**
-- React 19 + TypeScript
-- Vite
-- Tailwind CSS v4
-- React Router v7
-- Recharts (reports)
-- jsPDF (export)
-
-**Backend**
-- Node.js + Express v5
-- PostgreSQL (via Supabase)
-- JWT authentication
-- bcrypt
-
----
-
-## Running locally
-
-You need Node.js and a Supabase (PostgreSQL) instance. Copy the env files and fill in your credentials.
-
-```bash
-# Backend
-cd backend
-cp .env.example .env
-# fill in your Supabase URL, API keys, JWT secrets, and FRONTEND_URL
-npm install
-npm run dev
-
-# Frontend (separate terminal)
-cd frontend
-cp .env.example .env
-# fill in VITE_API_BASE_URL pointing to your backend
-npm install
-npm run dev
-```
-
-Frontend runs on `http://localhost:5173`, backend on `http://localhost:4000`.
-
-To seed the database with initial data:
-```bash
-cd backend
-npm run db:migrate
-npm run db:seed
-```
-
-## Production checklist
-
-Before deploying, complete these items:
-- Create the Supabase project and run the migration and seed scripts.
-- Set backend env vars: PORT, FRONTEND_URL, SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_KEY, JWT_ACCESS_SECRET, JWT_REFRESH_SECRET.
-- Set frontend env vars: VITE_API_BASE_URL and VITE_SOCKET_BASE_URL if needed.
-- Verify `npm run build` succeeds in `frontend/`.
-- Verify the backend starts cleanly with production env values.
-- Test login, order creation, kitchen flow, payment flow, and reports end to end.
-- Deploy frontend on Vercel and backend on Render, both over HTTPS.
-- Confirm cookies and CORS work across the two deployed domains.
-
----
-
-## Project structure
-
-```
-Odoo-POS-Cafe/
-├── frontend/          # React app
-│   └── src/
-│       ├── pages/     # All page-level components
-│       │   └── pos/   # POS terminal views (Floor, Register, Payment)
-│       ├── layouts/   # App shell + POS terminal layout
-│       ├── api/       # API client functions
-│       ├── auth/      # Auth context + protected routes
-│       └── components/
-├── backend/           # Express API
-│   └── src/
-│       ├── routes/    # REST endpoints
-│       └── server.js
-└── supabase/
-    └── migrations/    # SQL schema
-```
-
----
-
-## Hackathon context
-
-This was submitted as part of the **Odoo × Indus University Hackathon**. The problem statement asked teams to build a complete restaurant POS flow — covering backend configuration, a live terminal, kitchen display, customer display, payment processing, and reporting — in 24 hours.
-
-We chose to go fully custom rather than scaffolding off a template. Every screen, every API route, and the database schema was written during the hackathon window.
-
----
-
-*Odoo × Indus University Hackathon — 2026*
+*Built for the Odoo × Indus University Hackathon — 2026*
