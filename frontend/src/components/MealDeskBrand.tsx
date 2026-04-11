@@ -323,7 +323,10 @@ export function MealDeskSplashBrand({ size = 90 }: { size?: number }) {
 
 /* ─────────────────────────────────────────────
    SPLIT REVEAL BRAND  — MD to MealDesk
-   Used for landing open and login splash.
+   • Phase 1: M + D slide in touching each other (no gap)
+   • Phase 2: Letters cascade in one-by-one with blur+scale
+   • Desk letters get an accent glow pulse
+   • Accent underline scans left→right with shimmer
 ───────────────────────────────────────────── */
 export function MealDeskSplitReveal({
   size = 96,
@@ -334,94 +337,235 @@ export function MealDeskSplitReveal({
 }) {
   const fontSize = size >= 120 ? "text-8xl" : size >= 96 ? "text-7xl" : "text-6xl";
 
+  const inkColor = lightMode ? "white" : "var(--color-ink)";
+  const accentColor = "var(--color-accent)";
+
   return (
     <>
       <style>{`
-        @keyframes md-reveal-md-left {
-          0%   { opacity: 0; transform: translateX(-28px) scale(0.88); }
-          55%  { opacity: 1; transform: translateX(0) scale(1.04); }
-          100% { opacity: 0; transform: translateX(0) scale(0.94); }
+        /* Phase 1: MD initials touch and fade */
+        @keyframes md-init-m {
+          0%   { opacity:0; transform: translateX(-20px) scale(0.8) rotate(-5deg); filter:blur(8px); }
+          52%  { opacity:1; transform: translateX(0) scale(1.06) rotate(0.8deg);  filter:blur(0); }
+          78%  { opacity:1; transform: translateX(0) scale(1) rotate(0deg); }
+          100% { opacity:0; transform: translateX(0) scale(0.9); filter:blur(3px); }
         }
-        @keyframes md-reveal-md-right {
-          0%   { opacity: 0; transform: translateX(28px) scale(0.88); }
-          55%  { opacity: 1; transform: translateX(0) scale(1.04); }
-          100% { opacity: 0; transform: translateX(0) scale(0.94); }
+        @keyframes md-init-d {
+          0%   { opacity:0; transform: translateX(20px) scale(0.8) rotate(5deg);  filter:blur(8px); }
+          52%  { opacity:1; transform: translateX(0) scale(1.06) rotate(-0.8deg); filter:blur(0); }
+          78%  { opacity:1; transform: translateX(0) scale(1) rotate(0deg); }
+          100% { opacity:0; transform: translateX(0) scale(0.9); filter:blur(3px); }
         }
-        @keyframes md-reveal-word-left {
-          0%   { opacity: 0; transform: translateX(30px) scaleX(0.65); filter: blur(3px); }
-          60%  { opacity: 1; transform: translateX(0) scaleX(1); filter: blur(0); }
-          100% { opacity: 1; transform: translateX(0) scaleX(1); filter: blur(0); }
+        /* Phase 2: each letter cascades in */
+        @keyframes md-letter-in {
+          0%   { opacity:0; transform: translateY(20px) scale(0.72); filter:blur(8px); }
+          58%  { opacity:1; transform: translateY(-2px) scale(1.05); filter:blur(0); }
+          100% { opacity:1; transform: translateY(0) scale(1); filter:blur(0); }
         }
-        @keyframes md-reveal-word-right {
-          0%   { opacity: 0; transform: translateX(-30px) scaleX(0.65); filter: blur(3px); }
-          60%  { opacity: 1; transform: translateX(0) scaleX(1); filter: blur(0); }
-          100% { opacity: 1; transform: translateX(0) scaleX(1); filter: blur(0); }
+        /* Desk letters glow pulse */
+        @keyframes md-glow-letter {
+          0%,100% { text-shadow: 0 0 0 transparent; }
+          50%      { text-shadow: 0 0 18px rgba(249,115,22,0.75), 0 0 36px rgba(193,91,61,0.35); }
         }
-        @keyframes md-reveal-line {
-          from { width: 0; opacity: 0; }
-          to { width: 100%; opacity: 1; }
+        /* Underline scans right */
+        @keyframes md-scan-line {
+          0%   { transform: scaleX(0); transform-origin: left center; opacity:0; }
+          15%  { opacity:1; }
+          100% { transform: scaleX(1); transform-origin: left center; opacity:1; }
+        }
+        /* Shimmer on underline */
+        @keyframes md-shimmer-bar {
+          0%   { left:-60%; }
+          100% { left:160%; }
         }
       `}</style>
 
       <div className="flex flex-col items-center justify-center">
-        <div className="relative flex items-center justify-center" style={{ minHeight: `${size * 0.95}px` }}>
+        {/* ── Height container so phase 1 and 2 overlap ── */}
+        <div
+          className="relative flex items-center justify-center"
+          style={{ minHeight: `${size * 0.95}px` }}
+        >
+          {/* ── Phase 1: M and D initials (touching) ── */}
           <span
-            className={`${fontSize} font-black tracking-tight select-none`}
+            className={`${fontSize} font-black select-none leading-none`}
             style={{
-              color: lightMode ? "white" : "var(--color-ink)",
-              animation: "md-reveal-md-left 0.85s ease both",
+              color: inkColor,
+              letterSpacing: "-0.05em",
+              animation: "md-init-m 0.88s cubic-bezier(0.22,1,0.36,1) both",
             }}
           >
             M
           </span>
+          {/* D sits directly next to M — marginLeft:-0.03em closes any gap */}
           <span
-            className={`${fontSize} font-black tracking-tight select-none ml-4`}
+            className={`${fontSize} font-black select-none leading-none`}
             style={{
-              color: "var(--color-accent)",
-              animation: "md-reveal-md-right 0.85s ease both",
+              color: accentColor,
+              letterSpacing: "-0.05em",
+              marginLeft: "-0.03em",
+              animation: "md-init-d 0.88s cubic-bezier(0.22,1,0.36,1) both",
             }}
           >
             D
           </span>
 
+          {/* ── Phase 2: Full wordmark (Meal + Desk) letter cascade ── */}
           <div
-            className="absolute inset-0 flex items-center justify-center gap-0"
+            className="absolute inset-0 flex items-center justify-center"
             style={{ pointerEvents: "none" }}
+            aria-hidden="true"
           >
-            <span
-              className={`${fontSize} font-black tracking-tight select-none`}
-              style={{
-                marginRight: `${size * 0.32}px`,
-                color: lightMode ? "white" : "var(--color-ink)",
-                opacity: 0,
-                animation: "md-reveal-word-left 0.95s 0.72s ease both",
-              }}
-            >
-              Meal
-            </span>
-            <span
-              className={`${fontSize} font-black tracking-tight select-none`}
-              style={{
-                marginLeft: `${size * 0.28}px`,
-                color: "var(--color-accent)",
-                opacity: 0,
-                animation: "md-reveal-word-right 0.95s 0.72s ease both",
-              }}
-            >
-              Desk
-            </span>
+            {/* "Meal" — staggered letters */}
+            {(["M", "e", "a", "l"] as const).map((ch, i) => (
+              <span
+                key={`m-${i}`}
+                className={`${fontSize} font-black select-none leading-none`}
+                style={{
+                  color: inkColor,
+                  letterSpacing: "-0.05em",
+                  marginLeft: i === 0 ? 0 : "-0.02em",
+                  opacity: 0,
+                  animation: `md-letter-in 0.52s ${0.82 + i * 0.065}s cubic-bezier(0.22,1,0.36,1) both`,
+                }}
+              >
+                {ch}
+              </span>
+            ))}
+            {/* "Desk" — staggered letters with glow */}
+            {(["D", "e", "s", "k"] as const).map((ch, i) => (
+              <span
+                key={`d-${i}`}
+                className={`${fontSize} font-black select-none leading-none`}
+                style={{
+                  color: accentColor,
+                  letterSpacing: "-0.05em",
+                  /* Meal's last letter + Desk's D should touch */
+                  marginLeft: i === 0 ? "-0.02em" : "-0.02em",
+                  opacity: 0,
+                  animation: `md-letter-in 0.52s ${1.08 + i * 0.065}s cubic-bezier(0.22,1,0.36,1) both, md-glow-letter 2.4s ${1.6 + i * 0.12}s ease-in-out infinite`,
+                }}
+              >
+                {ch}
+              </span>
+            ))}
           </div>
         </div>
 
+        {/* ── Accent scan-line underline ── */}
         <div
-          className="mt-4 h-[3px] rounded-full"
           style={{
-            width: `${size * 1.6}px`,
-            background: "linear-gradient(90deg, var(--color-accent), #f97316)",
+            position: "relative",
+            width: `${size * 1.38}px`,
+            height: "3px",
+            borderRadius: "999px",
+            background: `linear-gradient(90deg, ${accentColor}, #f97316, #fbbf24)`,
+            marginTop: "10px",
+            overflow: "hidden",
             opacity: 0,
-            animation: "md-reveal-line 0.7s 1.05s ease both",
+            animation: "md-scan-line 0.6s 1.42s cubic-bezier(0.22,1,0.36,1) both",
+          }}
+        >
+          <span
+            style={{
+              position: "absolute",
+              top: 0,
+              width: "45%",
+              height: "100%",
+              background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.72), transparent)",
+              animation: "md-shimmer-bar 1.1s 2.0s ease both",
+            }}
+          />
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   MD LOADER  — Minimal loading indicator
+   Two bold initials that breathe independently
+   + a thin accent bar that pulses beneath.
+   Deliberately NOT the full split-reveal;
+   this is the lightweight in-page spinner.
+───────────────────────────────────────────── */
+export function MealDeskLoader({
+  label,
+  size = "md",
+}: {
+  label?: string;
+  size?: "sm" | "md" | "lg";
+}) {
+  const fontSize =
+    size === "lg" ? "text-5xl" : size === "sm" ? "text-2xl" : "text-4xl";
+  const barW =
+    size === "lg" ? "w-16" : size === "sm" ? "w-8" : "w-12";
+
+  return (
+    <>
+      <style>{`
+        @keyframes mdl-m-pulse {
+          0%,100% { opacity:1;    transform: scaleY(1)    translateY(0px); }
+          45%      { opacity:0.75; transform: scaleY(0.93) translateY(1px); }
+        }
+        @keyframes mdl-d-pulse {
+          0%,100% { opacity:1;   transform: scaleY(1)   translateY(0px); }
+          55%      { opacity:0.7; transform: scaleY(0.9) translateY(2px); }
+        }
+        @keyframes mdl-bar-pulse {
+          0%,100% { transform: scaleX(0.35); opacity: 0.5; }
+          50%      { transform: scaleX(1);    opacity: 1;   }
+        }
+        @keyframes mdl-label-fade {
+          0%,100% { opacity:0.45; }
+          50%      { opacity:1; }
+        }
+      `}</style>
+
+      <div className="flex flex-col items-center gap-3">
+        <div className={`flex items-baseline leading-none select-none ${fontSize}`}
+          style={{ gap: 0 }}
+        >
+          <span
+            className="font-black"
+            style={{
+              color: "var(--color-accent)",
+              letterSpacing: "-0.04em",
+              display: "inline-block",
+              animation: "mdl-m-pulse 1.6s ease-in-out infinite",
+            }}
+          >M</span>
+          <span
+            className="font-black"
+            style={{
+              color: "var(--color-ink)",
+              opacity: 0.65,
+              letterSpacing: "-0.04em",
+              display: "inline-block",
+              animation: "mdl-d-pulse 1.6s 0.22s ease-in-out infinite",
+            }}
+          >D</span>
+        </div>
+
+        <div
+          className={`${barW} h-[3px] rounded-full origin-center`}
+          style={{
+            background: "linear-gradient(90deg, var(--color-accent), #f97316)",
+            animation: "mdl-bar-pulse 1.6s 0.08s ease-in-out infinite",
           }}
         />
+
+        {label && (
+          <p
+            className="text-[10px] font-black uppercase tracking-[0.22em]"
+            style={{
+              color: "var(--color-muted)",
+              animation: "mdl-label-fade 1.6s ease-in-out infinite",
+            }}
+          >
+            {label}
+          </p>
+        )}
       </div>
     </>
   );

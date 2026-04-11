@@ -4,6 +4,15 @@ config();
 
 const nodeEnv = process.env.NODE_ENV || "development";
 
+function normalizeOrigin(value, envName) {
+  const raw = String(value || "").trim();
+  try {
+    return new URL(raw).origin;
+  } catch {
+    throw new Error(`${envName} must be a valid absolute URL without a path. Received: ${raw}`);
+  }
+}
+
 const requiredEnv = [
   "PORT",
   "FRONTEND_URL",
@@ -51,7 +60,7 @@ for (const entry of supabaseKeysToValidate) {
 export default {
   nodeEnv,
   port: Number(process.env.PORT || 4000),
-  frontendUrl: process.env.FRONTEND_URL,
+  frontendUrl: normalizeOrigin(process.env.FRONTEND_URL, "FRONTEND_URL"),
   supabase: {
     url: process.env.SUPABASE_URL,
     anonKey: process.env.SUPABASE_ANON_KEY,

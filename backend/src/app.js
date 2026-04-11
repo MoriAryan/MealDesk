@@ -38,6 +38,16 @@ const authLimiter = rateLimit({
   },
 });
 
+const globalLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  limit: 100, // limit each IP to 100 requests per minute
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    message: "Too many requests. Please slow down.",
+  },
+});
+
 app.use(
   cors({
     origin: env.frontendUrl,
@@ -53,6 +63,9 @@ app.use(cookieParser());
 
 app.use("/api", healthRoutes);
 app.use("/api/auth", authLimiter, authRoutes);
+app.use("/auth", authLimiter, authRoutes);
+
+app.use("/api", globalLimiter);
 app.use("/api/categories", categoriesRoutes);
 app.use("/api/products", productsRouter);
 app.use("/api/payment-methods", paymentMethodsRouter);

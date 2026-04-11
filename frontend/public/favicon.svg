@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Dark warm background circle -->
+  <rect width="32" height="32" rx="8" fill="#1e1508"/>
+  <!-- Subtle inner border -->
+  <rect x="1" y="1" width="30" height="30" rx="7.5" fill="none" stroke="#2a1e10" stroke-width="1"/>
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="mdGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c15b3d"/>
+      <stop offset="100%" stop-color="#f97316"/>
+    </linearGradient>
+  </defs>
+  <!-- "M" letter -->
+  <text
+    x="4"
+    y="22"
+    font-family="Impact, 'Arial Black', sans-serif"
+    font-size="18"
+    font-weight="900"
+    fill="url(#mdGrad)"
+    letter-spacing="-1"
+  >M</text>
+  <!-- "D" letter — accent orange -->
+  <text
+    x="17"
+    y="22"
+    font-family="Impact, 'Arial Black', sans-serif"
+    font-size="18"
+    font-weight="900"
+    fill="#d4c3a8"
+    letter-spacing="-1"
+  >D</text>
+  <!-- Tiny accent dot below -->
+  <circle cx="16" cy="27" r="1.5" fill="#c15b3d" opacity="0.7"/>
+</svg>

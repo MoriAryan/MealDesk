@@ -50,8 +50,9 @@ export function CategoriesPage() {
   );
   const activePosName = useMemo(
     () =>
-      posConfigs.find((pos) => pos.id === activePosConfigId)?.name ||
-      "Select POS",
+      activePosConfigId === ""
+        ? "All Terminals"
+        : posConfigs.find((pos) => pos.id === activePosConfigId)?.name || "All Terminals",
     [activePosConfigId, posConfigs],
   );
 
@@ -63,7 +64,7 @@ export function CategoriesPage() {
         const pos = await listPosConfigs(accessToken);
         setPosConfigs(pos.posConfigs);
         setActivePosConfigId(
-          (current) => current || pos.posConfigs[0]?.id || "",
+          (current) => current || "",
         );
       } catch (e) {
         setError(
@@ -76,12 +77,14 @@ export function CategoriesPage() {
   }, [accessToken]);
 
   useEffect(() => {
-    if (!accessToken || !activePosConfigId) return;
+    if (!accessToken) return;
 
     const loadCategories = async () => {
       try {
         setError(null);
-        const response = await listCategories(accessToken, activePosConfigId);
+        // If activePosConfigId is "", we can pass undefined so the backend knows to not filter
+        // We'll pass it as is, and the API caller handles empty strings.
+        const response = await listCategories(accessToken, activePosConfigId || undefined);
         setCategories(response.categories);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Failed to load categories");
@@ -210,6 +213,22 @@ export function CategoriesPage() {
           {isPosMenuOpen && (
             <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-border/80 bg-panel shadow-lg">
               <ul role="listbox" className="py-1">
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActivePosConfigId("");
+                      setIsPosMenuOpen(false);
+                    }}
+                    className={`w-full px-4 py-2 text-left text-sm transition-colors ${
+                      activePosConfigId === ""
+                        ? "bg-accent/20 text-ink font-semibold"
+                        : "text-ink hover:bg-bg/60"
+                    }`}
+                  >
+                    All Terminals
+                  </button>
+                </li>
                 {posConfigs.map((pos) => {
                   const isActive = pos.id === activePosConfigId;
 

@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useAuth } from "../auth/AuthProvider";
+import { RefreshCw } from "lucide-react";
 import {
   fetchKitchenTickets,
   updateTicketStage,
   updateItemPrepared,
 } from "../api/kitchen";
 import type { KitchenTicket, KitchenTicketItem } from "../api/kitchen";
-import { RefreshCw } from "lucide-react";
+import { MealDeskLoader } from "../components/MealDeskBrand";
 
 // ─── Sticky Note Colors per stage ─────────────────────────────────────────────
 const STAGE_STYLES = {
@@ -393,8 +394,8 @@ export const KitchenDisplayPage = () => {
 
   if (loading) {
     return (
-      <div className="flex h-[60vh] items-center justify-center">
-        <RefreshCw className="animate-spin text-accent" size={32} />
+      <div className="flex h-[60vh] flex-col items-center justify-center">
+        <MealDeskLoader label="Loading Board…" />
       </div>
     );
   }

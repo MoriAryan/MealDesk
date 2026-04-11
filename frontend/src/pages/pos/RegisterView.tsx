@@ -120,6 +120,12 @@ export function RegisterView({
                {filteredProducts.map(product => {
                   const cat = categories.find(c => c.id === product.category_id);
                   const color = cat?.color || '#cbd5e1';
+                  
+                  // Generate vibrant color for the fallback letter based on product name
+                  const FALLBACK_COLORS = ["#10b981", "#8b5cf6", "#ec4899", "#3b82f6", "#14b8a6", "#f43f5e", "#d946ef"];
+                  const charCodeSum = product.name.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+                  const fallbackColor = FALLBACK_COLORS[charCodeSum % FALLBACK_COLORS.length];
+
                   return (
                     <button 
                       key={product.id}
@@ -137,13 +143,20 @@ export function RegisterView({
                              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
                            />
                          ) : (
-                           <div className="absolute inset-0 bg-gradient-to-br from-panel via-bg/80 to-border/40" />
+                           <div className="absolute inset-0 flex items-center justify-center bg-panel">
+                             <div 
+                               className="flex h-20 w-20 items-center justify-center rounded-full transition-transform duration-500 ease-out group-hover:scale-110 shadow-sm"
+                               style={{ backgroundColor: `${fallbackColor}22` }}
+                             >
+                               <span 
+                                 className="text-4xl font-black leading-none tracking-tighter" 
+                                 style={{ color: fallbackColor }}
+                               >
+                                 {product.name.charAt(0).toUpperCase()}
+                               </span>
+                             </div>
+                           </div>
                          )}
-                         
-                         {/* Fallback Letter if image doesn't load or is mostly transparent */}
-                         <span className="relative z-0 text-[72px] font-black leading-none tracking-tighter opacity-15 mix-blend-multiply transition-transform duration-500 ease-out group-hover:scale-105" style={{ color }}>
-                           {product.name.charAt(0).toUpperCase()}
-                         </span>
                          
                          {cat && (
                             <div 
@@ -208,10 +221,10 @@ export function RegisterView({
           </button>
         </div>
         
-          <div className="flex-1 space-y-2.5 overflow-y-auto bg-bg/20 px-4 py-3 custom-scrollbar">
+          <div className="flex-1 space-y-1.5 overflow-y-auto bg-bg/20 px-4 py-2 custom-scrollbar">
           {cartItems.map(item => (
-             <div key={item.id} className="group flex flex-col rounded-xl border border-border/80 bg-panel p-3 transition-colors hover:border-accent/35">
-                <div className="mb-2.5 flex items-start justify-between gap-3">
+             <div key={item.id} className="group flex flex-col rounded-xl border border-border/80 bg-panel p-2 transition-colors hover:border-accent/35 shadow-sm">
+                <div className="mb-1.5 flex items-start justify-between gap-3">
                    <div className="flex flex-col pr-2">
                   <div className="line-clamp-2 text-sm font-semibold leading-tight text-ink">{item.product.name}</div>
                      {item.variant && (

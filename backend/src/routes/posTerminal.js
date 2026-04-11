@@ -49,11 +49,41 @@ router.post("/order", async (req, res) => {
     let subtotal = 0;
     let tax_total = 0;
 
+    // SECURITY: Never trust client-provided prices. Fetch canonical pricing from Database.
+    const productIds = items.map((i) => i.product.id);
+    const variantIds = items.filter((i) => i.variant).map((i) => i.variant.id);
+
+    const { data: dbProducts, error: dbProdError } = await supabaseAdmin
+      .from("products")
+      .select("id, name, price, uom, tax_rates(rate)")
+      .in("id", productIds);
+
+    if (dbProdError || !dbProducts || dbProducts.length === 0) {
+      return res.status(400).json({ message: "Invalid products in order." });
+    }
+
+    let dbVariants = [];
+    if (variantIds.length > 0) {
+      const { data: vData } = await supabaseAdmin
+        .from("product_variants")
+        .select("id, value, extra_price")
+        .in("id", variantIds);
+      dbVariants = vData || [];
+    }
+
+    const productMap = Object.fromEntries(dbProducts.map((p) => [p.id, p]));
+    const variantMap = Object.fromEntries(dbVariants.map((v) => [v.id, v]));
+
     for (const item of items) {
-      const extraPrice = item.variant ? Number(item.variant.extra_price || 0) : 0;
-      const unitPrice = Number(item.product.price) + extraPrice;
+      const dbProd = productMap[item.product.id];
+      if (!dbProd) return res.status(400).json({ message: `Product ${item.product.id} not found.` });
+
+      // Calculate strictly with server data
+      const extraPrice = item.variant && variantMap[item.variant.id] ? Number(variantMap[item.variant.id].extra_price || 0) : 0;
+      const unitPrice = Number(dbProd.price) + extraPrice;
       const lineSub = unitPrice * item.quantity;
-      const rate = item.product.tax_rates?.rate ? Number(item.product.tax_rates.rate) : 0;
+      const rate = dbProd.tax_rates?.rate ? Number(dbProd.tax_rates.rate) : 0;
+      
       subtotal += lineSub;
       tax_total += lineSub * (rate / 100);
     }
@@ -87,13 +117,18 @@ router.post("/order", async (req, res) => {
     if (orderError) throw orderError;
 
     const orderLines = items.map((item) => {
-      const extraPrice = item.variant ? Number(item.variant.extra_price || 0) : 0;
-      const unitPrice = Number(item.product.price) + extraPrice;
+      const dbProd = productMap[item.product.id];
+      const variantDb = item.variant ? variantMap[item.variant.id] : null;
+      
+      const extraPrice = variantDb ? Number(variantDb.extra_price || 0) : 0;
+      const unitPrice = Number(dbProd.price) + extraPrice;
       const lineSub = unitPrice * item.quantity;
-      const rate = item.product.tax_rates?.rate ? Number(item.product.tax_rates.rate) : 0;
-      const productName = item.variant
-        ? `${item.product.name} (${item.variant.value})`
-        : item.product.name;
+      const rate = dbProd.tax_rates?.rate ? Number(dbProd.tax_rates.rate) : 0;
+      
+      const productName = variantDb
+        ? `${dbProd.name} (${variantDb.value})`
+        : dbProd.name;
+        
       return {
         order_id: order.id,
         product_id: item.product.id,
@@ -101,7 +136,7 @@ router.post("/order", async (req, res) => {
         qty: item.quantity,
         unit_price: unitPrice,
         tax_rate: rate,
-        uom: item.product.uom || "unit",
+        uom: dbProd.uom || item.product.uom || "unit",
         discount: 0,
         subtotal: lineSub,
         total: lineSub * (1 + rate / 100),

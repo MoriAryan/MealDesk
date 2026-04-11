@@ -15,44 +15,49 @@ export function AppLayout() {
   return (
     <div className={`bg-bg text-ink selection:bg-accent/20 flex flex-col ${isPos ? "h-[100dvh] overflow-hidden" : "min-h-[100dvh]"}`}>
 
-      <header className="sticky top-0 z-50 border-b border-border bg-panel/90 backdrop-blur-md shrink-0">
-        <div className="mx-auto flex w-full max-w-[1280px] items-center justify-between px-5 py-3 md:px-6">
+      <header className="sticky top-0 z-50 border-b border-border bg-bg/90 backdrop-blur-md shrink-0">
+        <div className="mx-auto flex w-full max-w-[1280px] items-center justify-between px-5 py-4 md:px-7">
           {/* Logo */}
           <Link to="/" className="flex items-center transition-opacity hover:opacity-85">
             <MealDeskWordmark size="text-xl" showTagline={false} />
           </Link>
 
+          {/* Primary Nav inline if possible, or just below within header */}
+          <div className="hidden md:flex flex-1 justify-center items-center">
+             <TopNav />
+          </div>
+
           {/* Right actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <button
               onClick={toggleTheme}
-              className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-bg text-muted transition-colors hover:border-accent/40 hover:text-accent"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-panel text-muted transition-colors hover:border-accent hover:text-accent shadow-sm"
               aria-label="Toggle Theme"
             >
               {theme === "dark"
                 ? <Sun size={15} className="transition-transform hover:rotate-45" />
                 : <Moon size={15} className="transition-transform hover:-rotate-12" />}
             </button>
-            <div className="h-5 w-px bg-border/80" />
-            <span className="hidden text-xs font-medium text-muted sm:inline">
-              {user?.name || user?.email?.split('@')[0]}
-            </span>
-            <button
-              type="button"
-              onClick={() => void logout()}
-              className="flex items-center gap-1.5 rounded-md border border-border bg-bg px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-accent/40 hover:text-accent"
-            >
-              <LogOut size={13} />
-              <span className="hidden sm:inline">Logout</span>
-            </button>
+            <div className="h-6 w-px bg-border/80" />
+            <div className="flex items-center gap-2">
+              <span className="hidden text-sm font-semibold text-ink sm:inline">
+                {user?.name || user?.email?.split('@')[0]}
+              </span>
+              <button
+                type="button"
+                onClick={() => void logout()}
+                className="flex items-center justify-center p-2 rounded-full border border-border bg-panel text-muted hover:border-danger hover:text-danger hover:bg-danger/10 transition-colors shadow-sm"
+                title="Logout"
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Primary Nav */}
-        <div className="border-t border-border">
-          <div className="mx-auto w-full max-w-[1280px] px-4 md:px-6">
+        {/* Mobile Nav */}
+        <div className="md:hidden border-t border-border px-4 pb-3">
             <TopNav />
-          </div>
         </div>
       </header>
 

@@ -16,3 +16,33 @@ export function listTables(token: string, filters: TableFilters = {}) {
   const suffix = params.toString() ? `?${params.toString()}` : "";
   return requestJson<{ tables: DiningTable[] }>(`/tables${suffix}`, { token });
 }
+
+export function createTable(
+  token: string,
+  payload: { floorId: string; tableNumber: string; seats: number }
+) {
+  return requestJson<{ table: DiningTable }>("/tables", {
+    method: "POST",
+    token,
+    body: payload,
+  });
+}
+
+export function updateTable(
+  token: string,
+  id: string,
+  payload: { tableNumber?: string; seats?: number }
+) {
+  return requestJson<{ table: DiningTable }>(`/tables/${id}`, {
+    method: "PATCH",
+    token,
+    body: payload,
+  });
+}
+
+export function deleteTable(token: string, id: string) {
+  return requestJson<undefined>(`/tables/${id}`, {
+    method: "DELETE",
+    token,
+  });
+}

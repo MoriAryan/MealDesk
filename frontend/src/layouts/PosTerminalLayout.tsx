@@ -371,6 +371,8 @@ export function PosTerminalLayout() {
           <>
             {currentView === "FLOOR" && (
               <FloorView
+                posConfigId={activePosConfigId}
+                reloadData={loadData}
                 floors={floors}
                 tables={tables}
                 activeTableId={activeTableId}
