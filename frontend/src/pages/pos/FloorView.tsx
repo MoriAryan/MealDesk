@@ -578,21 +578,21 @@ export function FloorView({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, x: -60, filter: "blur(4px)" }}
             transition={{ duration: 0.35 }}
-            className="flex h-full"
+            className="flex flex-col-reverse lg:flex-row h-full overflow-hidden"
           >
             {/* ── Left: floor cards ─────────────────────────────────── */}
-            <div className="flex-1 flex flex-col min-w-0 p-8 md:p-10 overflow-y-auto border-r border-border/40">
-              <div className="mb-8">
-                <h2 className="text-3xl font-black tracking-tight text-ink flex items-center gap-3">
-                  <Building2 className="text-accent" size={28} />
+            <div className="flex-1 flex flex-col min-w-0 p-5 sm:p-8 md:p-10 overflow-y-auto lg:border-r border-border/40">
+              <div className="mb-6 md:mb-8">
+                <h2 className="text-2xl md:text-3xl font-black tracking-tight text-ink flex items-center gap-2 md:gap-3">
+                  <Building2 className="text-accent shrink-0" size={24} />
                   Cafe Floors
                 </h2>
-                <p className="text-muted mt-1.5 pl-1">
+                <p className="text-muted mt-1.5 pl-1 text-sm">
                   Select a zone to manage its tables and layout.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
                 <AnimatePresence>
                   {floorsList.map((floor, idx) => {
                     const tableCount = getTablesForFloor(floor.id).length;
@@ -612,18 +612,18 @@ export function FloorView({
                       >
                         {isEdit ? (
                           /* ── Inline floor editor ── */
-                          <div className="h-40 flex flex-col justify-center rounded-2xl border-2 border-accent/50 bg-panel p-5 shadow-lg gap-3">
-                            <p className="text-[11px] font-black uppercase tracking-widest text-accent">Rename Floor</p>
+                          <div className="h-40 flex flex-col justify-center rounded-2xl border-2 border-accent/50 bg-panel p-4 md:p-5 shadow-lg gap-2 md:gap-3">
+                            <p className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-accent">Rename Floor</p>
                             <input
                               autoFocus
                               value={editFloorName}
                               onChange={e => setEditFloorName(e.target.value)}
                               onKeyDown={e => e.key === "Enter" && handleUpdateFloor(floor.id)}
-                              className="w-full bg-bg border border-border rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-accent font-semibold"
+                              className="w-full bg-bg border border-border rounded-xl px-3 py-2 md:py-2.5 text-sm text-ink focus:outline-none focus:border-accent font-semibold"
                             />
                             <div className="flex gap-2">
-                              <button type="button" onClick={() => setEditingFloorId(null)} className="flex-1 py-2 text-xs font-bold uppercase border border-border rounded-xl hover:bg-bg text-muted"><X size={13} className="mx-auto" /></button>
-                              <button disabled={isSavingFloor} onClick={() => handleUpdateFloor(floor.id)} className="flex-1 py-2 text-xs font-bold uppercase bg-accent text-white rounded-xl disabled:opacity-50"><Check size={13} className="mx-auto" /></button>
+                              <button type="button" onClick={() => setEditingFloorId(null)} className="flex-1 py-1.5 md:py-2 text-xs font-bold uppercase border border-border rounded-xl hover:bg-bg text-muted"><X size={13} className="mx-auto" /></button>
+                              <button disabled={isSavingFloor} onClick={() => handleUpdateFloor(floor.id)} className="flex-1 py-1.5 md:py-2 text-xs font-bold uppercase bg-accent text-white rounded-xl disabled:opacity-50"><Check size={13} className="mx-auto" /></button>
                             </div>
                           </div>
                         ) : (
@@ -634,20 +634,20 @@ export function FloorView({
                               className="w-full h-full text-left overflow-hidden rounded-2xl border border-border/70 bg-panel shadow-sm hover:-translate-y-1 hover:shadow-lg hover:shadow-accent/10 hover:border-accent/50 transition-all focus:outline-none focus:ring-2 focus:ring-accent/40"
                             >
                               <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-accent/5 blur-2xl group-hover:bg-accent/15 transition-colors" />
-                              <div className="absolute inset-0 p-5 flex flex-col justify-between">
+                              <div className="absolute inset-0 p-4 md:p-5 flex flex-col justify-between">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs font-bold uppercase tracking-widest text-muted opacity-70">Level {idx + 1}</span>
-                                  <span className="text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-bg border border-border text-muted">{tableCount} table{tableCount !== 1 ? "s" : ""}</span>
+                                  <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-muted opacity-70">Level {idx + 1}</span>
+                                  <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-bg border border-border text-muted">{tableCount} table{tableCount !== 1 ? "s" : ""}</span>
                                 </div>
                                 <div>
-                                  <h3 className="text-2xl font-black tracking-tight text-ink group-hover:text-accent transition-colors">{floor.name}</h3>
-                                  <p className="text-xs text-muted mt-1 opacity-60 font-semibold uppercase tracking-widest flex items-center gap-1.5">Tap to enter →</p>
+                                  <h3 className="text-xl md:text-2xl font-black tracking-tight text-ink group-hover:text-accent transition-colors">{floor.name}</h3>
+                                  <p className="text-[10px] md:text-xs text-muted mt-1 md:mt-1.5 opacity-60 font-semibold uppercase tracking-widest flex items-center gap-1.5">Tap to enter →</p>
                                 </div>
                               </div>
                             </button>
                             {/* Edit / Delete overlay — visible on hover */}
                             {posConfigId && (
-                              <div className="absolute -top-2 -right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                              <div className="absolute -top-2 -right-2 flex gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity z-10">
                                 <button
                                   onClick={e => { e.stopPropagation(); setEditFloorName(floor.name); setEditingFloorId(floor.id); }}
                                   className="h-8 w-8 flex items-center justify-center rounded-full bg-panel border border-border shadow-md hover:border-accent hover:text-accent transition-all"
@@ -681,12 +681,12 @@ export function FloorView({
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={() => setIsAddingFloor(true)}
-                        className="h-40 flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border/60 bg-bg hover:border-accent/50 hover:bg-accent/5 transition-all focus:outline-none"
+                        className="h-40 flex flex-col items-center justify-center gap-2 md:gap-3 rounded-2xl border-2 border-dashed border-border/60 bg-bg hover:border-accent/50 hover:bg-accent/5 transition-all focus:outline-none"
                       >
-                        <div className="h-11 w-11 rounded-full bg-panel border border-border shadow-sm text-muted flex items-center justify-center">
-                          <Plus size={22} />
+                        <div className="h-10 w-10 md:h-11 md:w-11 rounded-full bg-panel border border-border shadow-sm text-muted flex items-center justify-center">
+                          <Plus size={20} className="md:w-[22px] md:h-[22px]" />
                         </div>
-                        <span className="text-xs font-bold uppercase tracking-widest text-muted">Add New Floor</span>
+                        <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-muted">Add New Floor</span>
                       </motion.button>
                     ) : (
                       <motion.form
@@ -696,19 +696,19 @@ export function FloorView({
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0 }}
                         onSubmit={handleCreateFloor}
-                        className="h-40 flex flex-col justify-center rounded-2xl border-2 border-accent/40 bg-panel p-5 shadow-lg gap-3"
+                        className="h-40 flex flex-col justify-center rounded-2xl border-2 border-accent/40 bg-panel p-4 md:p-5 shadow-lg gap-2 md:gap-3"
                       >
-                        <p className="text-[11px] font-black uppercase tracking-widest text-accent">New Floor</p>
+                        <p className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-accent">New Floor</p>
                         <input
                           autoFocus
                           value={newFloorName}
                           onChange={e => setNewFloorName(e.target.value)}
                           placeholder="e.g. VIP Lounge"
-                          className="w-full bg-bg border border-border rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-accent font-semibold"
+                          className="w-full bg-bg border border-border rounded-xl px-3 py-2 md:py-2.5 text-sm text-ink focus:outline-none focus:border-accent font-semibold"
                         />
-                        <div className="flex gap-2">
-                          <button type="button" onClick={() => setIsAddingFloor(false)} className="flex-1 py-2 text-xs font-bold uppercase border border-border rounded-xl hover:bg-bg text-muted">Cancel</button>
-                          <button disabled={!newFloorName.trim() || isSubmittingFloor} type="submit" className="flex-1 py-2 text-xs font-bold uppercase bg-accent text-white rounded-xl disabled:opacity-50">Deploy</button>
+                        <div className="flex gap-2 mb-1">
+                          <button type="button" onClick={() => setIsAddingFloor(false)} className="flex-1 py-1.5 md:py-2 text-[10px] md:text-xs font-bold uppercase border border-border rounded-xl hover:bg-bg text-muted">Cancel</button>
+                          <button disabled={!newFloorName.trim() || isSubmittingFloor} type="submit" className="flex-1 py-1.5 md:py-2 text-[10px] md:text-xs font-bold uppercase bg-accent text-white rounded-xl disabled:opacity-50">Deploy</button>
                         </div>
                       </motion.form>
                     )}
@@ -717,17 +717,17 @@ export function FloorView({
               </div>
             </div>
 
-            {/* ── Right: 3D Building (42% width) ───────────────────── */}
-            <div className="hidden lg:flex w-[42%] xl:w-[42%] shrink-0 flex-col border-l border-border/40 bg-bg/50">
-              <div className="px-6 pt-8 pb-2 border-b border-border/40">
-                <p className="text-xs font-black uppercase tracking-widest text-muted opacity-60">
+            {/* ── Right: 3D Building ───────────────────── */}
+            <div className="flex w-full lg:w-[42%] xl:w-[42%] h-[35vh] lg:h-auto shrink-0 flex-col border-b lg:border-b-0 lg:border-l border-border/40 bg-bg/50">
+              <div className="px-5 md:px-6 pt-5 md:pt-8 pb-2 border-b border-border/40 shrink-0">
+                <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted opacity-60">
                   Live Preview
                 </p>
-                <h3 className="text-lg font-black text-ink">
+                <h3 className="text-base md:text-lg font-black text-ink">
                   {floorsList.length === 0 ? "No floors yet" : `${floorsList.length}-storey Cafe`}
                 </h3>
               </div>
-              <div className="flex-1 min-h-0">
+              <div className="flex-1 min-h-[200px] lg:min-h-0">
                 <IsoBuilding floorCount={floorsList.length} hoveredFloorIdx={hoveredFloorIdx} />
               </div>
             </div>

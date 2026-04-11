@@ -37,8 +37,8 @@ export function PaymentView({ cartItems, paymentMethods, onCancel, onPaymentSucc
   };
 
   return (
-    <div className="flex h-full w-full items-center justify-center overflow-y-auto bg-bg px-4 py-6 md:px-6 md:py-8">
-      <div className="flex min-h-[560px] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-border bg-panel shadow-[var(--shadow-artisanal)] md:flex-row">
+    <div className="flex h-full w-full items-start md:items-center justify-center overflow-y-auto bg-bg px-4 py-4 md:px-6 md:py-8">
+      <div className="flex md:min-h-[560px] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-border bg-panel shadow-[var(--shadow-artisanal)] md:flex-row mt-4 md:mt-0 mb-4 md:mb-0">
 
         {/* Left Side: Methods */}
         <div className="flex w-full flex-col border-b border-border/60 bg-bg/45 p-5 md:w-[320px] md:border-b-0 md:border-r md:p-6">
@@ -72,15 +72,15 @@ export function PaymentView({ cartItems, paymentMethods, onCancel, onPaymentSucc
         </div>
 
         {/* Right Side: Total, Receipt, & Confirmation */}
-        <div className="relative flex flex-1 flex-col overflow-hidden p-5 md:p-8 bg-panel">
+        <div className="relative flex flex-1 flex-col overflow-hidden p-4 md:p-8 bg-panel">
           {/* Subtle background glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 md:w-64 md:h-64 bg-accent/5 rounded-full blur-[60px] md:blur-[100px] pointer-events-none" />
 
-          <h2 className="z-10 mb-5 text-2xl font-black tracking-tight text-ink">Checkout Summary</h2>
+          <h2 className="z-10 mb-3 md:mb-5 text-xl md:text-2xl font-black tracking-tight text-ink">Checkout Summary</h2>
 
           {/* Itemized Receipt Area */}
-          <div className="z-10 mb-6 flex flex-1 flex-col overflow-hidden rounded-2xl border border-border/60 bg-bg/35 shadow-inner backdrop-blur-sm">
-            <div className="flex-1 overflow-y-auto px-5 py-4 custom-scrollbar">
+          <div className="z-10 mb-4 md:mb-6 flex flex-1 flex-col overflow-hidden rounded-2xl border border-border/60 bg-bg/35 shadow-inner backdrop-blur-sm">
+            <div className="flex-1 overflow-y-auto px-4 py-3 md:px-5 md:py-4 custom-scrollbar min-h-[140px]">
               {cartItems.map((item) => (
                 <div key={item.id} className="mb-3 flex items-start justify-between border-b border-border/40 pb-3 last:mb-0 last:border-b-0 last:pb-0">
                   <div className="flex flex-col pr-3">
@@ -97,48 +97,48 @@ export function PaymentView({ cartItems, paymentMethods, onCancel, onPaymentSucc
             </div>
             
             {/* Total Footer inside the receipt */}
-            <div className="bg-panel border-t border-border/60 p-5 flex items-end justify-between">
-              <span className="text-xs font-bold uppercase tracking-[0.16em] text-muted">Total Due</span>
-              <span className="text-4xl font-black tracking-tight text-ink">${total.toFixed(2)}</span>
+            <div className="bg-panel border-t border-border/60 p-4 md:p-5 flex items-end justify-between">
+              <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.16em] text-muted">Total Due</span>
+              <span className="text-3xl md:text-4xl font-black tracking-tight text-ink">${total.toFixed(2)}</span>
             </div>
           </div>
 
           {/* Dynamic Content based on Method */}
-          <div className="z-10 flex min-h-[170px] flex-col items-center justify-center rounded-xl border border-border/40 bg-panel/45 px-4 py-4">
+          <div className="z-10 flex min-h-[140px] md:min-h-[170px] flex-col items-center justify-center rounded-xl border border-border/40 bg-panel/45 px-4 py-4">
              {selectedMethod === "upi" ? (
                <div className="my-2 flex flex-col items-center justify-center">
-                 <div className="mb-4 inline-block rounded-2xl border border-gray-100 bg-white p-3 shadow-lg transition-transform duration-300 hover:scale-105">
+                 <div className="mb-3 md:mb-4 inline-block rounded-2xl border border-gray-100 bg-white p-2 md:p-3 shadow-lg transition-transform duration-300 hover:scale-105">
                    <img
                      src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=4&data=${encodeURIComponent(`upi://pay?pa=${upiId}&pn=CafePOS&am=${total.toFixed(2)}&cu=INR&tn=CafeOrder`)}`}
                      alt="UPI QR Code"
-                     width={140}
-                     height={140}
-                     className="rounded-xl"
+                     width={120}
+                     height={120}
+                     className="rounded-xl md:w-[140px] md:h-[140px]"
                    />
                  </div>
-                 <p className="mb-1 text-lg font-black text-ink">Scan to Pay via UPI</p>
-                 <p className="mb-3 text-sm font-semibold text-muted/80">{upiId} · ₹{total.toFixed(2)}</p>
-                 <div className="flex flex-wrap items-center justify-center gap-2">
-                   <span className="text-[10px] uppercase tracking-wider bg-green-500/10 text-green-500 px-3 py-1 rounded-full font-bold">BHIM</span>
-                   <span className="text-[10px] uppercase tracking-wider bg-blue-500/10 text-blue-500 px-3 py-1 rounded-full font-bold">Paytm</span>
+                 <p className="mb-1 text-base md:text-lg font-black text-ink">Scan to Pay via UPI</p>
+                 <p className="mb-2 md:mb-3 text-[11px] md:text-sm font-semibold text-muted/80">{upiId} · ₹{total.toFixed(2)}</p>
+                 <div className="flex flex-wrap items-center justify-center gap-1.5 md:gap-2">
+                   <span className="text-[9px] md:text-[10px] uppercase tracking-wider bg-green-500/10 text-green-500 px-2 md:px-3 py-1 rounded-full font-bold">BHIM</span>
+                   <span className="text-[9px] md:text-[10px] uppercase tracking-wider bg-blue-500/10 text-blue-500 px-2 md:px-3 py-1 rounded-full font-bold">Paytm</span>
                  </div>
                </div>
              ) : (
                <div className="w-full text-center">
                  {processing ? (
-                   <div className="flex flex-col items-center gap-3">
-                      <div className="w-8 h-8 border-4 border-success border-r-transparent rounded-full animate-spin" />
-                      <p className="text-lg text-success font-bold tracking-tight">Processing payment…</p>
+                   <div className="flex flex-col items-center gap-2 md:gap-3">
+                      <div className="w-6 h-6 md:w-8 md:h-8 border-4 border-success border-r-transparent rounded-full animate-spin" />
+                      <p className="text-base md:text-lg text-success font-bold tracking-tight">Processing payment…</p>
                    </div>
                  ) : (
-                   <p className="text-base font-medium text-muted/70">Awaiting validation for <span className="text-ink font-bold">{selectedMethod}</span> payment...</p>
+                   <p className="text-sm md:text-base font-medium text-muted/70">Awaiting validation for <span className="text-ink font-bold">{selectedMethod}</span> payment...</p>
                  )}
                </div>
              )}
           </div>
 
           {/* Action Buttons */}
-          <div className="z-10 mt-5 flex w-full gap-3">
+          <div className="z-10 mt-4 md:mt-5 flex w-full gap-2 md:gap-3">
             <button
               onClick={onCancel}
               disabled={processing}
